@@ -1019,9 +1019,6 @@
             if (!sel) return;
             for (var i = 0; i < sel.options.length; i++) if (sel.options[i].value === id) sel.options[i].textContent = name;
           });
-          document.querySelectorAll("#stopChips .stop-chip").forEach(function (c) {
-            if (c.getAttribute("data-stop") === id) c.textContent = name;
-          });
           renderTour();
         }
       })
@@ -1054,12 +1051,11 @@
   var tourFrom = null, tourTo = null, stopOrder = [];
   var activeTourPlan = null;
   try { var at = sessionStorage.getItem("cg_active_tour_plan"); if (at) activeTourPlan = JSON.parse(at); } catch (e) {}
+  // Stops live only in stopOrder now: the map is the one place to add or
+  // remove them (tap in stop mode to add, tap again to remove). The route
+  // chain preview below shows them; there is no separate chip list anymore.
   function selectedStops() {
-    var pressed = {};
-    document.querySelectorAll("#stopChips .stop-chip").forEach(function (c) {
-      if (c.getAttribute("aria-pressed") === "true") pressed[c.getAttribute("data-stop")] = true;
-    });
-    return stopOrder.filter(function (s) { return pressed[s] && s !== tourFrom.value && s !== tourTo.value; });
+    return stopOrder.filter(function (s) { return s !== tourFrom.value && s !== tourTo.value; });
   }
   function chainPlaces() {
     var p = [];
@@ -1078,34 +1074,10 @@
     var o = document.createElement("option"); o.value = value; o.textContent = label;
     sel.appendChild(o);
   }
-  function ensureStopChip(value) {
-    var found = null;
-    document.querySelectorAll("#stopChips .stop-chip").forEach(function (c) {
-      if (c.getAttribute("data-stop") === value) found = c;
-    });
-    if (found) return found;
-    var c = document.createElement("button");
-    c.type = "button"; c.className = "stop-chip";
-    c.setAttribute("data-stop", value); c.setAttribute("aria-pressed", "false");
-    c.textContent = placeLabel(value);
-    $("stopChips").appendChild(c); bindStopChip(c);
-    return c;
-  }
   function setStop(value, on) {
-    var c = ensureStopChip(value);
-    c.setAttribute("aria-pressed", on ? "true" : "false");
     var i = stopOrder.indexOf(value);
     if (on && i === -1) stopOrder.push(value);
     if (!on && i !== -1) stopOrder.splice(i, 1);
-    // A stop that is off shows nowhere: only points the rider actually
-    // added appear in the stop list — un-picking one removes its chip.
-    if (!on && c.parentNode) c.parentNode.removeChild(c);
-  }
-  function bindStopChip(c) {
-    c.addEventListener("click", function () {
-      setStop(c.getAttribute("data-stop"), c.getAttribute("aria-pressed") !== "true");
-      renderTour();
-    });
   }
   function buildChain(el, places, mode) {
     if (!el) return;
@@ -1177,9 +1149,6 @@
       else { var hrs = dist / 55; tt.textContent = hrs < 1 ? "≈ " + bnNum(Math.round(dist / 55 * 60)) + " মিনিট" : "≈ " + bnNum(hrs.toFixed(1)) + " ঘণ্টা"; }
     }
     var tc = $("tourStopsCount"); if (tc) tc.textContent = bnNum(stops.length) + "টা";
-    // The stop list shows only added points; when none are added, the hint shows instead.
-    var nsh = $("noStopsHint");
-    if (nsh) nsh.style.display = document.querySelectorAll("#stopChips .stop-chip").length ? "none" : "";
     buildChain($("tourRouteChain"), places, "preview");
     renderTourMap();
   }
@@ -1259,8 +1228,7 @@
         toast($("tourToast"), "এটা তোমার শুরু/গন্তব্য — থামা হিসেবে যোগ হবে না");
         return false;
       }
-      var c = ensureStopChip(value);
-      setStop(value, c.getAttribute("aria-pressed") !== "true");
+      setStop(value, stopOrder.indexOf(value) === -1);
     }
     renderTour();
     return true;
@@ -1469,7 +1437,6 @@
     // exactly like picking on the map does — no stale numbers.
     tourFrom.addEventListener("change", renderTour);
     tourTo.addEventListener("change", renderTour);
-    document.querySelectorAll("#stopChips .stop-chip").forEach(bindStopChip);
     setPickMode("from");
     // Area names looked up for map pins earlier in this session.
     try { var pn = JSON.parse(sessionStorage.getItem("cg_pin_names") || "{}"); if (pn && typeof pn === "object") pinNames = pn; } catch (e) {}
