@@ -457,7 +457,7 @@ html,body{height:100%}
 body{margin:0}
 #app{display:flex; flex-direction:column; height:100dvh; max-width:480px; margin:0 auto; background:var(--card); box-shadow:0 0 0 1px var(--line)}
 @media (min-width:520px){ #app{border-left:1px solid var(--line); border-right:1px solid var(--line)} }
-#screens{flex:1; min-height:0; display:flex; flex-direction:column; position:relative}
+#screens{flex:1; min-height:0; display:flex; flex-direction:column; position:relative; padding-bottom:64px}
 .screen-riding{overflow:hidden !important}
 .hidden{display:none !important}
 .field-error{color:var(--red); font-size:13.5px; font-weight:600; margin:0}
@@ -481,8 +481,12 @@ body{margin:0}
 .tour-map svg.tm-route{z-index:3}
 .tour-map .tm-pins{z-index:4}
 .tour-map .leaflet-container{font-family:inherit; cursor:crosshair}
-/* Bottom tabs: always visible, fixed at the bottom of the app */
+/* Bottom tabs: always visible, pinned to the bottom of the visible screen.
+   position:fixed (not just in-flow flex) so the phone browser's address bar
+   can never push the bar below the fold — the page itself cannot scroll it away. */
 .bottom-tabs{
+  position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+  width:min(480px, 100%); z-index:60;
   flex:none; display:flex; gap:6px; padding:8px 10px calc(8px + env(safe-area-inset-bottom));
   background:var(--card); border-top:1px solid var(--line); box-shadow:0 -6px 18px rgba(30,27,22,.06);
 }
