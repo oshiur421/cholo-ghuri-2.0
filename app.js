@@ -132,7 +132,11 @@
       if (hasGpsFix) { updateMyMarker(); if (window.map) window.map.panTo([riderLocation.lat, riderLocation.lng], { animate: true }); }
       setTimeout(function () { if (window.map) window.map.invalidateSize(); }, 120);
     }
-    if (id === "screen-tour") { ensureTourMap(); setTimeout(function () { if (tourMap) tourMap.invalidateSize(); }, 120); }
+    // Leaving the Riding map ends Tour point-picking (the banner goes away).
+    if (id !== "screen-riding" && tourPickActive) {
+      tourPickActive = false;
+      var pb = $("pickBanner"); if (pb) pb.hidden = true;
+    }
   }
   document.querySelectorAll(".bottom-tabs [role='tab']").forEach(function (tab) {
     tab.addEventListener("click", function () { openScreen(tab.getAttribute("data-screen")); });
@@ -152,6 +156,9 @@
     if (el._leaflet_id) { el._leaflet_id = null; el.innerHTML = ""; }
     window.map = L.map("map", { zoomControl: false, attributionControl: true, touchZoom: true, scrollWheelZoom: true, doubleClickZoom: true, zoomSnap: 0.5 })
       .setView([riderLocation.lat, riderLocation.lng], 14);
+    // In Tour pick mode, a tap on the real map picks a tour point.
+    // (Ordinary taps do nothing — the map keeps its normal pan/zoom.)
+    window.map.on("click", function (e) { if (tourPickActive) handleRideMapPick(e.latlng); });
     rideTileLayer = L.tileLayer(tileUrlFor(currentMapTheme), {
       maxZoom: 19, tileSize: 512, zoomOffset: -1, attribution: "© Mapbox"
     }).addTo(window.map);
@@ -1129,6 +1136,51 @@
     }
     applyPick(id);
   }
+  /* ---------- Tour picking on the real Riding map ---------- */
+  var tourPickActive = false; // true while the Tour "pick points" banner is up
+  function handleRideMapPick(latlng) {
+    if (!latlng) return;
+    var nearest = null, nd = 1e9;
+    Object.keys(PLACE_LATLNG).forEach(function (p) {
+      var ll = PLACE_LATLNG[p];
+      var d = haversineKm(latlng.lat, latlng.lng, ll[0], ll[1]);
+      if (d < nd) { nd = d; nearest = p; }
+    });
+    if (nearest && nd <= 15) {
+      applyPick(nearest);
+      toast($("rideToast"), placeLabel(nearest) + " Tour-এ যোগ হলো");
+      return;
+    }
+    // No known place nearby — drop a map pin here and use it as the point.
+    var id = "MapPin-" + latlng.lat.toFixed(4) + "-" + latlng.lng.toFixed(4);
+    if (!PLACE_LATLNG[id]) {
+      PLACE_LATLNG[id] = [latlng.lat, latlng.lng];
+      // Real distances from this pin to every known place, so the tour total stays honest.
+      Object.keys(PLACE_LATLNG).forEach(function (p) {
+        if (p === id) return;
+        var ll = PLACE_LATLNG[p];
+        DIST[id + "|" + p] = Math.max(5, Math.round(haversineKm(latlng.lat, latlng.lng, ll[0], ll[1])));
+      });
+      ensureOption(tourFrom, id, "ম্যাপ পিন");
+      ensureOption(tourTo, id, "ম্যাপ পিন");
+    }
+    applyPick(id);
+    toast($("rideToast"), "ম্যাপ পিন Tour-এ যোগ হলো");
+  }
+  function openRideMapPick() {
+    tourPickActive = true;
+    var b = $("pickBanner"); if (b) b.hidden = false;
+    setPickMode(pickMode || "from");
+    openScreen("screen-riding");
+  }
+  function closeRideMapPick() {
+    tourPickActive = false;
+    var b = $("pickBanner"); if (b) b.hidden = true;
+    openScreen("screen-tour");
+  }
+  on("openRideMapPickBtn", "click", openRideMapPick);
+  on("pickDoneBtn", "click", closeRideMapPick);
+
   function drawTourRouteOnRidingMap(plan) {
     if (!window.map || !plan) return;
     if (tourRouteLine) { try { window.map.removeLayer(tourRouteLine); } catch (e) {} tourRouteLine = null; }

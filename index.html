@@ -74,6 +74,15 @@
                   <span><span class="loc-label">তুমি এখন</span><span class="loc-name" id="whereNow">অবস্থান খোঁজা হচ্ছে…</span><span class="loc-sub" id="whereSub">GPS চালু হলে এখানে তোমার আসল জায়গা দেখাবে</span></span>
                 </div>
               </div>
+              <div class="pick-banner" id="pickBanner" hidden>
+                <p class="pick-hint" id="pickHint" role="status"></p>
+                <div class="pick-modes" role="group" aria-label="ম্যাপে এখন কী বসাচ্ছো">
+                  <button type="button" class="pick-mode-btn" data-mode="from" aria-pressed="true">১ · শুরু<small>কোথা থেকে</small></button>
+                  <button type="button" class="pick-mode-btn" data-mode="to" aria-pressed="false">২ · গন্তব্য<small>কোথায় যাবে</small></button>
+                  <button type="button" class="pick-mode-btn" data-mode="stop" aria-pressed="false">৩ · থামা<small>মাঝে যেখানে থামবে</small></button>
+                </div>
+                <button type="button" class="btn btn-quiet" id="pickDoneBtn">পয়েন্ট বাছা শেষ — Tour-এ ফেরো</button>
+              </div>
               <div class="map-tools">
                 <div class="speed-dial" aria-label="গতি ৬২ কিলোমিটার প্রতি ঘণ্টা, সীমা ৮০">
                   <div class="num" id="speedNum">0</div>
@@ -152,27 +161,11 @@
             <div class="tour-body">
               <div class="tour-map-card">
                 <div class="tour-sec-lab" style="margin-bottom:8px">ম্যাপ থেকে সরাসরি বাছো — একে একে তিনটেই</div>
-                <div class="pick-modes" role="group" aria-label="ম্যাপে এখন কী বসাচ্ছো">
-                  <button type="button" class="pick-mode-btn" data-mode="from" aria-pressed="true">১ · শুরু<small>কোথা থেকে</small></button>
-                  <button type="button" class="pick-mode-btn" data-mode="to" aria-pressed="false">২ · গন্তব্য<small>কোথায় যাবে</small></button>
-                  <button type="button" class="pick-mode-btn" data-mode="stop" aria-pressed="false">৩ · থামা<small>মাঝে যেখানে থামবে</small></button>
-                </div>
-                <p class="pick-hint" id="pickHint" role="status"></p>
-                <div class="tour-map" id="tourMap" role="group" aria-label="ট্যুরের ম্যাপ — চাপ দিয়ে শুরু, গন্তব্য আর থামা বসাও">
-                  <div id="tourLeaflet"></div>
-                  <div class="tm-shade" aria-hidden="true"></div>
-                  <svg class="tm-route" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-                    <polyline id="tourMapLineCase" fill="none" stroke="#fffdf7" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" opacity=".92" points=""/>
-                    <polyline id="tourMapLine" fill="none" stroke="#17684a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 2.4" points=""/>
-                  </svg>
-                  <div class="tm-pins" id="tourMapPins"></div>
-                </div>
-                <div class="tour-map-selected" id="tourMapSelected" aria-label="ম্যাপে বেছে নেওয়া পথ"></div>
-                <p class="tour-map-note">নামের পিনে চাপ দিলে সেই জায়গাটাই বসবে। নাম নেই এমন জায়গা হলে ম্যাপের খালি জায়গায় চাপ দাও — নিজের পিন পড়বে, তাই যেকোনো জায়গা থেকে যেকোনো জায়গায় ট্যুর সাজানো যায়। থামা মোডে পিনে আবার চাপ দিলে থামাটা বাদ যাবে।</p>
-                <div class="tour-map-actions">
-                  <button type="button" id="clearStopsBtn">সব থামা মুছো</button>
-                  <button type="button" id="resetPickBtn">শুরু থেকে আবার বাছো</button>
-                </div>
+                <p class="tour-map-note" style="margin:0 2px 10px">চাপ দিলে আসল রাইডার ম্যাপ খুলবে — সেখানে চাপ দিয়ে শুরু, গন্তব্য আর মাঝের থামা বসাও, এই Tour-এ যোগ হয়ে যাবে।</p>
+                <button type="button" class="btn btn-primary" id="openRideMapPickBtn" style="width:100%">
+                  ম্যাপে গিয়ে পয়েন্ট বাছো
+                  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+                </button>
               </div>
 
               <p class="rp-alt-lab">অথবা তালিকা থেকে বাছো — ম্যাপের পিন আর পথ সঙ্গে সঙ্গে মিলে যাবে</p>

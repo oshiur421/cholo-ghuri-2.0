@@ -142,7 +142,12 @@
     padding:5px 9px 5px 6px; border-radius:999px; box-shadow:0 3px 10px rgba(0,0,0,.28);
   }
   .stop-badge i{font-style:normal; width:18px; height:18px; border-radius:50%; background:#17684a; color:#fff; display:flex; align-items:center; justify-content:center; font-size:10.5px}
-  .riding-ui{position:relative; z-index:4; display:flex; flex-direction:column; height:100%}
+  /* The overlay must not eat touches: it covers the whole screen above the
+     map, so its empty middle area used to swallow every pinch/drag and the
+     browser zoomed the whole app instead of the map. Let touches pass
+     through to the map, except on the real controls. */
+  .riding-ui{position:relative; z-index:4; display:flex; flex-direction:column; height:100%; pointer-events:none}
+  .riding-ui .map-tools, .riding-ui .ride-sheet, .riding-ui .pick-banner{pointer-events:auto}
   .map-topbar{
     padding:40px 12px 0;
     display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
@@ -475,6 +480,12 @@ body{margin:0}
 .map-zone .stop-badge{z-index:3}
 .map-zone .leaflet-container{font-family:inherit}
 .map-zone .leaflet-control-attribution{font-size:9px; background:rgba(255,253,247,.75)}
+/* Tour point-picking banner on the Riding map (shown only in pick mode) */
+.pick-banner{margin:10px 12px 0; background:rgba(255,253,247,.97); color:#1e1b16; border-radius:14px; padding:10px 12px; box-shadow:0 4px 14px rgba(0,0,0,.28)}
+.pick-banner[hidden]{display:none}
+.pick-banner .pick-hint{margin:0 0 8px; color:#1e1b16}
+.pick-banner .pick-modes{margin-bottom:8px}
+.pick-banner .btn-quiet{width:100%}
 /* Tour: real Leaflet map as the picking surface; pins float above it */
 .tour-map #tourLeaflet{position:absolute; inset:0; z-index:1; background:#2c2a24}
 .tour-map .tm-shade{z-index:2; pointer-events:none}
