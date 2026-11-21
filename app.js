@@ -97,6 +97,11 @@
   var hasGpsFix = false; // true only after a real GPS fix — never show the Dhaka fallback as "you"
   var hasJoinedDB = false;
   var isHandlingKick = false, isHandlingRoomClose = false;
+  // A rider counts as "live" for 2 minutes without an update (was 45s).
+  // On a ride, phones lose signal in tunnels, go into pockets with the tab
+  // backgrounded (mobile browsers throttle timers there), or drop to 2G —
+  // 45s was ejecting live members and even whole rooms over a short gap.
+  var STALE_AFTER_MS = 120000;
   var kickedRiderIds = new Set();
   var allConvoyRiders = new Map();
   var policeReportsMap = new Map();
@@ -371,11 +376,20 @@
     var code = codeInput ? codeInput.value.trim().toUpperCase() : "";
     if (!code) { code = generateRoomCode(); if (codeInput) codeInput.value = code; }
 
+    // A fresh join attempt clears any earlier kick/room-close lock, so a
+    // rider who was kicked (or wrongly ejected) can join again by pressing
+    // START — the lock used to stay set forever and blocked every rejoin.
+    isHandlingKick = false; isHandlingRoomClose = false;
     var riderId = currentSession.riderId;
     var isDifferent = !riderId || !currentSession.riderName ||
       currentSession.riderName.trim().toLowerCase() !== name.toLowerCase() ||
       (currentSession.roomCode || "").trim().toUpperCase() !== code;
-    if (isDifferent) riderId = generateUUID();
+    if (isDifferent) {
+      // Remove the old row first, so the same person never shows twice
+      // in the group list (old row + new row) after rejoining.
+      if (riderId) supabaseRest("riders?id=eq." + encodeURIComponent(riderId), "DELETE").catch(function () {});
+      riderId = generateUUID();
+    }
 
     var wantedLeader = captainWanted;
     var finalIsLeader = wantedLeader;
@@ -386,7 +400,7 @@
       if (Array.isArray(existing)) existing.forEach(function (r) {
         if (!r || !r.id) return;
         var t = r.updated_at ? new Date(r.updated_at).getTime() : 0;
-        if (isNaN(t) || now - t > 45000) stale.push(r); else live.push(r);
+        if (isNaN(t) || now - t > STALE_AFTER_MS) stale.push(r); else live.push(r);
       });
       stale.forEach(function (s) {
         supabaseRest("riders?id=eq." + encodeURIComponent(s.id), "DELETE").catch(function () {});
@@ -483,7 +497,7 @@
         if ((r.room_code || "").indexOf("KICKED_") === 0 || (r.room_code || "").indexOf("CLOSED_") === 0) return;
         if (kickedRiderIds.has(r.id)) return;
         var t = r.updated_at ? new Date(r.updated_at).getTime() : 0;
-        if (isNaN(t) || now - t > 45000) stale.push(r); else live.push(r);
+        if (isNaN(t) || now - t > STALE_AFTER_MS) stale.push(r); else live.push(r);
       });
       stale.forEach(function (s) {
         supabaseRest("riders?id=eq." + encodeURIComponent(s.id), "DELETE").catch(function () {});
@@ -520,7 +534,13 @@
     if (!hasJoinedDB || !currentSession.riderId) return;
     try {
       var rows = await supabaseRest("riders?id=eq." + encodeURIComponent(currentSession.riderId) + "&select=id,room_code", "GET");
-      if (Array.isArray(rows) && rows.length === 0) { handleKickedFromConvoy(); return; }
+      if (Array.isArray(rows) && rows.length === 0) {
+        // My row is gone but there is no KICKED_ marker — that is a lost
+        // row (stale cleanup by another member, bad signal), NOT a kick.
+        // Quietly put my row back instead of throwing me out of the room.
+        upsertLiveRiderData(true);
+        return;
+      }
       if (rows && rows[0] && (rows[0].room_code || "").indexOf("KICKED_") === 0) handleKickedFromConvoy();
     } catch (e) {}
   }
@@ -528,6 +548,10 @@
     if (isHandlingKick) return;
     isHandlingKick = true;
     hasJoinedDB = false;
+    // Clean up my own KICKED_ marker row so it does not linger in the DB.
+    if (currentSession.riderId) {
+      supabaseRest("riders?id=eq." + encodeURIComponent(currentSession.riderId), "DELETE").catch(function () {});
+    }
     toast($("rideToast"), "Captain তোমাকে গ্রুপ থেকে সরিয়ে দিয়েছে");
     openScreen("screen-join");
   }
@@ -615,7 +639,13 @@
       }
     } catch (e) { toast($("rideToast"), "যাচাই করা যায়নি — আবার চেষ্টা করো"); return; }
     try {
-      await supabaseRest("riders?id=eq." + encodeURIComponent(targetId), "DELETE");
+      // Mark the row KICKED_ instead of deleting it: a deleted row looks
+      // exactly like a row lost to bad signal, so the member's phone could
+      // not tell a real kick from a network gap. The KICKED_ marker is the
+      // reliable signal (see checkIfCurrentRiderKicked).
+      await supabaseRest("riders?id=eq." + encodeURIComponent(targetId), "PATCH", {
+        room_code: "KICKED_" + (currentSession.roomCode || "").trim().toUpperCase()
+      });
       kickedRiderIds.add(targetId);
       allConvoyRiders.delete(targetId); removeRemoteRiderMarker(targetId);
       if (realtimeChannel) realtimeChannel.send({ type: "broadcast", event: "kick", payload: { riderId: targetId } });
