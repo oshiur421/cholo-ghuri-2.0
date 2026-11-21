@@ -461,12 +461,7 @@ body{margin:0}
 .screen-riding{overflow:hidden !important}
 .hidden{display:none !important}
 .field-error{color:var(--red); font-size:13.5px; font-weight:600; margin:0}
-/* Join hero: plain gradient art, no photo, no logo image */
-.join-hero-art{width:100%; height:218px; display:block;
-  background:linear-gradient(135deg, #0f4f37 0%, #17684a 45%, #2c2a24 100%);}
-.join-hero-art::after{content:""; display:block; height:100%;
-  background:radial-gradient(120px 60px at 78% 30%, rgba(238,194,122,.55), transparent 70%),
-             radial-gradient(200px 90px at 20% 80%, rgba(255,253,247,.14), transparent 70%);}
+/* Join hero: the demo's riders photo (riders.jpg) behind the wordmark */
 .join-hero .scrim{position:absolute; inset:auto 0 0 0; padding:34px 20px 14px;
   background:linear-gradient(to top, rgba(14,13,10,.82), rgba(14,13,10,0)); color:#f5f1e6;}
 /* Riding: real Leaflet/Mapbox map fills the map zone */
