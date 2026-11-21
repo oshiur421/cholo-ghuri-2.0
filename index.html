@@ -1,41 +1,46 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#070a0f">
+  <meta name="theme-color" content="#1b1915">
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="apple-touch-icon" href="icon-192.png">
   <meta name="description" content="Cholo Ghuri - Mobile-first biker group tour convoy and real-time highway police radar web application.">
-  <title>CHOLO GHURI - Biker Convoy & Highway Radar</title>
+  <title>Cholo Ghuri — Biker convoy &amp; highway radar</title>
 
   <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.tailwindcss.com/3.4.16" integrity="sha384-mS5Uq7sE90lgbBDN8xgf34ibEgbZo4gB3tfLY40ZRle+M188BQw8onzNHg6GUZaA" crossorigin="anonymous"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
       theme: {
         extend: {
           colors: {
-            'cyber-dark': '#070a0f',
-            'cyber-card': 'rgba(11, 17, 27, 0.85)',
-            'neon-green': '#00ff87',
-            'neon-orange': '#ff7700',
-            'police-blue': '#0077ff',
-            'police-red': '#ff1e42'
+            'cyber-dark': '#1b1915',
+            'cyber-card': '#fffdf7',
+            'neon-green': '#17684a',
+            'neon-orange': '#9a6206',
+            'police-blue': '#2f6fb2',
+            'police-red': '#b3372a'
           },
           fontFamily: {
-            hud: ['Orbitron', 'monospace'],
-            cyber: ['Chakra Petch', 'Rajdhani', 'sans-serif'],
-            sans: ['Rajdhani', 'Inter', 'sans-serif']
+            hud: ['"IBM Plex Mono"', 'monospace'],
+            cyber: ['"Hind Siliguri"', 'sans-serif'],
+            sans: ['"Hind Siliguri"', 'sans-serif']
           }
         }
       }
     }
   </script>
+
+  <!-- Hind Siliguri + IBM Plex Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
   <!-- FontAwesome 6 CDN -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -116,7 +121,7 @@
       }
       var code = roomCodeInput ? roomCodeInput.value.trim().toUpperCase() : "";
       if (!code || code === "----") {
-        code = "DHAKA" + Math.floor(100 + Math.random() * 900);
+        code = (function () { var a = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"; var b = new Uint8Array(6); if (typeof crypto !== "undefined" && crypto.getRandomValues) { crypto.getRandomValues(b); } else { for (var i = 0; i < 6; i++) b[i] = Math.floor(Math.random() * 256); } var c = ""; for (var j = 0; j < 6; j++) c += a[b[j] % 36]; return c; })();
         if (roomCodeInput) roomCodeInput.value = code;
       }
       var isLeader = isLeaderCheckbox ? Boolean(isLeaderCheckbox.checked) : false;
@@ -284,31 +289,23 @@
   <div id="iabWarningBanner" class="hidden fixed top-0 left-0 right-0 z-[100020] bg-slate-950/95 border-b-2 border-amber-500 shadow-[0_4px_25px_rgba(245,158,11,0.5)] px-3 py-2.5 sm:px-4 sm:py-3 text-slate-100 flex flex-col sm:flex-row items-center justify-between gap-2.5 backdrop-blur-xl">
     <div class="flex items-start sm:items-center gap-2.5 min-w-0 flex-1">
       <div class="iab-icon-box w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/50 flex items-center justify-center text-amber-400 flex-shrink-0">
-        <svg class="iab-warning-svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-          <line x1="12" y1="9" x2="12" y2="13"/>
-          <line x1="12" y1="17" x2="12.01" y2="17"/>
-        </svg>
+        <i class="fa-solid fa-triangle-exclamation" style="color:#fbbf24"></i>
       </div>
       <div class="flex flex-col min-w-0 text-left">
-        <span class="font-cyber font-bold text-xs sm:text-sm text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
-          In-App Browser GPS Restriction
+        <span class="font-cyber font-bold text-xs sm:text-sm text-amber-300 tracking-wider flex items-center gap-1.5">
+          In-app browser GPS restriction
         </span>
         <p id="iabWarningText" class="font-sans text-[11px] sm:text-xs text-slate-200 mt-0.5 leading-snug">
-          Facebook's in-app browser blocks GPS! To get your Real Location, click the three dots (⋮) on the top right and select <strong>'Open in System Browser / Chrome'</strong>.
+          Facebook's in-app browser blocks GPS! To get your real location, tap the three dots on the top right and select <strong>'Open in system browser / Chrome'</strong>.
         </p>
       </div>
     </div>
     <div class="flex items-center gap-2 w-full sm:w-auto justify-end flex-shrink-0">
-      <button id="iabOpenChromeBtn" type="button" class="hidden px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-cyber font-bold text-xs uppercase shadow-[0_0_15px_rgba(0,255,135,0.4)] flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap active:scale-95">
-        <svg class="iab-chrome-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-          <polyline points="15 3 21 3 21 9"/>
-          <line x1="10" y1="14" x2="21" y2="3"/>
-        </svg>
+      <button id="iabOpenChromeBtn" type="button" class="hidden px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-cyber font-bold text-xs shadow-[0_0_15px_rgba(0,255,135,0.4)] flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap active:scale-95">
+        <i class="fa-brands fa-chrome"></i>
         <span>Open in Chrome</span>
       </button>
-      <button id="dismissIabBannerBtn" type="button" class="p-1.5 px-2.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors cursor-pointer text-xs" title="Dismiss Notice">
+      <button id="dismissIabBannerBtn" type="button" class="p-1.5 px-2.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors cursor-pointer text-xs" title="Dismiss notice">
         <i class="fa-solid fa-xmark"></i>
       </button>
     </div>
@@ -320,114 +317,71 @@
   <!-- ==================== FLOATING MINIMIZED ALERT DOCK ==================== -->
   <div id="miniAlertDock" class="mini-alert-dock" aria-label="Active floating alerts"></div>
 
-
   <!-- ==================== TOP FLOATING HUD BAR ==================== -->
   <header class="hud-top-bar fixed top-0 left-0 right-0 z-[10000] p-1.5 sm:p-3 pointer-events-none w-full max-w-full overflow-x-hidden" style="pointer-events: none !important; z-index: 10000 !important;">
     <div class="hud-top-container max-w-7xl mx-auto flex flex-col gap-1.5 sm:gap-2.5 w-full pointer-events-none" style="pointer-events: none !important;">
-      
-      <!-- Row 1: Left (Brand, Room, Join, Share, Sync Dot) & Right (Speed Limit & Speedometer) -->
-      <div class="hud-row-1 flex items-center justify-between gap-1.5 sm:gap-3 w-full pointer-events-auto" style="pointer-events: auto !important; position: relative; z-index: 10005;">
-        
-        <!-- Left: Logo Badge, Room Code, Join Button, Share, DB Sync Dot -->
-        <div class="glass-panel-neon rounded-xl sm:rounded-2xl p-1.5 sm:px-3 sm:py-2 flex items-center gap-1.5 sm:gap-2.5 pointer-events-auto shadow-2xl flex-shrink min-w-0">
-          <div class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-slate-900 border border-[#00ff87] flex items-center justify-center shadow-[0_0_12px_rgba(0,255,135,0.35)] flex-shrink-0 overflow-hidden p-0.5" title="Cholo Ghuri">
+
+      <!-- Row 1: Brand chip (left) + exact location card (right) -->
+      <div class="hud-row-1 flex items-start justify-between gap-1.5 sm:gap-3 w-full pointer-events-auto" style="pointer-events: auto !important; position: relative; z-index: 10005;">
+
+        <!-- Brand chip -->
+        <div class="brand-panel glass-panel-neon rounded-xl sm:rounded-2xl p-1.5 sm:px-3 sm:py-2 flex items-center gap-1.5 sm:gap-2.5 pointer-events-auto shadow-2xl flex-shrink min-w-0">
+          <div class="brand-logo w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden p-0.5" title="Cholo Ghuri">
             <img src="logo.png" alt="Cholo Ghuri" class="w-full h-full object-contain block" />
           </div>
           <div class="flex flex-col min-w-0">
             <div class="flex items-center gap-1">
-              <span class="font-cyber font-bold tracking-wider text-[11px] sm:text-sm text-slate-100 truncate">CHOLO GHURI</span>
-              <span id="captainBadge" class="hidden px-1 py-0.2 text-[8px] sm:text-[9px] font-bold rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 whitespace-nowrap">
-                <i class="fa-solid fa-crown text-[7px] mr-0.5"></i>CAPTAIN
+              <span class="brand-name font-cyber font-bold tracking-wider text-[11px] sm:text-sm text-slate-100 truncate">Cholo Ghuri</span>
+              <span id="captainBadge" class="hidden px-1 py-0.2 text-[8px] sm:text-[9px] font-bold rounded whitespace-nowrap">
+                <i class="fa-solid fa-crown text-[7px] mr-0.5"></i>Captain
               </span>
             </div>
             <div class="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs">
-              <button id="roomCodeBadgeBtn" title="Click to copy tour room code" class="font-hud font-bold text-neon-green tracking-wider hover:underline flex items-center gap-0.5 cursor-pointer">
+              <button id="roomCodeBadgeBtn" title="Click to copy tour room code" class="room-code-btn font-hud font-bold tracking-wider hover:underline flex items-center gap-0.5 cursor-pointer">
                 <span id="activeRoomCode">----</span>
                 <i class="fa-regular fa-copy text-[8px] sm:text-[9px] text-slate-400"></i>
               </button>
-              <button id="topJoinRoomBtn" onclick="window.openJoinModal()" title="Join Convoy or Change Room" class="px-1.5 sm:px-2 py-0.5 rounded bg-emerald-500/20 hover:bg-emerald-500/40 text-neon-green border border-emerald-500/60 text-[9px] sm:text-[11px] font-cyber font-bold tracking-wider uppercase transition-all flex items-center gap-0.5 cursor-pointer pointer-events-auto whitespace-nowrap">
+              <button id="topJoinRoomBtn" onclick="window.openJoinModal()" title="Join convoy or change room" class="join-btn px-1.5 sm:px-2 py-0.5 rounded text-[9px] sm:text-[11px] font-cyber font-bold tracking-wider transition-all flex items-center gap-0.5 cursor-pointer pointer-events-auto whitespace-nowrap">
                 <i class="fa-solid fa-plus text-[8px]"></i>
-                <span>JOIN</span>
+                <span>Join</span>
               </button>
-              <button id="topShareRoomBtn" onclick="window.copyInviteLink && window.copyInviteLink()" title="Copy Tour Invite Link" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-slate-600 hover:border-cyan-400 text-[9px] sm:text-[10px] font-cyber font-bold flex items-center gap-1 cursor-pointer pointer-events-auto transition-colors whitespace-nowrap">
+              <button id="topShareRoomBtn" onclick="window.copyInviteLink && window.copyInviteLink()" title="Copy tour invite link" class="invite-btn px-1.5 py-0.5 rounded text-[9px] sm:text-[10px] font-cyber font-bold flex items-center gap-1 cursor-pointer pointer-events-auto transition-colors whitespace-nowrap">
                 <i class="fa-solid fa-share-nodes text-[8px]"></i>
-                <span class="hidden sm:inline">INVITE</span>
+                <span class="hidden sm:inline">Invite</span>
               </button>
               <!-- DB Sync Status Dot -->
-              <span id="dbSyncStatusWrapper" class="flex items-center gap-1 pl-0.5" title="DB Sync: Connected">
+              <span id="dbSyncStatusWrapper" class="flex items-center gap-1 pl-0.5" title="DB sync: connected">
                 <span id="dbSyncDot" class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(0,255,136,0.85)] transition-all duration-300"></span>
               </span>
             </div>
           </div>
         </div>
 
-        <!-- Right: Traffic Speed Limit Sign, Digital Speedometer & Top-Right Group Badge -->
-        <div class="flex items-center gap-1.5 sm:gap-2.5">
-          <div class="glass-panel rounded-xl sm:rounded-2xl p-1 sm:px-3 sm:py-1.5 flex items-center gap-1.5 sm:gap-3 pointer-events-auto border border-slate-700/60 shadow-2xl flex-shrink-0">
-            <!-- Circular Traffic Speed Limit Sign -->
-            <div class="flex flex-col items-center">
-              <div id="speedLimitSign" class="speed-limit-sign" title="Highway Speed Limit">
-                <span id="speedLimitVal" class="speed-limit-number">80</span>
-                <span class="speed-limit-unit">LIMIT</span>
-              </div>
-            </div>
-
-            <!-- Digital Speedometer -->
-            <div class="flex flex-col items-end pr-0.5 sm:pr-1">
-              <div class="flex items-baseline gap-0.5">
-                <span id="liveSpeedDisplay" class="font-hud font-black text-xl sm:text-3xl text-neon-green speedo-glow leading-none">00</span>
-                <span class="font-cyber font-bold text-[8px] sm:text-xs text-slate-400">KM/H</span>
-              </div>
-              <span id="speedStatusLabel" class="text-[8px] sm:text-[9px] font-semibold text-emerald-400 uppercase tracking-wider">Cruising</span>
-            </div>
-          </div>
-
-          <!-- Top-Right Group Badge Button (Removed/Hidden to avoid duplicates) -->
-          <button id="topRightGroupBtn" class="hidden" style="display: none !important; pointer-events: none !important;" aria-hidden="true" tabindex="-1">
-            <span id="topRightRidersCount">1</span>
-          </button>
-        </div>
-
-      </div>
-
-      <!-- Row 2: Full-width slim bar showing Current Road Name badge and GROUP (X) riders button side by side -->
-      <div class="hud-row-2 flex items-center justify-between gap-1.5 sm:gap-3 w-full pointer-events-auto" style="pointer-events: auto !important; position: relative; z-index: 10005;">
-        <!-- Current Road Name Banner (clean flex layout, no pills inside) -->
-        <div id="currentRoadBanner" class="glass-panel road-banner-glow rounded-xl sm:rounded-2xl px-2.5 py-1.5 sm:px-4 sm:py-2 flex items-center gap-2 sm:gap-3 border border-emerald-500/20 shadow-2xl flex-1 min-w-0">
-          <div class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-neon-green flex-shrink-0">
-            <i id="compassIcon" class="fa-solid fa-location-arrow text-[10px] sm:text-xs transition-transform duration-300"></i>
+        <!-- Exact location card (was: current road banner) -->
+        <div id="currentRoadBanner" class="loc-top glass-panel rounded-xl sm:rounded-2xl px-2.5 py-1.5 sm:px-3 sm:py-2 flex items-start gap-2 shadow-2xl flex-shrink-0">
+          <div class="loc-pin w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center flex-shrink-0">
+            <i id="compassIcon" class="fa-solid fa-location-dot text-[11px] sm:text-xs transition-transform duration-300"></i>
           </div>
           <div class="flex flex-col min-w-0 text-left flex-1 overflow-hidden">
-            <span class="text-[7.5px] sm:text-[8.5px] uppercase tracking-widest text-emerald-400/80 font-bold leading-tight whitespace-nowrap">CURRENT ROAD</span>
-            <div id="currentRoadName" class="hud-road-text font-cyber font-bold text-xs sm:text-sm text-slate-100 truncate" title="Dhaka - Mawa Expressway (N8)">
+            <span class="loc-label text-[10px] sm:text-[11px] font-bold leading-tight whitespace-nowrap">তুমি এখন</span>
+            <div id="currentRoadName" class="loc-name font-cyber font-bold text-xs sm:text-sm truncate" title="Dhaka - Mawa Expressway (N8)">
               Dhaka - Mawa Expressway (N8)
             </div>
+            <span id="locSub" class="loc-sub text-[10px] sm:text-[11px] truncate">ট্যুর সেট করলে পরের থামা এখানে দেখাবে</span>
           </div>
         </div>
 
-        <!-- Day/Night Map Theme Toggle Button -->
-        <button id="mapThemeToggleBtn" class="hud-pill-btn theme-toggle-btn" title="Switch Day/Night Map">
-          <span class="theme-opt night-opt active">🌙 NIGHT</span>
-          <span class="theme-divider">/</span>
-          <span class="theme-opt day-opt">☀️ DAY</span>
-        </button>
-
-        <!-- Tour Planner Button -->
-        <button id="openTourPlannerBtn" onclick="window.openTourPlanner && window.openTourPlanner()" title="Group Tour & Multi-Stop Waypoint Planner" class="glass-panel-neon hover:border-cyan-400 active:scale-95 rounded-xl sm:rounded-2xl px-2.5 py-1.5 sm:px-3.5 sm:py-2 flex items-center gap-1.5 border border-cyan-500/40 text-slate-200 transition-all shadow-2xl cursor-pointer pointer-events-auto flex-shrink-0 whitespace-nowrap" style="pointer-events: auto !important; position: relative; z-index: 10010; touch-action: manipulation;">
-          <span class="text-xs sm:text-sm">🗺️</span>
-          <span class="font-cyber font-bold text-[10px] sm:text-xs uppercase tracking-wider text-cyan-300">TOUR</span>
-          <span id="activeTourIndicatorDot" class="hidden w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
-        </button>
-
-        <!-- Group (X) Riders Drawer Button -->
-        <button id="topRidersCountBtn" onclick="window.toggleGroupDrawer && window.toggleGroupDrawer()" title="View Group Riders List & Distances" class="group-trigger-btn glass-panel-neon hover:border-emerald-400 active:scale-95 rounded-xl sm:rounded-2xl px-2.5 py-1.5 sm:px-4 sm:py-2 flex items-center gap-1.5 border border-emerald-500/40 text-slate-200 transition-all shadow-2xl cursor-pointer pointer-events-auto flex-shrink-0 whitespace-nowrap" style="pointer-events: auto !important; position: relative; z-index: 10010; touch-action: manipulation;">
-          <span class="radar-beacon w-2 h-2 rounded-full bg-neon-green pointer-events-none"></span>
-          <span class="font-cyber font-bold text-[10px] sm:text-xs uppercase tracking-wider pointer-events-none">GROUP (<span id="activeRidersCount" class="pointer-events-none">1</span>)</span>
-          <i class="fa-solid fa-chevron-right text-[8px] sm:text-[9px] text-slate-400 pointer-events-none"></i>
+        <!-- Hidden duplicate group button (kept for JS compat) -->
+        <button id="topRightGroupBtn" class="hidden" style="display: none !important; pointer-events: none !important;" aria-hidden="true" tabindex="-1">
+          <span id="topRightRidersCount">1</span>
         </button>
       </div>
 
-      <!-- Dedicated Sub-Road Alert Section (Directly underneath CURRENT ROAD bar, never overlapping) -->
+      <!-- Hidden header buttons — replaced by the bottom tabs, kept in DOM for JS bindings -->
+      <button id="openTourPlannerBtn" class="hidden" style="display: none !important; pointer-events: none !important;" aria-hidden="true" tabindex="-1">Tour</button>
+      <button id="topRidersCountBtn" class="hidden group-trigger-btn" style="display: none !important; pointer-events: none !important;" aria-hidden="true" tabindex="-1">Group</button>
+
+      <!-- Ride sheet: tour progress + alert cards (shown at the bottom of the map) -->
       <div id="subRoadAlertSection" class="sub-road-alert-section pointer-events-auto">
         <!-- 0. Live Tour Route Progress Strip -->
         <div id="tourProgressStrip" class="sub-road-alert-card tour-progress-card hidden">
@@ -437,37 +391,37 @@
             </div>
             <div class="alert-card-text flex flex-col min-w-0 flex-1">
               <div class="flex items-center justify-between gap-2">
-                <span id="tourProgressLabel" class="alert-card-label text-cyan-400 font-bold uppercase tracking-wider text-[10px] sm:text-xs truncate">
-                  TOUR: DHAKA ➔ BANDARBAN
+                <span id="tourProgressLabel" class="alert-card-label text-cyan-400 font-bold tracking-wider text-[10px] sm:text-xs truncate">
+                  Tour: Dhaka → Bandarban
                 </span>
-                <span id="tourSubgroupTag" class="text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-hud uppercase">
-                  ALL RIDERS
+                <span id="tourSubgroupTag" class="text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-hud">
+                  All riders
                 </span>
               </div>
               <!-- Chain breadcrumb -->
               <div id="tourChainBreadcrumb" class="font-cyber font-semibold text-[10.5px] sm:text-xs text-slate-200 truncate mt-0.5">
-                Dhaka ➔ 🤝 Cumilla ➔ ⛽ Chattogram ➔ 🏁 Bandarban
+                Dhaka → Cumilla → Chattogram → Bandarban
               </div>
               <!-- Next stoppage highlight with live distance -->
               <div id="tourNextStopHighlight" class="text-[10px] sm:text-[11px] font-cyber text-emerald-300 font-bold flex items-center gap-1.5 mt-0.5">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-                <span id="tourNextStopText">NEXT: 🤝 Cumilla (Regroup) • 18.4 km</span>
+                <span id="tourNextStopText">Next: Cumilla (Regroup) • 18.4 km</span>
               </div>
             </div>
           </div>
           <div class="alert-card-actions flex items-center gap-1.5 flex-shrink-0">
-            <button id="viewTourNextStopBtn" type="button" class="sub-alert-btn sub-alert-btn-action sub-alert-btn-cyan" title="Pan to Next Tour Stop">
+            <button id="viewTourNextStopBtn" type="button" class="sub-alert-btn sub-alert-btn-action sub-alert-btn-cyan" title="Pan to next tour stop">
               <i class="fa-solid fa-location-crosshairs text-[10px]"></i>
-              <span>VIEW</span>
+              <span>View</span>
             </button>
-            <button id="openTourPlannerFromStripBtn" type="button" class="sub-alert-btn sub-alert-btn-min" title="Edit Tour Plan">
+            <button id="openTourPlannerFromStripBtn" type="button" class="sub-alert-btn sub-alert-btn-min" title="Edit tour plan">
               <i class="fa-solid fa-map text-[10px]"></i>
             </button>
-            <button id="endTourFromStripBtn" type="button" class="sub-alert-btn sub-alert-btn-action sub-alert-btn-rose" title="End & Clear Active Tour">
+            <button id="endTourFromStripBtn" type="button" class="sub-alert-btn sub-alert-btn-action sub-alert-btn-rose" title="End &amp; clear active tour">
               <i class="fa-solid fa-trash-can text-[10px]"></i>
-              <span>END TOUR</span>
+              <span>End tour</span>
             </button>
-            <button id="minimizeTourProgressBtn" type="button" class="sub-alert-btn sub-alert-btn-min" title="Minimize Tour Progress">
+            <button id="minimizeTourProgressBtn" type="button" class="sub-alert-btn sub-alert-btn-min" title="Minimize tour progress">
               <i class="fa-solid fa-minus text-[10px]"></i>
             </button>
           </div>
@@ -481,31 +435,31 @@
             </div>
             <div class="alert-card-text flex flex-col min-w-0 flex-1">
               <div class="flex items-center gap-2">
-                <span id="tourProximityBadge" class="alert-card-label text-amber-400 font-bold uppercase tracking-wider text-[10px] sm:text-xs">
-                  REGROUP POINT AHEAD
+                <span id="tourProximityBadge" class="alert-card-label text-amber-400 font-bold tracking-wider text-[10px] sm:text-xs">
+                  Regroup point ahead
                 </span>
                 <span id="tourProximityDistanceBadge" class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 font-hud">
                   450m
                 </span>
               </div>
               <span id="tourProximityText" class="alert-card-desc font-cyber font-bold text-xs sm:text-sm text-slate-100 truncate">
-                🤝 REGROUP POINT: Cumilla (2/3 Riders Arrived)
+                Regroup point: Cumilla (2/3 riders arrived)
               </span>
             </div>
           </div>
           <div class="alert-card-actions flex items-center gap-1.5 flex-shrink-0">
-            <button id="locateTourStopBtn" type="button" class="sub-alert-btn sub-alert-btn-action sub-alert-btn-amber" title="Locate Waypoint">
+            <button id="locateTourStopBtn" type="button" class="sub-alert-btn sub-alert-btn-action sub-alert-btn-amber" title="Locate waypoint">
               <i class="fa-solid fa-location-crosshairs text-[10px]"></i>
-              <span>LOCATE</span>
+              <span>Locate</span>
             </button>
-            <button id="markTourStopDoneBtn" type="button" class="sub-alert-btn sub-alert-btn-action sub-alert-btn-emerald" title="Mark Stoppage Reached & Proceed">
+            <button id="markTourStopDoneBtn" type="button" class="sub-alert-btn sub-alert-btn-action sub-alert-btn-emerald" title="Mark stoppage reached &amp; proceed">
               <i class="fa-solid fa-check text-[10px]"></i>
-              <span>MARK DONE</span>
+              <span>Mark done</span>
             </button>
-            <button id="minimizeTourAlertBtn" type="button" class="sub-alert-btn sub-alert-btn-min" title="Minimize Alert to Dock">
+            <button id="minimizeTourAlertBtn" type="button" class="sub-alert-btn sub-alert-btn-min" title="Minimize alert to dock">
               <i class="fa-solid fa-minus text-[10px]"></i>
             </button>
-            <button id="dismissTourAlertBtn" type="button" class="sub-alert-btn sub-alert-btn-close" title="Dismiss Proximity Alert">
+            <button id="dismissTourAlertBtn" type="button" class="sub-alert-btn sub-alert-btn-close" title="Dismiss proximity alert">
               <i class="fa-solid fa-xmark text-xs"></i>
             </button>
           </div>
@@ -518,21 +472,21 @@
               <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
             <div class="alert-card-text flex flex-col min-w-0">
-              <span class="alert-card-label text-amber-400 font-bold uppercase tracking-wider">CONVOY GAP ALERT</span>
+              <span class="alert-card-label text-amber-400 font-bold tracking-wider">Convoy gap alert</span>
               <span id="convoyAlertText" class="alert-card-desc font-cyber font-bold text-xs sm:text-sm text-slate-100 truncate">
-                ⚠️ Rider • 1.5 km dure ache!
+                Rider 1.5 km দূরে আছে!
               </span>
             </div>
           </div>
           <div class="alert-card-actions flex items-center gap-1.5 flex-shrink-0">
-            <button id="viewStragglerBtn" type="button" class="sub-alert-btn sub-alert-btn-action sub-alert-btn-amber" title="Locate Straggler Rider">
+            <button id="viewStragglerBtn" type="button" class="sub-alert-btn sub-alert-btn-action sub-alert-btn-amber" title="Locate straggler rider">
               <i class="fa-solid fa-location-crosshairs text-[10px]"></i>
-              <span>LOCATE</span>
+              <span>Locate</span>
             </button>
-            <button id="minimizeConvoyAlertBtn" type="button" class="sub-alert-btn sub-alert-btn-min" title="Minimize Alert to Dock">
+            <button id="minimizeConvoyAlertBtn" type="button" class="sub-alert-btn sub-alert-btn-min" title="Minimize alert to dock">
               <i class="fa-solid fa-minus text-[10px]"></i>
             </button>
-            <button id="dismissConvoyAlertBtn" type="button" class="sub-alert-btn sub-alert-btn-close" title="Permanently Dismiss Alert">
+            <button id="dismissConvoyAlertBtn" type="button" class="sub-alert-btn sub-alert-btn-close" title="Permanently dismiss alert">
               <i class="fa-solid fa-xmark text-xs"></i>
             </button>
           </div>
@@ -545,21 +499,21 @@
               <i class="fa-solid fa-shield-halved"></i>
             </div>
             <div class="alert-card-text flex flex-col min-w-0">
-              <span class="alert-card-label text-rose-400 font-bold uppercase tracking-wider">POLICE RADAR ALERT</span>
+              <span class="alert-card-label text-rose-400 font-bold tracking-wider">Police radar alert</span>
               <span id="approachingPoliceText" class="alert-card-desc font-cyber font-bold text-xs sm:text-sm text-slate-100 truncate">
-                🛡️ Police Checkpost • 850m samne (by Sakib)
+                Police checkpost • 850m সামনে (by Sakib)
               </span>
             </div>
           </div>
           <div class="alert-card-actions flex items-center gap-1.5 flex-shrink-0">
-            <button id="verifyApproachingBtn" type="button" class="sub-alert-btn sub-alert-btn-action sub-alert-btn-rose" title="Verify Police Checkpost">
+            <button id="verifyApproachingBtn" type="button" class="sub-alert-btn sub-alert-btn-action sub-alert-btn-rose" title="Verify police checkpost">
               <i class="fa-solid fa-circle-check text-[10px]"></i>
-              <span>VERIFY</span>
+              <span>Verify</span>
             </button>
-            <button id="minimizeApproachingBtn" type="button" class="sub-alert-btn sub-alert-btn-min" title="Minimize Alert to Dock">
+            <button id="minimizeApproachingBtn" type="button" class="sub-alert-btn sub-alert-btn-min" title="Minimize alert to dock">
               <i class="fa-solid fa-minus text-[10px]"></i>
             </button>
-            <button id="dismissApproachingBtn" type="button" class="sub-alert-btn sub-alert-btn-close" title="Permanently Dismiss Alert">
+            <button id="dismissApproachingBtn" type="button" class="sub-alert-btn sub-alert-btn-close" title="Permanently dismiss alert">
               <i class="fa-solid fa-xmark text-xs"></i>
             </button>
           </div>
@@ -572,21 +526,21 @@
               <i class="fa-solid fa-road"></i>
             </div>
             <div class="alert-card-text flex flex-col min-w-0">
-              <span class="alert-card-label text-cyan-400 font-bold uppercase tracking-wider">SPEED / ROAD ALERT</span>
+              <span class="alert-card-label text-cyan-400 font-bold tracking-wider">Speed / road alert</span>
               <span id="roadTransitionAlertText" class="alert-card-desc font-cyber font-bold text-xs sm:text-sm text-slate-100 truncate">
-                🛣️ Dhaka - Mawa Expressway (N8) • Speed Limit 80 KM/H
+                Dhaka - Mawa Expressway (N8) • Speed limit 80 km/h
               </span>
             </div>
           </div>
           <div class="alert-card-actions flex items-center gap-1.5 flex-shrink-0">
-            <button id="viewRoadDetailsBtn" type="button" class="sub-alert-btn sub-alert-btn-action sub-alert-btn-cyan" title="View Road Details Modal">
+            <button id="viewRoadDetailsBtn" type="button" class="sub-alert-btn sub-alert-btn-action sub-alert-btn-cyan" title="View road details modal">
               <i class="fa-solid fa-circle-info text-[10px]"></i>
-              <span>DETAILS</span>
+              <span>Details</span>
             </button>
-            <button id="minimizeRoadAlertBtn" type="button" class="sub-alert-btn sub-alert-btn-min" title="Minimize Alert to Dock">
+            <button id="minimizeRoadAlertBtn" type="button" class="sub-alert-btn sub-alert-btn-min" title="Minimize alert to dock">
               <i class="fa-solid fa-minus text-[10px]"></i>
             </button>
-            <button id="dismissRoadAlertBtn" type="button" class="sub-alert-btn sub-alert-btn-close" title="Permanently Dismiss Alert">
+            <button id="dismissRoadAlertBtn" type="button" class="sub-alert-btn sub-alert-btn-close" title="Permanently dismiss alert">
               <i class="fa-solid fa-xmark text-xs"></i>
             </button>
           </div>
@@ -599,7 +553,7 @@
               <i class="fa-solid fa-walkie-talkie"></i>
             </div>
             <div class="alert-card-text flex flex-col min-w-0">
-              <span class="alert-card-label text-emerald-400 font-bold uppercase tracking-wider">WALKIE-TALKIE RADIO</span>
+              <span class="alert-card-label text-emerald-400 font-bold tracking-wider">Walkie-talkie radio</span>
               <div class="flex items-center gap-2 min-w-0">
                 <div class="ptt-audio-wave inline-flex flex-shrink-0" aria-hidden="true">
                   <span class="wave-bar"></span>
@@ -608,13 +562,13 @@
                   <span class="wave-bar"></span>
                 </div>
                 <span id="pttRadioBannerText" class="alert-card-desc font-cyber font-bold text-xs sm:text-sm text-slate-100 truncate">
-                  📻 Rider transmitting...
+                  Rider transmitting...
                 </span>
               </div>
             </div>
           </div>
           <div class="alert-card-actions flex items-center gap-1.5 flex-shrink-0">
-            <button id="dismissPttRadioBtn" type="button" class="sub-alert-btn sub-alert-btn-close" title="Dismiss Radio Status">
+            <button id="dismissPttRadioBtn" type="button" class="sub-alert-btn sub-alert-btn-close" title="Dismiss radio status">
               <i class="fa-solid fa-xmark text-xs"></i>
             </button>
           </div>
@@ -627,14 +581,14 @@
               <i id="toastIcon" class="fa-solid fa-crosshairs text-sky-400"></i>
             </div>
             <div class="alert-card-text flex flex-col min-w-0">
-              <span id="toastTitle" class="alert-card-label text-sky-400 font-bold uppercase tracking-wider truncate">LOCATING RIDER</span>
+              <span id="toastTitle" class="alert-card-label text-sky-400 font-bold tracking-wider truncate">Locating rider</span>
               <span id="toastBody" class="alert-card-desc font-cyber font-bold text-xs sm:text-sm text-slate-100 truncate">
                 Focused on Rider_471
               </span>
             </div>
           </div>
           <div class="alert-card-actions flex items-center gap-1.5 flex-shrink-0">
-            <button id="dismissToastBtn" type="button" class="sub-alert-btn sub-alert-btn-close" title="Close Notification">
+            <button id="dismissToastBtn" type="button" class="sub-alert-btn sub-alert-btn-close" title="Close notification">
               <i class="fa-solid fa-xmark text-xs"></i>
             </button>
           </div>
@@ -643,6 +597,27 @@
 
     </div>
   </header>
+
+  <!-- ==================== SPEED DIAL (on the map, right edge) ==================== -->
+  <div class="speed-dial-wrap" aria-label="Speedometer">
+    <div class="speed-dial">
+      <span id="liveSpeedDisplay" class="font-hud font-black text-xl sm:text-3xl leading-none">00</span>
+      <span class="speed-unit">km/h</span>
+      <span class="speed-lim"><span id="speedLimitSign" class="speed-limit-sign" title="Highway speed limit"><span id="speedLimitVal" class="speed-limit-number">80</span></span> সীমা</span>
+    </div>
+    <span id="speedStatusLabel" class="speed-status">Cruising</span>
+  </div>
+
+  <!-- ==================== MAP TOOLS (right edge) ==================== -->
+  <div id="mapTools" class="map-tools">
+    <button id="recenterBtn" onclick="window.recenterCamera && window.recenterCamera()" title="Recenter camera on rider" class="tool-btn" type="button" aria-label="Recenter map on me">
+      <i id="lockTargetIcon" class="fa-solid fa-crosshairs"></i>
+    </button>
+    <button id="mapThemeToggleBtn" class="tool-btn theme-toggle-btn" title="Switch day/night map" type="button" aria-label="Switch day or night map">
+      <span class="theme-opt night-opt active"><i class="fa-solid fa-moon"></i></span>
+      <span class="theme-opt day-opt"><i class="fa-solid fa-sun"></i></span>
+    </button>
+  </div>
 
   <!-- ==================== SCREEN BORDER OVERSPEED FLASH ==================== -->
   <div id="overspeedBorderAlert" class="opacity-0"></div>
@@ -656,58 +631,67 @@
   <div id="drawerBackdrop" class="hidden fixed inset-0 z-[99990] bg-black/65 backdrop-blur-sm transition-opacity duration-300" onclick="window.closeGroupDrawer ? window.closeGroupDrawer() : (window.toggleGroupDrawer && window.toggleGroupDrawer(false))" style="display: none !important; opacity: 0; pointer-events: none;"></div>
 
   <!-- ==================== LEFT COLLAPSIBLE GROUP RIDERS DRAWER ==================== -->
-  <aside id="convoyDrawer" data-group-drawer="true" data-alias="ridersDrawer groupDrawer" class="hidden -translate-x-full glass-panel-neon flex flex-col border-r border-emerald-500/30 shadow-[0_0_50px_rgba(0,0,0,0.95)]" style="display: none; transform: translateX(-100%); pointer-events: none;">
+  <aside id="convoyDrawer" data-group-drawer="true" data-alias="ridersDrawer groupDrawer" class="hidden -translate-x-full glass-panel-neon flex flex-col border-r shadow-[0_0_50px_rgba(0,0,0,0.95)]" style="display: none; transform: translateX(-100%); pointer-events: none;">
     <!-- Drawer Header -->
-    <div class="p-3.5 sm:p-4 border-b border-emerald-500/20 flex flex-col gap-2.5">
+    <div class="drawer-head p-3.5 sm:p-4 border-b flex flex-col gap-2.5">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-neon-green">
+          <div class="drawer-head-icon w-8 h-8 rounded-lg flex items-center justify-center">
             <i class="fa-solid fa-users-viewfinder text-sm"></i>
           </div>
           <div>
-            <h3 class="font-cyber font-black text-sm text-slate-100 tracking-wider uppercase">CONVOY SQUAD</h3>
-            <span class="text-[10px] font-hud text-neon-green font-bold tracking-widest" id="drawerRoomCode">ROOM: ----</span>
+            <h3 class="font-cyber font-black text-sm tracking-wider">তোমার গ্রুপ</h3>
+            <span class="text-[10px] font-hud font-bold tracking-widest" id="drawerRoomCode">Room: ----</span>
           </div>
         </div>
-        <button id="closeRidersDrawerBtn" onclick="window.closeGroupDrawer ? window.closeGroupDrawer() : (window.toggleGroupDrawer && window.toggleGroupDrawer(false))" title="Close Riders Drawer" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 hover:text-white flex items-center justify-center text-xs cursor-pointer border border-slate-700 transition-all">
+        <button id="closeRidersDrawerBtn" onclick="window.closeGroupDrawer ? window.closeGroupDrawer() : (window.toggleGroupDrawer && window.toggleGroupDrawer(false))" title="Close riders drawer" class="drawer-close w-8 h-8 rounded-lg flex items-center justify-center text-xs cursor-pointer transition-all">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
 
       <!-- Quick + Invite Friend Button -->
-      <button onclick="window.copyInviteLink && window.copyInviteLink()" title="Copy Tour Invite Link to Share" class="w-full py-2 px-3 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 active:scale-95 border border-emerald-500/50 text-neon-green font-cyber font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer">
+      <button onclick="window.copyInviteLink && window.copyInviteLink()" title="Copy tour invite link to share" class="invite-friend-btn w-full py-2 px-3 rounded-xl font-cyber font-bold text-xs tracking-wider flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer">
         <i class="fa-solid fa-user-plus text-xs"></i>
-        <span>+ Invite Friend</span>
+        <span>+ বন্ধুকে ইনভাইট করো</span>
       </button>
     </div>
 
-    <!-- Convoy Leader Status Banner -->
-    <div class="px-4 py-2 bg-black/40 border-b border-slate-800 flex items-center justify-between text-xs">
-      <div class="flex items-center gap-1.5 text-amber-400 font-cyber font-bold">
-        <i class="fa-solid fa-crown text-xs"></i>
-        <span id="drawerLeaderName">Leader: Searching...</span>
+    <!-- Next stop (mirrors the live tour) -->
+    <div class="drawer-next-stop px-4 pt-3">
+      <div class="next-stop-card">
+        <span class="lab">পরের থামা</span>
+        <div class="place" id="drawerNextStop">ট্যুর সেট করলে এখানে দেখাবে</div>
+        <div class="chain" id="drawerChain"></div>
       </div>
-      <span class="text-[10px] text-slate-400">Max Gap: <strong class="text-rose-400">1.5 km</strong></span>
+    </div>
+
+    <!-- Convoy Leader Status Banner -->
+    <div class="drawer-leader px-4 py-2 border-b flex items-center justify-between text-xs">
+      <div class="flex items-center gap-1.5 font-cyber font-bold">
+        <i class="fa-solid fa-crown text-xs"></i>
+        <span id="drawerLeaderName">Leader: খুঁজছি...</span>
+      </div>
+      <span class="text-[10px]">সর্বোচ্চ গ্যাপ: <strong>1.5 km</strong></span>
     </div>
 
     <!-- Connected Riders Subheader -->
-    <div class="px-4 pt-2.5 pb-1 flex items-center justify-between text-[10px] font-cyber font-bold tracking-wider text-slate-400 uppercase">
-      <span>CONNECTED RIDERS</span>
-      <span class="text-neon-green flex items-center gap-1 text-[9px] font-medium lowercase">
-        <i class="fa-solid fa-location-crosshairs text-[9px]"></i> tap to locate
+    <div class="px-4 pt-2.5 pb-1 flex items-center justify-between text-[10px] font-cyber font-bold tracking-wider uppercase">
+      <span>কানেক্টেড রাইডার</span>
+      <span class="flex items-center gap-1 text-[9px] font-medium lowercase">
+        <i class="fa-solid fa-location-crosshairs text-[9px]"></i> চাপ দিলে লোকেট হবে
       </span>
     </div>
 
     <!-- Scrollable Riders List -->
     <div id="ridersListContainer" class="flex-1 overflow-y-auto p-3 space-y-2.5">
       <!-- Dynamic Rider Cards inserted via JS -->
-      <div class="text-center text-xs text-slate-500 py-6">Loading convoy telemetry...</div>
+      <div class="text-center text-xs py-6">কনভয় টেলিমেট্রি লোড হচ্ছে...</div>
     </div>
 
     <!-- Drawer Footer -->
-    <div class="p-3 border-t border-slate-800 bg-black/60 flex items-center justify-between text-[11px] text-slate-400">
-      <span>Auto-sync via Supabase</span>
-      <span class="flex items-center gap-1 text-emerald-400">
+    <div class="drawer-foot p-3 border-t flex items-center justify-between text-[11px]">
+      <span>Supabase দিয়ে অটো-সিঙ্ক</span>
+      <span class="flex items-center gap-1">
         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Live
       </span>
     </div>
@@ -716,33 +700,33 @@
   <!-- ==================== ROAD TRANSITION POPUP MODAL ==================== -->
   <div id="roadTransitionModal" class="road-change-modal hidden opacity-0 pointer-events-none">
     <div class="road-change-card">
-      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400 text-neon-green text-xs font-cyber font-bold uppercase mb-2">
-        <i class="fa-solid fa-road"></i> NEW ROAD ENTERED
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-cyber font-bold mb-2 road-change-pill">
+        <i class="fa-solid fa-road"></i> নতুন রাস্তায় ঢুকেছ
       </div>
-      <h2 id="popupRoadName" class="font-cyber font-black text-2xl sm:text-3xl text-white my-2 tracking-wide leading-tight">
+      <h2 id="popupRoadName" class="font-cyber font-black text-2xl sm:text-3xl my-2 tracking-wide leading-tight">
         Dhaka - Mawa Expressway (N8)
       </h2>
-      <div id="popupRoadType" class="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-2">
+      <div id="popupRoadType" class="text-xs font-semibold tracking-wider mb-2">
         Expressway / Trunk Highway
       </div>
 
       <!-- Giant Circular Speed Limit Sign -->
       <div class="giant-speed-sign">
         <span id="popupSpeedLimit" class="giant-speed-num">80</span>
-        <span class="giant-speed-unit">LIMIT KM/H</span>
+        <span class="giant-speed-unit">সীমা km/h</span>
       </div>
 
-      <p id="popupVoiceSubtext" class="text-xs text-emerald-300 font-bold mt-2 flex items-center justify-center gap-1.5">
+      <p id="popupVoiceSubtext" class="text-xs font-bold mt-2 flex items-center justify-center gap-1.5">
         <i class="fa-solid fa-volume-high"></i>
-        <span id="popupVoiceMsg">Announced: Speed limit updated!</span>
+        <span id="popupVoiceMsg">ঘোষণা: স্পিড লিমিট বদলেছে!</span>
       </p>
 
       <div class="mt-4 flex items-center justify-center gap-2.5">
-        <button id="minimizeRoadPopupBtn" type="button" class="px-5 py-2.5 rounded-xl text-xs font-cyber font-bold uppercase bg-slate-800/90 hover:bg-slate-700 text-cyan-300 border border-cyan-500/40 shadow-lg cursor-pointer flex items-center gap-1.5 transition-all">
-          <i class="fa-solid fa-compress text-[11px]"></i> MINIMIZE
+        <button id="minimizeRoadPopupBtn" type="button" class="px-5 py-2.5 rounded-xl text-xs font-cyber font-bold bg-slate-800/90 hover:bg-slate-700 text-cyan-300 border border-cyan-500/40 shadow-lg cursor-pointer flex items-center gap-1.5 transition-all">
+          <i class="fa-solid fa-compress text-[11px]"></i> ছোট করো
         </button>
-        <button id="dismissRoadPopupBtn" type="button" class="neon-btn-green px-6 py-2.5 rounded-xl text-xs font-cyber font-bold uppercase shadow-lg cursor-pointer">
-          DISMISS / CONFIRM
+        <button id="dismissRoadPopupBtn" type="button" class="neon-btn-green px-6 py-2.5 rounded-xl text-xs font-cyber font-bold shadow-lg cursor-pointer">
+          ঠিক আছে
         </button>
       </div>
 
@@ -753,14 +737,14 @@
 
 
   <!-- ==================== PUSH-TO-TALK (PTT) WALKIE-TALKIE DOCK ==================== -->
-  <div id="pttWalkieDock" class="ptt-walkie-dock" style="position: fixed; left: 12px; bottom: 96px; z-index: 9500; display: flex; flex-direction: column; align-items: center; gap: 8px;" aria-label="Walkie-Talkie Voice Communicator">
+  <div id="pttWalkieDock" class="ptt-walkie-dock" style="position: fixed; left: 12px; bottom: 150px; z-index: 9500; display: flex; flex-direction: column; align-items: center; gap: 8px;" aria-label="Walkie-talkie voice communicator">
     <!-- Speaker Mute/Unmute Toggle Button -->
-    <button id="pttMuteSpeakerBtn" type="button" class="ptt-speaker-btn" title="Mute/Unmute Incoming Radio Audio" aria-label="Mute or Unmute Walkie-Talkie Audio">
+    <button id="pttMuteSpeakerBtn" type="button" class="ptt-speaker-btn" title="Mute/unmute incoming radio audio" aria-label="Mute or unmute walkie-talkie audio">
       <span id="pttSpeakerIcon" class="ptt-speaker-icon">🔊</span>
     </button>
 
     <!-- Main Glove-Friendly PTT Button -->
-    <button id="pttTalkBtn" type="button" class="ptt-talk-btn" title="Push To Talk (Tap or Hold to Talk)" aria-label="Push To Talk Voice Communicator">
+    <button id="pttTalkBtn" type="button" class="ptt-talk-btn" title="Push to talk (tap or hold to talk)" aria-label="Push to talk voice communicator">
       <div class="ptt-talk-content">
         <i class="fa-solid fa-walkie-talkie ptt-talk-icon" id="pttTalkIcon"></i>
         <span id="pttTalkLabel" class="ptt-talk-label">PTT</span>
@@ -772,128 +756,118 @@
 
   <!-- ==================== BOTTOM GLOVE-FRIENDLY HUD CONTROL BAR ==================== -->
   <div id="bottomControlBar" class="hud-bottom-bar">
-    
-    <!-- Left Glove Button: Recenter Map -->
-    <button id="recenterBtn" onclick="window.recenterCamera && window.recenterCamera()" title="Recenter Camera on Rider" class="glove-btn glass-panel hover:glass-panel-neon active:scale-95 rounded-xl sm:rounded-2xl px-2.5 sm:px-4 py-2 sm:py-3 flex items-center justify-center gap-1 sm:gap-2 border border-slate-700/80 hover:border-emerald-500/60 transition-all shadow-xl cursor-pointer pointer-events-auto flex-initial">
-      <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-slate-800/80 border border-slate-700 flex items-center justify-center text-neon-green text-xs sm:text-sm flex-shrink-0">
-        <i id="lockTargetIcon" class="fa-solid fa-crosshairs"></i>
-      </div>
-      <div class="hidden sm:flex flex-col text-left">
-        <span class="font-cyber font-bold text-xs uppercase text-slate-200">Recenter</span>
-        <span class="text-[10px] text-slate-400 font-medium">GPS Lock</span>
-      </div>
+
+    <!-- Camera: take a checkpost photo and report -->
+    <button id="cameraReportBtn" type="button" title="ছবি তুলে চেকপোস্ট জানাও" class="camera-btn glove-btn active:scale-95 rounded-xl sm:rounded-2xl px-2.5 sm:px-4 py-2 sm:py-3 flex items-center justify-center gap-1 sm:gap-2 transition-all shadow-xl cursor-pointer pointer-events-auto flex-initial" aria-label="ছবি তুলে চেকপোস্ট জানাও">
+      <i class="fa-solid fa-camera text-base sm:text-lg"></i>
     </button>
 
     <!-- Center Massive Glove Button: Report Police Checkpost -->
-    <button id="reportPoliceBtn" onclick="window.openReportPoliceModal && window.openReportPoliceModal()" title="Report Police Checkpost to Convoy" class="police-btn glove-btn active:scale-95 rounded-xl sm:rounded-3xl px-3 sm:px-6 py-2 sm:py-3.5 flex items-center justify-center gap-2 sm:gap-2.5 transition-all shadow-2xl cursor-pointer pointer-events-auto flex-1 min-w-0">
-      <div class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-slate-950/80 border border-red-500/40 flex items-center justify-center text-red-500 text-sm sm:text-base shadow-inner flex-shrink-0">
+    <button id="reportPoliceBtn" onclick="window.openReportPoliceModal && window.openReportPoliceModal()" title="Report police checkpost to convoy" class="police-btn glove-btn active:scale-95 rounded-xl sm:rounded-3xl px-3 sm:px-6 py-2 sm:py-3.5 flex items-center justify-center gap-2 sm:gap-2.5 transition-all shadow-2xl cursor-pointer pointer-events-auto flex-1 min-w-0">
+      <div class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl flex items-center justify-center text-sm sm:text-base shadow-inner flex-shrink-0 report-shield">
         <i class="fa-solid fa-shield-halved animate-pulse"></i>
       </div>
       <div class="flex flex-col text-left min-w-0">
-        <span class="font-cyber font-black text-[11px] sm:text-xs tracking-wider uppercase text-white drop-shadow whitespace-nowrap">
-          REPORT POLICE CHECKPOST
+        <span class="font-cyber font-black text-[13px] sm:text-sm tracking-wider whitespace-nowrap">
+          চেকপোস্ট জানাও
         </span>
-        <span class="text-[8px] sm:text-[9px] text-cyan-300 font-semibold tracking-wide hidden sm:block whitespace-nowrap">
-          Broadcast Radar Alert
+        <span class="text-[9px] sm:text-[10px] font-semibold tracking-wide hidden sm:block whitespace-nowrap">
+          গ্রুপের সবাইকে জানাও
         </span>
       </div>
     </button>
 
     <!-- Leave Tour Button -->
-    <button id="leaveTourBtn" data-id="exitRoomBtn" onclick="window.leaveActiveTour && window.leaveActiveTour()" title="Leave Active Convoy Room" class="glove-btn glass-panel hover:bg-red-950/40 active:scale-95 rounded-xl sm:rounded-2xl px-2.5 sm:px-3.5 py-2 sm:py-3 flex items-center justify-center gap-1 border border-slate-700/80 hover:border-red-500/50 transition-all shadow-xl text-slate-300 hover:text-red-400 cursor-pointer pointer-events-auto flex-initial">
+    <button id="leaveTourBtn" data-id="exitRoomBtn" onclick="window.leaveActiveTour && window.leaveActiveTour()" title="Leave active convoy room" class="glove-btn glass-panel active:scale-95 rounded-xl sm:rounded-2xl px-2.5 sm:px-3.5 py-2 sm:py-3 flex items-center justify-center gap-1 transition-all shadow-xl cursor-pointer pointer-events-auto flex-initial">
       <i class="fa-solid fa-arrow-right-from-bracket text-xs sm:text-sm"></i>
-      <span class="hidden sm:inline font-cyber font-bold text-xs">EXIT</span>
+      <span class="hidden sm:inline font-cyber font-bold text-xs">Exit</span>
     </button>
   </div>
 
-  <!-- ==================== ONBOARDING GLASSMORPHISM MODAL ==================== -->
+  <!-- ==================== ONBOARDING (JOIN) MODAL ==================== -->
   <div id="onboardingModal" style="position: fixed; inset: 0; z-index: 99999;" class="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-xl transition-all duration-300">
-    <div class="glass-panel-neon w-full max-w-md rounded-3xl p-6 sm:p-8 border border-emerald-500/30 shadow-[0_0_50px_rgba(0,0,0,0.9)] relative overflow-hidden">
-      
+    <div class="join-card glass-panel-neon w-full max-w-md rounded-3xl p-6 sm:p-8 border shadow-[0_0_50px_rgba(0,0,0,0.9)] relative overflow-hidden">
+
       <!-- Close / Dismiss Modal Button -->
-      <button type="button" id="closeOnboardingModalBtn" onclick="window.closeJoinModal()" title="Close Modal" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-colors z-10 cursor-pointer">
+      <button type="button" id="closeOnboardingModalBtn" onclick="window.closeJoinModal()" title="Close modal" class="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center transition-colors z-10 cursor-pointer join-close-btn">
         <i class="fa-solid fa-xmark text-sm"></i>
       </button>
-      
-      <!-- Ambient Glow Behind Modal -->
-      <div class="absolute -top-24 -left-24 w-48 h-48 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none"></div>
-      <div class="absolute -bottom-24 -right-24 w-48 h-48 bg-orange-500/15 rounded-full blur-3xl pointer-events-none"></div>
 
       <!-- Header & Branding -->
       <div class="text-center mb-6 relative">
         <div class="cholo-ghuri-brand-logo">
           <img src="logo.png" alt="Cholo Ghuri" class="brand-logo-img">
         </div>
-        <h1 class="font-cyber font-black text-2xl sm:text-3xl tracking-wider text-slate-100 flex items-center justify-center gap-2">
-          CHOLO GHURI
+        <h1 class="font-cyber font-black text-2xl sm:text-3xl tracking-wider flex items-center justify-center gap-2">
+          Cholo Ghuri
         </h1>
-        <p class="font-cyber font-bold text-xs sm:text-sm text-neon-green tracking-widest uppercase mt-0.5">
-          Biker Convoy & Highway Radar
+        <p class="join-tagline font-cyber font-bold text-sm sm:text-base mt-1">
+          একসঙ্গে রাইড করি, সুন্দর একটা বাংলাদেশ গড়ি
         </p>
-        <p class="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
-          Synchronized convoy tracking, live GPS telemetry & community police radar alerts.
+        <p class="text-xs mt-1 max-w-xs mx-auto join-sub">
+          Biker convoy &amp; highway radar — একসাথে চলা, লাইভ GPS আর চেকপোস্ট অ্যালার্ট।
         </p>
       </div>
 
       <!-- Form Inputs -->
       <form id="onboardingForm" onsubmit="window.submitOnboarding(event); return false;" class="space-y-4">
-        
+
         <!-- Input 1: Rider Name -->
         <div>
-          <label for="riderNameInput" class="block font-cyber font-bold text-xs text-slate-300 uppercase tracking-wider mb-1.5">
-            <i class="fa-solid fa-helmet-safety text-neon-green mr-1"></i> Rider Call-Sign / Name
+          <label for="riderNameInput" class="block font-cyber font-bold text-xs tracking-wider mb-1.5">
+            <i class="fa-solid fa-helmet-safety mr-1"></i> তোমার নাম
           </label>
           <div class="relative">
-            <input 
-              type="text" 
-              id="riderNameInput" 
+            <input
+              type="text"
+              id="riderNameInput"
               value=""
-              placeholder="e.g. Sakib, RiderX, Tornado" 
+              placeholder="যেমন: Sakib, RiderX, Tornado"
               maxlength="20"
               autocomplete="off"
               autocorrect="off"
               autocapitalize="off"
               spellcheck="false"
-              class="w-full bg-slate-900/90 border border-slate-700 focus:border-neon-green rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none transition-colors font-medium shadow-inner"
+              class="join-input w-full rounded-xl px-4 py-3 text-sm placeholder-slate-500 outline-none transition-colors font-medium shadow-inner"
             >
           </div>
         </div>
 
         <!-- Input 2: Tour Room Code + Generate Code Button -->
         <div>
-          <label for="roomCodeInput" class="block font-cyber font-bold text-xs text-slate-300 uppercase tracking-wider mb-1.5">
-            <i class="fa-solid fa-key text-neon-green mr-1"></i> Tour Room Code
+          <label for="roomCodeInput" class="block font-cyber font-bold text-xs tracking-wider mb-1.5">
+            <i class="fa-solid fa-key mr-1"></i> ট্যুর রুম কোড
           </label>
           <div class="flex gap-2">
-            <input 
-              type="text" 
-              id="roomCodeInput" 
-              placeholder="e.g. DHAKA101" 
+            <input
+              type="text"
+              id="roomCodeInput"
+              placeholder="যেমন: K7Q2M9"
               maxlength="16"
               autocomplete="off"
-              class="flex-1 uppercase bg-slate-900/90 border border-slate-700 focus:border-neon-green rounded-xl px-4 py-3 text-sm font-hud font-bold tracking-widest text-neon-green placeholder-slate-600 outline-none transition-colors shadow-inner"
+              class="join-input flex-1 uppercase rounded-xl px-4 py-3 text-sm font-hud font-bold tracking-widest placeholder-slate-600 outline-none transition-colors shadow-inner"
             >
-            <button 
-              type="button" 
-              id="generateCodeBtn" 
-              title="Generate a Random Tour Code"
-              class="px-3.5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 border border-slate-600 hover:border-emerald-400 text-slate-200 transition-all flex items-center justify-center gap-1.5 text-xs font-cyber font-bold whitespace-nowrap shadow-md"
+            <button
+              type="button"
+              id="generateCodeBtn"
+              title="Generate a random tour code"
+              class="gen-code-btn px-3.5 py-3 rounded-xl transition-all flex items-center justify-center gap-1.5 text-xs font-cyber font-bold whitespace-nowrap shadow-md"
             >
-              <i class="fa-solid fa-dice text-neon-green text-sm"></i>
-              <span>Generate</span>
+              <i class="fa-solid fa-dice text-sm"></i>
+              <span>নতুন কোড</span>
             </button>
           </div>
         </div>
 
         <!-- Toggle: I am Ride Leader (Captain) -->
-        <div id="leaderToggleContainer" class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 flex items-center justify-between transition-all duration-200">
+        <div id="leaderToggleContainer" class="leader-toggle rounded-xl p-3 flex items-center justify-between transition-all duration-200">
           <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center leader-crown">
               <i class="fa-solid fa-crown text-sm"></i>
             </div>
             <div>
-              <span class="block font-cyber font-bold text-xs text-slate-200">Ride Leader (Captain)</span>
-              <span class="block text-[10px] text-slate-400">Leads convoy pin with gold beacon & heading</span>
+              <span class="block font-cyber font-bold text-xs">Ride leader (Captain)</span>
+              <span class="block text-[10px]">Captain-এর পিন ম্যাপে আলাদা দেখাবে</span>
             </div>
           </div>
           <label class="relative inline-flex items-center cursor-pointer">
@@ -903,34 +877,34 @@
         </div>
 
         <!-- Dynamic Notice: Leader already exists in room -->
-        <div id="leaderNotice" class="hidden text-[11px] font-cyber font-semibold text-amber-300 bg-amber-950/50 border border-amber-500/40 rounded-xl px-3 py-2 flex items-center gap-2 -mt-1 shadow-sm transition-all duration-200">
-          <i class="fa-solid fa-crown text-amber-400 text-xs flex-shrink-0"></i>
-          <span id="leaderNoticeText">Leader is already in this room — joining as Rider</span>
+        <div id="leaderNotice" class="hidden text-[11px] font-cyber font-semibold rounded-xl px-3 py-2 flex items-center gap-2 -mt-1 shadow-sm transition-all duration-200 leader-notice">
+          <i class="fa-solid fa-crown text-xs flex-shrink-0"></i>
+          <span id="leaderNoticeText">এই রুমে Captain আগেই আছে — তুমি Rider হিসেবে ঢুকছ</span>
         </div>
 
-        <!-- Big Neon Action Button -->
-        <button 
-          type="button" 
+        <!-- Big Action Button -->
+        <button
+          type="button"
           id="startRidingBtn"
           onclick="window.submitOnboarding(event)"
-          class="neon-btn-green w-full py-3.5 rounded-2xl font-cyber text-base uppercase tracking-wider flex items-center justify-center gap-2 mt-4 cursor-pointer"
+          class="neon-btn-green w-full py-3.5 rounded-2xl font-cyber text-base tracking-wider flex items-center justify-center gap-2 mt-4 cursor-pointer"
         >
           <i class="fa-solid fa-bolt text-lg"></i>
-          <span>START RIDING</span>
+          <span>Ride শুরু করো</span>
         </button>
 
         <!-- Download Android App (APK) -->
         <a
           href="cholo-ghuri.apk"
           download="cholo-ghuri.apk"
-          class="w-full py-3 rounded-2xl font-cyber text-sm uppercase tracking-wider flex items-center justify-center gap-2 mt-2 cursor-pointer border border-cyan-500/50 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 transition-all active:scale-95"
+          class="apk-btn w-full py-3 rounded-2xl font-cyber text-sm tracking-wider flex items-center justify-center gap-2 mt-2 cursor-pointer transition-all active:scale-95"
         >
           <i class="fa-brands fa-android text-base"></i>
-          <span>Download Android App (APK)</span>
+          <span>Android app ডাউনলোড</span>
         </a>
 
-        <p class="text-center text-[10px] text-slate-500 pt-1">
-          GPS telemetry is shared only with riders entering the same Tour Code.
+        <p class="text-center text-[10px] pt-1 join-foot">
+          Ride শুরু করলেই লোকেশন শুধু তোমার গ্রুপের কাছেই যাবে।
         </p>
       </form>
 
@@ -939,39 +913,39 @@
 
   <!-- ==================== GPS PERMISSION REQUIRED MODAL ==================== -->
   <div id="gpsPermissionModal" class="fixed inset-0 z-[100010] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md hidden transition-all duration-300">
-    <div class="glass-panel-neon max-w-sm w-full rounded-2xl p-6 border border-amber-500/50 text-center relative shadow-[0_0_40px_rgba(245,158,11,0.35)]">
-      <div class="w-14 h-14 rounded-2xl bg-amber-500/15 border-2 border-amber-500 mx-auto flex items-center justify-center text-amber-400 text-2xl mb-3 shadow-[0_0_20px_rgba(245,158,11,0.3)] animate-pulse">
+    <div class="glass-panel-neon max-w-sm w-full rounded-2xl p-6 border text-center relative shadow-[0_0_40px_rgba(245,158,11,0.35)]">
+      <div class="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center text-2xl mb-3 animate-pulse gps-modal-icon">
         <i class="fa-solid fa-location-dot"></i>
       </div>
-      <h3 class="font-cyber font-black text-lg text-white uppercase tracking-wider">
-        Real GPS Location Required
+      <h3 class="font-cyber font-black text-lg tracking-wider">
+        আসল GPS লোকেশন দরকার
       </h3>
-      <p class="text-xs text-slate-300 mt-2 mb-4 leading-relaxed font-sans">
-        Location access was denied or disabled in your browser. Cholo Ghuri needs real GPS to track convoy distance and radar checkposts accurately.
+      <p class="text-xs mt-2 mb-4 leading-relaxed font-sans">
+        লোকেশন বন্ধ আছে বা অনুমতি দেওয়া হয়নি। কনভয়ের দূরত্ব আর চেকপোস্ট ঠিকমতো দেখাতে Cholo Ghuri-র আসল GPS লাগবে।
       </p>
-      
-      <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 text-left mb-4 text-[11px] text-slate-400 space-y-1.5 font-sans">
+
+      <div class="rounded-xl p-3 text-left mb-4 text-[11px] space-y-1.5 font-sans gps-steps">
         <div class="flex items-start gap-2">
-          <span class="text-amber-400 font-bold">1.</span>
-          <span>Tap the lock/info icon (🔒 / ℹ️) beside the website URL.</span>
+          <span class="font-bold">১.</span>
+          <span>ওয়েবসাইটের ঠিকানার পাশে তালা/তথ্য আইকনে চাপ দাও।</span>
         </div>
         <div class="flex items-start gap-2">
-          <span class="text-amber-400 font-bold">2.</span>
-          <span>Set <strong>Location</strong> permission to <strong>Allow</strong>.</span>
+          <span class="font-bold">২.</span>
+          <span><strong>Location</strong> অনুমতি <strong>Allow</strong> করে দাও।</span>
         </div>
         <div class="flex items-start gap-2">
-          <span class="text-amber-400 font-bold">3.</span>
-          <span>Tap the <strong>Enable Real GPS / Retry</strong> button below.</span>
+          <span class="font-bold">৩.</span>
+          <span>নিচের <strong>আসল GPS চালু করো</strong> বোতামে চাপ দাও।</span>
         </div>
       </div>
 
       <div class="flex flex-col gap-2">
-        <button id="retryGpsBtn" type="button" class="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-slate-950 font-cyber font-bold text-xs uppercase shadow-[0_0_20px_rgba(0,255,135,0.4)] flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95">
+        <button id="retryGpsBtn" type="button" class="neon-btn-green w-full py-3 rounded-xl font-cyber font-bold text-xs flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95">
           <i class="fa-solid fa-crosshairs text-sm"></i>
-          <span>📍 Enable Real GPS / Retry</span>
+          <span>আসল GPS চালু করো / আবার চেষ্টা করো</span>
         </button>
-        <button id="closeGpsModalBtn" onclick="window.closeGpsPermissionModal && window.closeGpsPermissionModal()" type="button" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white font-cyber font-bold text-xs uppercase border border-slate-700 cursor-pointer transition-colors">
-          Dismiss
+        <button id="closeGpsModalBtn" onclick="window.closeGpsPermissionModal && window.closeGpsPermissionModal()" type="button" class="w-full py-2.5 rounded-xl font-cyber font-bold text-xs border cursor-pointer transition-colors gps-dismiss-btn">
+          বাদ দাও
         </button>
       </div>
     </div>
@@ -979,54 +953,54 @@
 
   <!-- ==================== POLICE REPORT CONFIRMATION MODAL ==================== -->
   <div id="policeConfirmModal" class="fixed inset-0 z-[1600] flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md hidden">
-    <div class="glass-panel-neon max-w-sm w-full rounded-2xl p-5 border border-red-500/40 text-center relative shadow-2xl">
-      <div class="w-14 h-14 rounded-2xl bg-red-500/15 border-2 border-red-500 mx-auto flex items-center justify-center text-red-500 text-2xl mb-3 animate-bounce">
+    <div class="glass-panel-neon max-w-sm w-full rounded-2xl p-5 border text-center relative shadow-2xl">
+      <div class="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center text-2xl mb-3 animate-bounce police-confirm-icon">
         <i class="fa-solid fa-shield-halved"></i>
       </div>
-      <h3 class="font-cyber font-black text-lg text-white uppercase tracking-wider">CONFIRM POLICE CHECKPOST</h3>
-      <p class="text-xs text-slate-300 mt-1 mb-3">
-        Broadcast real-time radar alert to all riders in convoy <span id="confirmRoomCodeSpan" class="font-hud text-neon-green font-bold">----</span>?
+      <h3 class="font-cyber font-black text-lg tracking-wider">চেকপোস্ট আছে নিশ্চিত করো</h3>
+      <p class="text-xs mt-1 mb-3">
+        <span id="confirmRoomCodeSpan" class="font-hud font-bold">----</span> রুমের সবাইকে এখনই জানাবে?
       </p>
 
       <!-- Glove-friendly Camera / Photo Section -->
       <div class="mb-4 text-left">
         <input type="file" id="policePhotoInput" accept="image/*" capture="environment" class="hidden">
-        
+
         <!-- Add Photo Trigger Button -->
-        <button 
-          type="button" 
-          id="triggerPolicePhotoBtn" 
-          onclick="document.getElementById('policePhotoInput').click()" 
-          class="w-full py-2.5 px-3 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700 hover:border-cyan-400 text-slate-200 text-xs font-cyber font-bold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-md cursor-pointer"
+        <button
+          type="button"
+          id="triggerPolicePhotoBtn"
+          onclick="document.getElementById('policePhotoInput').click()"
+          class="photo-trigger-btn w-full py-2.5 px-3 rounded-xl text-xs font-cyber font-bold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-md cursor-pointer"
         >
-          <i class="fa-solid fa-camera text-cyan-400 text-sm"></i>
-          <span>Take / Add Checkpost Photo (Optional)</span>
+          <i class="fa-solid fa-camera text-sm"></i>
+          <span>ছবি তোলো বা গ্যালারি থেকে নাও (ঐচ্ছিক)</span>
         </button>
 
         <!-- Photo Preview Container (Hidden initially) -->
-        <div id="policePhotoPreviewContainer" class="hidden mt-2 relative rounded-xl overflow-hidden border border-cyan-500/40 bg-slate-950/90 p-1.5 shadow-lg">
-          <img id="policePhotoPreview" src="" alt="Checkpost Preview" class="w-full h-32 object-cover rounded-lg">
-          <div class="mt-1.5 flex items-center justify-between px-1 text-[10px] text-slate-300 font-cyber">
-            <span class="flex items-center gap-1 text-cyan-300 font-mono">
-              <i class="fa-solid fa-image"></i> Photo Attached
+        <div id="policePhotoPreviewContainer" class="hidden mt-2 relative rounded-xl overflow-hidden border bg-slate-950/90 p-1.5 shadow-lg">
+          <img id="policePhotoPreview" src="" alt="Checkpost preview" class="w-full h-32 object-cover rounded-lg">
+          <div class="mt-1.5 flex items-center justify-between px-1 text-[10px] font-cyber">
+            <span class="flex items-center gap-1 font-mono">
+              <i class="fa-solid fa-image"></i> ছবি লাগানো হয়েছে
             </span>
-            <button 
-              type="button" 
-              id="removePolicePhotoBtn" 
-              class="text-rose-400 hover:text-rose-300 font-bold flex items-center gap-1 active:scale-90 transition-transform cursor-pointer"
+            <button
+              type="button"
+              id="removePolicePhotoBtn"
+              class="font-bold flex items-center gap-1 active:scale-90 transition-transform cursor-pointer text-rose-400 hover:text-rose-300"
             >
-              <i class="fa-solid fa-xmark"></i> Remove Photo
+              <i class="fa-solid fa-xmark"></i> ছবি সরাও
             </button>
           </div>
         </div>
       </div>
 
       <div class="grid grid-cols-2 gap-3">
-        <button id="cancelPoliceReportBtn" class="py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-cyber font-bold text-xs uppercase border border-slate-700 cursor-pointer">
-          Cancel
+        <button id="cancelPoliceReportBtn" class="py-2.5 rounded-xl font-cyber font-bold text-xs border cursor-pointer modal-cancel-btn">
+          বাতিল
         </button>
-        <button id="confirmPoliceReportBtn" class="py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-500 hover:to-rose-600 text-white font-cyber font-bold text-xs uppercase shadow-lg shadow-red-600/40 cursor-pointer">
-          Broadcast Alert
+        <button id="confirmPoliceReportBtn" class="py-2.5 rounded-xl font-cyber font-bold text-xs shadow-lg cursor-pointer modal-confirm-btn">
+          সবাইকে জানাও
         </button>
       </div>
     </div>
@@ -1036,163 +1010,159 @@
   <div id="verifyPoliceModal" class="verify-police-modal hidden opacity-0 pointer-events-none">
     <div class="verify-police-card text-center max-h-[90vh] overflow-y-auto">
       <!-- Flashing Red/Blue Shield Icon -->
-      <div class="w-14 h-14 rounded-2xl bg-slate-900 border-2 border-red-500 mx-auto flex items-center justify-center text-red-500 text-2xl mb-3 shadow-[0_0_25px_rgba(255,30,66,0.4)]">
+      <div class="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center text-2xl mb-3 shadow-[0_0_25px_rgba(255,30,66,0.4)] verify-shield">
         <i class="fa-solid fa-shield-halved animate-pulse"></i>
       </div>
-      <h3 class="font-cyber font-black text-lg sm:text-xl text-white uppercase tracking-wider">
-        VERIFY POLICE CHECKPOST
+      <h3 class="font-cyber font-black text-lg sm:text-xl tracking-wider">
+        চেকপোস্টটা কি এখনো আছে?
       </h3>
-      <p id="verifyReportMeta" class="text-xs text-slate-400 mt-1 mb-3">
-        Reported by <strong id="verifyReporterName" class="text-cyan-300 font-bold">Sakib</strong> • <span id="verifyDistanceText" class="text-slate-300">120m away</span>
+      <p id="verifyReportMeta" class="text-xs mt-1 mb-3">
+        জানিয়েছে <strong id="verifyReporterName" class="font-bold">Sakib</strong> • <span id="verifyDistanceText">120m দূরে</span>
       </p>
 
       <!-- Checkpost Photo in Verify Modal -->
       <div id="verifyPolicePhotoContainer" class="hidden mb-3">
-        <img 
-          id="verifyPolicePhoto" 
-          src="" 
-          alt="Checkpost Photo" 
-          onclick="if(this.src) window.openPolicePhotoViewer(this.src)" 
-          class="max-h-40 w-full object-cover rounded-xl border border-red-500/40 cursor-pointer shadow-lg hover:border-cyan-400 transition-colors"
+        <img
+          id="verifyPolicePhoto"
+          src=""
+          alt="Checkpost photo"
+          onclick="if(this.src) window.openPolicePhotoViewer(this.src)"
+          class="max-h-40 w-full object-cover rounded-xl border cursor-pointer shadow-lg transition-colors"
           title="Tap to view full screen"
         >
-        <div class="text-[10px] text-slate-400 flex items-center justify-center gap-1 mt-1 font-mono">
-          <i class="fa-solid fa-expand text-[9px] text-cyan-300"></i> Tap photo for full screen
+        <div class="text-[10px] flex items-center justify-center gap-1 mt-1 font-mono">
+          <i class="fa-solid fa-expand text-[9px]"></i> বড় করে দেখতে ছবিতে চাপ দাও
         </div>
       </div>
 
       <!-- Score & Ratio Progress Bar -->
-      <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3 mb-4">
+      <div class="rounded-xl p-3 mb-4 verify-score-box">
         <div class="flex justify-between items-center text-xs font-bold mb-1.5 font-hud">
-          <span class="text-emerald-400 flex items-center gap-1">
-            <i class="fa-solid fa-check"></i> True: <span id="verifyTrueVotes">1</span>
+          <span class="flex items-center gap-1">
+            <i class="fa-solid fa-check"></i> সত্যি: <span id="verifyTrueVotes">1</span>
           </span>
-          <span class="text-rose-400 flex items-center gap-1">
-            <i class="fa-solid fa-xmark"></i> False: <span id="verifyFalseVotes">0</span>
+          <span class="flex items-center gap-1">
+            <i class="fa-solid fa-xmark"></i> ভুয়া: <span id="verifyFalseVotes">0</span>
           </span>
         </div>
-        <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden flex">
+        <div class="w-full h-2.5 rounded-full overflow-hidden flex verify-bar-track">
           <div id="verifyTrueBar" class="bg-emerald-500 h-full transition-all duration-300" style="width: 100%;"></div>
           <div id="verifyFalseBar" class="bg-rose-500 h-full transition-all duration-300" style="width: 0%;"></div>
         </div>
-        <div class="flex justify-between items-center text-[10px] text-slate-400 mt-2 font-medium">
-          <span>Consensus Score</span>
-          <span id="verifyAutoDeleteThresholdText" class="text-rose-400 font-bold">Auto-deletes at 10 false votes (&ge;80%)</span>
+        <div class="flex justify-between items-center text-[10px] mt-2 font-medium">
+          <span>সবার মতামত</span>
+          <span id="verifyAutoDeleteThresholdText" class="font-bold">১০টা ভুয়া ভোট (৮০%+) পেলে নিজে থেকে মুছে যাবে</span>
         </div>
       </div>
 
-      <p class="font-cyber font-bold text-sm text-slate-200 mb-4">
-        Is the police checkpost still active here?
+      <p class="font-cyber font-bold text-sm mb-4">
+        পুলিশ চেকপোস্টটা কি এখনো ওখানে আছে?
       </p>
 
       <!-- Two Large Glove-Friendly Voting Buttons -->
       <div class="grid grid-cols-2 gap-3">
-        <button id="voteTrueBtn" class="vote-btn-yes py-3.5 rounded-xl font-cyber font-bold text-xs uppercase flex items-center justify-center gap-1.5 cursor-pointer">
+        <button id="voteTrueBtn" class="vote-btn-yes py-3.5 rounded-xl font-cyber font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer">
           <i class="fa-solid fa-thumbs-up text-sm"></i>
-          <span>YES, REAL (True)</span>
+          <span>হ্যাঁ, আসলেই আছে</span>
         </button>
-        <button id="voteFalseBtn" class="vote-btn-no py-3.5 rounded-xl font-cyber font-bold text-xs uppercase flex items-center justify-center gap-1.5 cursor-pointer">
+        <button id="voteFalseBtn" class="vote-btn-no py-3.5 rounded-xl font-cyber font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer">
           <i class="fa-solid fa-thumbs-down text-sm"></i>
-          <span>NO, FAKE (False)</span>
+          <span>না, ভুয়া</span>
         </button>
       </div>
 
       <!-- Action Buttons -->
       <div class="mt-4 flex items-center justify-center gap-3">
-        <button id="minimizeVerifyModalBtn" type="button" class="text-xs text-cyan-400 hover:text-cyan-300 uppercase font-cyber font-bold tracking-wider py-1.5 px-3.5 rounded-lg border border-cyan-500/30 bg-cyan-950/40 hover:bg-cyan-900/40 cursor-pointer flex items-center gap-1.5 transition-colors">
-          <i class="fa-solid fa-compress text-[10px]"></i> Minimize
+        <button id="minimizeVerifyModalBtn" type="button" class="text-xs font-cyber font-bold tracking-wider py-1.5 px-3.5 rounded-lg border cursor-pointer flex items-center gap-1.5 transition-colors verify-min-btn">
+          <i class="fa-solid fa-compress text-[10px]"></i> ছোট করো
         </button>
-        <button id="closeVerifyModalBtn" type="button" class="text-xs text-slate-400 hover:text-white uppercase font-cyber font-bold tracking-wider py-1.5 px-3.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 cursor-pointer transition-colors">
-          Dismiss / Close
+        <button id="closeVerifyModalBtn" type="button" class="text-xs font-cyber font-bold tracking-wider py-1.5 px-3.5 rounded-lg border cursor-pointer verify-close-btn">
+          বাদ দাও
         </button>
       </div>
     </div>
   </div>
 
   <!-- ==================== MAP PICKING BANNER OVERLAY ==================== -->
-  <div id="mapPickBanner" class="fixed top-4 left-1/2 -translate-x-1/2 z-[15000] hidden flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-slate-900/95 border-2 border-cyan-400 text-slate-100 shadow-[0_0_30px_rgba(0,240,255,0.4)] backdrop-blur-md">
-    <div class="w-7 h-7 rounded-lg bg-cyan-500/20 flex items-center justify-center text-cyan-400 animate-pulse text-sm">
+  <div id="mapPickBanner" class="fixed top-4 left-1/2 -translate-x-1/2 z-[15000] hidden flex items-center gap-3 px-4 py-2.5 rounded-2xl backdrop-blur-md">
+    <div class="w-7 h-7 rounded-lg flex items-center justify-center animate-pulse text-sm map-pick-icon">
       <i class="fa-solid fa-location-crosshairs"></i>
     </div>
     <div class="flex flex-col">
-      <span class="text-xs font-cyber font-bold text-cyan-300 uppercase tracking-wider">TAP ON MAP TO PICK LOCATION</span>
-      <span id="mapPickSubtitle" class="text-[10px] text-slate-400">Selecting waypoint coordinates...</span>
+      <span class="text-xs font-cyber font-bold tracking-wider">ম্যাপে চাপ দিয়ে জায়গা বেছে নাও</span>
+      <span id="mapPickSubtitle" class="text-[10px]">ওয়েপয়েন্টের জায়গা বাছছি...</span>
     </div>
-    <button id="cancelMapPickBtn" type="button" onclick="window.cancelMapPick && window.cancelMapPick()" class="ml-2 px-3 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-cyber font-bold border border-slate-700 transition-colors cursor-pointer">
-      Cancel
+    <button id="cancelMapPickBtn" type="button" onclick="window.cancelMapPick && window.cancelMapPick()" class="ml-2 px-3 py-1 rounded-xl text-xs font-cyber font-bold border transition-colors cursor-pointer map-pick-cancel">
+      বাতিল
     </button>
   </div>
 
   <!-- ==================== GROUP TOUR & MULTI-STOP WAYPOINT PLANNER MODAL ==================== -->
   <div id="tourPlannerModal" style="position: fixed; inset: 0; z-index: 10000;" class="fixed inset-0 z-[10000] flex items-center justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-xl hidden opacity-0 pointer-events-none transition-all duration-300">
-    <div class="glass-panel-neon w-full max-w-2xl max-h-[92vh] flex flex-col rounded-3xl border border-cyan-500/40 shadow-[0_0_60px_rgba(0,0,0,0.95)] overflow-hidden relative">
-      
+    <div class="tour-planner-card glass-panel-neon w-full max-w-2xl max-h-[92vh] flex flex-col rounded-3xl border shadow-[0_0_60px_rgba(0,0,0,0.95)] overflow-hidden relative">
+
       <!-- Close Button -->
-      <button type="button" id="closeTourPlannerModalBtn" onclick="window.closeTourPlanner && window.closeTourPlanner()" title="Close Tour Planner" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-colors z-20 cursor-pointer">
+      <button type="button" id="closeTourPlannerModalBtn" onclick="window.closeTourPlanner && window.closeTourPlanner()" title="Close tour planner" class="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center transition-colors z-20 cursor-pointer modal-x-btn">
         <i class="fa-solid fa-xmark text-sm"></i>
       </button>
 
-      <!-- Ambient Glows -->
-      <div class="absolute -top-20 -left-20 w-44 h-44 bg-cyan-500/20 rounded-full blur-3xl pointer-events-none"></div>
-      <div class="absolute -bottom-20 -right-20 w-44 h-44 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none"></div>
-
       <!-- Modal Header -->
-      <div class="p-4 sm:p-5 border-b border-cyan-500/20 flex items-center gap-3 relative z-10 flex-shrink-0">
-        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-cyan-500/15 border border-cyan-400 flex items-center justify-center text-cyan-400 text-lg shadow-[0_0_20px_rgba(0,240,255,0.3)]">
+      <div class="tour-head p-4 sm:p-5 border-b flex items-center gap-3 relative z-10 flex-shrink-0">
+        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center text-lg tour-head-icon">
           <i class="fa-solid fa-route"></i>
         </div>
         <div class="flex flex-col min-w-0 pr-8">
-          <h2 class="font-cyber font-black text-base sm:text-lg text-slate-100 tracking-wider uppercase truncate">
-            GROUP TOUR & WAYPOINT PLANNER
+          <h2 class="font-cyber font-black text-base sm:text-lg tracking-wider truncate">
+            Tour planner
           </h2>
-          <p class="font-cyber font-semibold text-[10px] sm:text-xs text-cyan-300 uppercase tracking-widest truncate">
-            Multi-Stop Route • Regroup & Refuel Points • Subgroups
+          <p class="font-cyber font-semibold text-[10px] sm:text-xs tracking-widest truncate">
+            একাধিক থামা • একসাথে মেলার জায়গা • তেল নেওয়ার জায়গা
           </p>
         </div>
       </div>
 
       <!-- Modal Body (Scrollable) -->
       <div class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 custom-scrollbar relative z-10">
-        
+
         <!-- Section 1: Tour Name & Assign Tour Subgroup -->
         <div class="tour-config-card p-3.5 sm:p-4 space-y-3.5">
           <div class="grid grid-cols-1 sm:grid-cols-12 gap-3.5 items-start">
-            
+
             <!-- Tour Name Input (7 cols on sm) -->
             <div class="sm:col-span-7 flex flex-col gap-1.5">
-              <label for="tourPlanNameInput" class="text-[10.5px] font-cyber font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                <i class="fa-solid fa-route text-cyan-400"></i> Tour Name
+              <label for="tourPlanNameInput" class="text-[10.5px] font-cyber font-bold tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-route"></i> ট্যুরের নাম
               </label>
-              <input 
-                type="text" 
-                id="tourPlanNameInput" 
-                placeholder="e.g. DHAKA101 Tour Plan"
-                class="w-full bg-slate-950/90 border border-slate-700/80 focus:border-cyan-400 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-cyber text-slate-100 placeholder-slate-500 outline-none transition-all shadow-inner"
+              <input
+                type="text"
+                id="tourPlanNameInput"
+                placeholder="যেমন: DHAKA101 Tour Plan"
+                class="tour-input w-full rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-cyber outline-none transition-all shadow-inner"
               >
             </div>
 
             <!-- Target Subgroup Dropdown (5 cols on sm) -->
             <div class="sm:col-span-5 flex flex-col gap-1.5">
-              <label for="tourSubgroupSelect" class="text-[10.5px] font-cyber font-bold uppercase tracking-wider text-emerald-300 flex items-center gap-1.5">
-                <i class="fa-solid fa-tower-broadcast text-emerald-400"></i> 📡 ASSIGN TOUR TO:
+              <label for="tourSubgroupSelect" class="text-[10.5px] font-cyber font-bold tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-tower-broadcast"></i> এই ট্যুরটা যাদের জন্য
               </label>
-              <select 
-                id="tourSubgroupSelect" 
-                class="w-full bg-slate-950/90 border border-slate-700/80 focus:border-emerald-400 rounded-xl px-3 py-2.5 text-xs font-cyber text-slate-200 outline-none transition-all cursor-pointer shadow-inner"
+              <select
+                id="tourSubgroupSelect"
+                class="tour-input w-full rounded-xl px-3 py-2.5 text-xs font-cyber outline-none transition-all cursor-pointer shadow-inner"
               >
-                <option value="All Riders">🌐 All Riders (Full Convoy)</option>
-                <option value="Alpha Squad">⚡ Alpha Squad</option>
-                <option value="Tour Group A">🏍️ Tour Group A</option>
-                <option value="Tour Group B">🏍️ Tour Group B</option>
-                <option value="Fast Squad">🔥 Fast Squad</option>
-                <option value="Cruisers">⚓ Cruisers</option>
-                <option value="__custom__">➕ Create New Subgroup...</option>
+                <option value="All Riders">সবাই (পুরো কনভয়)</option>
+                <option value="Alpha Squad">Alpha Squad</option>
+                <option value="Tour Group A">Tour Group A</option>
+                <option value="Tour Group B">Tour Group B</option>
+                <option value="Fast Squad">Fast Squad</option>
+                <option value="Cruisers">Cruisers</option>
+                <option value="__custom__">নতুন গ্রুপ বানাও...</option>
               </select>
-              <input 
-                type="text" 
-                id="tourSubgroupCustomInput" 
-                placeholder="Type custom subgroup name..." 
-                class="hidden w-full mt-1.5 bg-slate-950 border border-emerald-500/60 focus:border-emerald-400 rounded-xl px-3 py-2 text-xs font-cyber text-emerald-300 outline-none shadow-inner transition-all"
+              <input
+                type="text"
+                id="tourSubgroupCustomInput"
+                placeholder="নতুন গ্রুপের নাম লেখো..."
+                class="hidden w-full mt-1.5 rounded-xl px-3 py-2 text-xs font-cyber outline-none shadow-inner transition-all tour-input"
               >
             </div>
 
@@ -1202,10 +1172,10 @@
         <!-- Section 2: Quick Bangladesh Highway Waypoint Presets -->
         <div class="space-y-1.5">
           <div class="flex items-center justify-between">
-            <span class="text-[10px] font-cyber font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
-              <i class="fa-solid fa-bolt text-amber-400"></i> Quick Presets (Tap to Add Waypoint)
+            <span class="text-[10px] font-cyber font-bold tracking-wider flex items-center gap-1">
+              <i class="fa-solid fa-bolt"></i> তাড়াতাড়ি যোগ করো (চাপ দিলেই থামা বসবে)
             </span>
-            <span class="text-[9px] text-slate-500">Major Highway Stops</span>
+            <span class="text-[9px]">বড় হাইওয়ের থামা</span>
           </div>
           <div id="tourPresetsContainer" class="flex flex-wrap gap-1.5">
             <button type="button" class="preset-chip" data-name="Dhaka (Zero Point)" data-lat="23.7289" data-lng="90.4105" data-type="start">+ Dhaka</button>
@@ -1222,11 +1192,11 @@
         <!-- Section 3: Waypoint Builder List (Point A, B, C, D...) -->
         <div class="space-y-2">
           <div class="flex items-center justify-between">
-            <label class="text-[11px] font-cyber font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-              <i class="fa-solid fa-map-pin text-rose-400"></i> Route Waypoint Chain
+            <label class="text-[11px] font-cyber font-bold tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-map-pin"></i> রুটের থামাগুলো
             </label>
-            <span id="waypointCountBadge" class="text-[10px] font-hud text-cyan-400 bg-cyan-950/60 px-2 py-0.5 rounded-full border border-cyan-800">
-              0 STOPS
+            <span id="waypointCountBadge" class="text-[10px] font-hud px-2 py-0.5 rounded-full border">
+              0 থামা
             </span>
           </div>
 
@@ -1237,46 +1207,46 @@
 
           <!-- Builder Controls (Add, Use Current GPS, Clear) -->
           <div class="flex flex-wrap items-center gap-2 pt-2">
-            <button 
-              type="button" 
-              id="addWaypointBtn" 
-              class="flex-1 min-w-[150px] py-2 px-3 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 active:scale-95 text-cyan-300 border border-cyan-500/40 font-cyber font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all shadow cursor-pointer"
+            <button
+              type="button"
+              id="addWaypointBtn"
+              class="tour-add-btn flex-1 min-w-[150px] py-2 px-3 rounded-xl active:scale-95 font-cyber font-bold text-xs tracking-wider flex items-center justify-center gap-1.5 transition-all shadow cursor-pointer"
             >
               <i class="fa-solid fa-plus text-xs"></i>
-              <span>+ Add Stoppage (Point B, C...)</span>
+              <span>+ থামা যোগ করো</span>
             </button>
-            <button 
-              type="button" 
-              id="useCurrentGpsAsStartBtn" 
+            <button
+              type="button"
+              id="useCurrentGpsAsStartBtn"
               title="Set your current GPS coordinates as Point A Start"
-              class="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-emerald-400 border border-emerald-500/30 font-cyber font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer"
+              class="tour-gps-btn py-2 px-3 rounded-xl active:scale-95 font-cyber font-bold text-xs tracking-wider flex items-center gap-1.5 transition-all cursor-pointer"
             >
               <i class="fa-solid fa-crosshairs text-xs"></i>
-              <span>My GPS as Start</span>
+              <span>আমার GPS শুরুর জায়গা</span>
             </button>
-            <button 
-              type="button" 
-              id="clearTourPlanBtn" 
-              title="Clear all waypoints & end tour"
-              class="py-2 px-3.5 rounded-xl bg-red-950/60 hover:bg-red-900/80 active:scale-95 text-rose-300 hover:text-white border border-red-500/60 hover:border-red-400 font-cyber font-bold text-xs uppercase tracking-wider transition-all shadow-[0_0_15px_rgba(239,68,68,0.3)] flex items-center justify-center gap-1.5 cursor-pointer"
+            <button
+              type="button"
+              id="clearTourPlanBtn"
+              title="Clear all waypoints &amp; end tour"
+              class="tour-clear-btn py-2 px-3.5 rounded-xl active:scale-95 font-cyber font-bold text-xs tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <i class="fa-solid fa-trash-can text-xs"></i>
-              <span>🗑️ CLEAR ALL / END TOUR</span>
+              <span>সব মুছো / ট্যুর শেষ</span>
             </button>
           </div>
         </div>
 
         <!-- Section 4: Live Tour Route Distance & Time Estimate Summary -->
-        <div id="tourPlanSummaryBox" class="p-3 rounded-xl bg-slate-900/90 border border-cyan-500/30 flex items-center justify-between text-xs font-cyber">
+        <div id="tourPlanSummaryBox" class="p-3 rounded-xl flex items-center justify-between text-xs font-cyber">
           <div class="flex items-center gap-2">
-            <i class="fa-solid fa-road text-cyan-400"></i>
-            <span id="tourSummaryDistance" class="text-slate-200 font-bold">Total: ~0.0 km</span>
+            <i class="fa-solid fa-road"></i>
+            <span id="tourSummaryDistance" class="font-bold">মোট: ~0.0 km</span>
           </div>
           <div class="flex items-center gap-2">
-            <i class="fa-solid fa-clock text-amber-400"></i>
-            <span id="tourSummaryDuration" class="text-slate-200 font-bold">Est: ~0h 00m</span>
+            <i class="fa-solid fa-clock"></i>
+            <span id="tourSummaryDuration" class="font-bold">আনুমানিক: ~0h 00m</span>
           </div>
-          <div class="flex items-center gap-1.5 text-emerald-400 font-semibold">
+          <div class="flex items-center gap-1.5 font-semibold">
             <i class="fa-solid fa-satellite-dish text-[10px]"></i>
             <span id="tourSyncEngineLabel">OSRM + Dual Sync</span>
           </div>
@@ -1285,22 +1255,22 @@
       </div>
 
       <!-- Modal Footer Action Bar -->
-      <div class="p-3.5 sm:p-4 border-t border-cyan-500/20 bg-slate-950/80 flex items-center justify-between gap-3 relative z-10 flex-shrink-0">
-        <button 
-          type="button" 
-          id="closeTourPlannerFooterBtn" 
-          onclick="window.closeTourPlanner && window.closeTourPlanner()" 
-          class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-cyber font-bold text-xs uppercase border border-slate-700 cursor-pointer transition-colors"
+      <div class="tour-foot p-3.5 sm:p-4 border-t flex items-center justify-between gap-3 relative z-10 flex-shrink-0">
+        <button
+          type="button"
+          id="closeTourPlannerFooterBtn"
+          onclick="window.closeTourPlanner && window.closeTourPlanner()"
+          class="px-4 py-2.5 rounded-xl font-cyber font-bold text-xs border cursor-pointer transition-colors tour-cancel-btn"
         >
-          Cancel
+          বাতিল
         </button>
-        <button 
-          type="button" 
-          id="activateTourPlanBtn" 
-          class="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-cyan-600 to-emerald-600 hover:from-cyan-500 hover:to-emerald-500 text-white font-cyber font-bold text-xs sm:text-sm uppercase tracking-wider shadow-lg shadow-cyan-600/30 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2"
+        <button
+          type="button"
+          id="activateTourPlanBtn"
+          class="flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-cyber font-bold tracking-wider shadow-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2 tour-activate-btn"
         >
           <i class="fa-solid fa-paper-plane text-xs"></i>
-          <span>🚀 ACTIVATE & BROADCAST TOUR</span>
+          <span>ট্যুর চালু করো ও সবাইকে জানাও</span>
         </button>
       </div>
 
@@ -1310,32 +1280,121 @@
   <!-- ==================== POLICE PHOTO LIGHTBOX VIEWER ==================== -->
   <div id="policePhotoViewerModal" class="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md hidden transition-all duration-300">
     <div class="relative max-w-lg w-full bg-slate-900 border border-slate-700 rounded-2xl p-3 shadow-2xl flex flex-col items-center">
-      <button 
-        type="button" 
-        onclick="window.closePolicePhotoViewer()" 
+      <button
+        type="button"
+        onclick="window.closePolicePhotoViewer()"
         class="absolute -top-3 -right-3 w-9 h-9 rounded-full bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center font-bold shadow-lg text-sm z-10 active:scale-95 cursor-pointer"
-        title="Close Photo Viewer"
+        title="Close photo viewer"
       >
         <i class="fa-solid fa-xmark"></i>
       </button>
       <div class="w-full flex items-center justify-between px-2 pb-2 border-b border-slate-800 text-xs font-cyber text-slate-300">
         <span class="flex items-center gap-1.5 text-rose-400 font-bold">
-          <i class="fa-solid fa-shield-halved"></i> Police Checkpost Photo
+          <i class="fa-solid fa-shield-halved"></i> চেকপোস্টের ছবি
         </span>
-        <span class="text-[10px] text-slate-500">Tap outside or ✕ to close</span>
+        <span class="text-[10px] text-slate-500">বন্ধ করতে বাইরে চাপ দাও বা ✕ দাও</span>
       </div>
       <div class="w-full overflow-hidden rounded-xl mt-2 flex items-center justify-center bg-black/70 max-h-[70vh]">
-        <img id="policePhotoViewerImg" src="" alt="Police Checkpost" class="w-full max-h-[70vh] object-contain rounded-xl">
+        <img id="policePhotoViewerImg" src="" alt="Police checkpost" class="w-full max-h-[70vh] object-contain rounded-xl">
       </div>
     </div>
   </div>
+
+  <!-- ==================== BOTTOM TAB BAR: JOIN / RIDING / GROUP / TOUR ==================== -->
+  <nav id="bottomTabBar" class="bottom-tab-bar" aria-label="মূল সেকশন">
+    <button type="button" id="tabJoin" data-tab="join" class="tab-btn active" aria-selected="true">
+      <i class="fa-solid fa-user-plus"></i>
+      <span>Join</span>
+    </button>
+    <button type="button" id="tabRiding" data-tab="riding" class="tab-btn" aria-selected="false">
+      <i class="fa-solid fa-motorcycle"></i>
+      <span>Riding</span>
+    </button>
+    <button type="button" id="tabGroup" data-tab="group" class="tab-btn" aria-selected="false">
+      <i class="fa-solid fa-users"></i>
+      <span>Group (<span id="activeRidersCount">1</span>)</span>
+    </button>
+    <button type="button" id="tabTour" data-tab="tour" class="tab-btn" aria-selected="false">
+      <i class="fa-solid fa-route"></i>
+      <span>Tour</span>
+      <span id="activeTourIndicatorDot" class="hidden tab-tour-dot"></span>
+    </button>
+  </nav>
 
   <!-- ==================== SCRIPTS ==================== -->
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <!-- Supabase JS SDK v2 -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.2/dist/umd/supabase.js" integrity="sha384-A97u3Qnt9GZHURO9YJZRe7VQgGUeFzcv6I1oIGnUTxQrCxnpQMwR0/G8F2zt9abZ" crossorigin="anonymous"></script>
   <!-- Main Application Logic -->
   <script src="app.js"></script>
+  <!-- Tab bar wiring + live mirrors (no backend logic changed) -->
+  <script>
+    (function () {
+      function $(id) { return document.getElementById(id); }
+      var tabs = Array.prototype.slice.call(document.querySelectorAll('#bottomTabBar [data-tab]'));
+      function setActive(name) {
+        tabs.forEach(function (b) {
+          var on = b.getAttribute('data-tab') === name;
+          b.classList.toggle('active', on);
+          b.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+      }
+      function goRiding() {
+        if (window.closeGroupDrawer) window.closeGroupDrawer();
+        if (window.closeTourPlanner) window.closeTourPlanner();
+        if (window.closeJoinModal) window.closeJoinModal();
+        setActive('riding');
+        if (window.map) { try { window.map.invalidateSize(); } catch (e) {} }
+      }
+      function bind(id, fn) { var el = $(id); if (el) el.addEventListener('click', fn); }
+      bind('tabJoin', function () { setActive('join'); if (window.openJoinModal) window.openJoinModal(); });
+      bind('tabRiding', goRiding);
+      bind('tabGroup', function () { setActive('group'); if (window.toggleGroupDrawer) window.toggleGroupDrawer(true); });
+      bind('tabTour', function () { setActive('tour'); if (window.openTourPlanner) window.openTourPlanner(); });
+      // Camera button: open the police report modal and jump straight to the photo picker.
+      bind('cameraReportBtn', function () {
+        if (window.openReportPoliceModal) window.openReportPoliceModal();
+        setTimeout(function () { var b = $('triggerPolicePhotoBtn'); if (b) b.click(); }, 400);
+      });
+      // Keep the tab state in sync when overlays are closed from their own buttons.
+      bind('closeRidersDrawerBtn', function () { setActive('riding'); });
+      bind('closeTourPlannerModalBtn', function () { setActive('riding'); });
+      bind('closeTourPlannerFooterBtn', function () { setActive('riding'); });
+      bind('closeOnboardingModalBtn', function () { setActive('riding'); });
+      bind('startRidingBtn', function () { setTimeout(function () { setActive('riding'); }, 350); });
+      var backdrop = $('drawerBackdrop');
+      if (backdrop) backdrop.addEventListener('click', function () { setActive('riding'); });
+
+      // Live mirrors: next-stop + route chain shown in the location card and the Group drawer.
+      function stripEmoji(s) {
+        return (s || '').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{2190}-\u{21FF}]/gu, '').replace(/\s+/g, ' ').trim();
+      }
+      function cleanNextStop(s) {
+        var t = stripEmoji(s).replace(/^NEXT:\s*/i, '').replace(/^Next:\s*/i, '');
+        return t;
+      }
+      function syncMirrors() {
+        var nextEl = $('tourNextStopText'), chainEl = $('tourChainBreadcrumb');
+        var locSub = $('locSub'), dNext = $('drawerNextStop'), dChain = $('drawerChain');
+        var nextTxt = nextEl ? cleanNextStop(nextEl.textContent) : '';
+        var chainTxt = chainEl ? stripEmoji(chainEl.textContent).replace(/\s*➔\s*/g, ' → ') : '';
+        var strip = $('tourProgressStrip');
+        var tourOn = strip && !strip.classList.contains('hidden');
+        if (locSub) locSub.textContent = (tourOn && nextTxt) ? nextTxt : 'ট্যুর সেট করলে পরের থামা এখানে দেখাবে';
+        if (dNext) dNext.textContent = (tourOn && nextTxt) ? nextTxt : 'ট্যুর সেট করলে এখানে দেখাবে';
+        if (dChain) dChain.textContent = (tourOn && chainTxt) ? chainTxt : '';
+      }
+      if (window.MutationObserver) {
+        var obs = new MutationObserver(syncMirrors);
+        ['tourNextStopText', 'tourChainBreadcrumb', 'tourProgressStrip'].forEach(function (id) {
+          var el = $(id);
+          if (el) obs.observe(el, { childList: true, characterData: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+        });
+      }
+      syncMirrors();
+      setActive('join');
+    })();
+  </script>
 </body>
 </html>

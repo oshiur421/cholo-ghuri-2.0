@@ -98,13 +98,6 @@ try {
 } catch (e) {
   console.warn("Immediate map init warning:", e);
 }
-window.closeSimDevPanel = function(e) {
-  if (e && e.stopPropagation) e.stopPropagation();
-};
-
-window.toggleSimDevPanel = function(e) {
-  if (e && e.stopPropagation) e.stopPropagation();
-};
 window.openJoinModal = function() {
   const modal = document.getElementById("onboardingModal");
   if (modal) {
@@ -161,7 +154,7 @@ window.submitOnboarding = async function(event) {
 
   let code = roomCodeInput ? roomCodeInput.value.trim().toUpperCase() : "";
   if (!code || code === "----") {
-    code = typeof generateRoomCode === "function" ? generateRoomCode() : "DHAKA" + Math.floor(100 + Math.random() * 900);
+    code = typeof generateRoomCode === "function" ? generateRoomCode() : (function () { var a = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"; var b = new Uint8Array(6); if (typeof crypto !== "undefined" && crypto.getRandomValues) { crypto.getRandomValues(b); } else { for (var i = 0; i < 6; i++) b[i] = Math.floor(Math.random() * 256); } var c = ""; for (var j = 0; j < 6; j++) c += a[b[j] % 36]; return c; })();
     if (roomCodeInput) roomCodeInput.value = code;
   }
 
@@ -332,12 +325,10 @@ window.submitOnboarding = async function(event) {
   }
 
   // Trigger quick non-blocking geolocation lookup with Dhaka fallback (23.8103, 90.4125)
-  if (typeof isSimulating !== "undefined" && !isSimulating) {
-    if (typeof requestQuickGeolocation === "function") {
-      requestQuickGeolocation();
-    } else if (typeof startGPSTracking === "function") {
-      startGPSTracking();
-    }
+  if (typeof requestQuickGeolocation === "function") {
+    requestQuickGeolocation();
+  } else if (typeof startGPSTracking === "function") {
+    startGPSTracking();
   }
 
   // e) Start the dual sync loop (runDualSyncLoop()) and show a success toast
@@ -368,14 +359,6 @@ window.recenterCamera = function() {
     isCameraLocked = true;
     if (typeof updateRecenterButtonUI === "function") updateRecenterButtonUI();
     const targetMap = window.map || (typeof map !== "undefined" ? map : null);
-
-    // If currently in Highway Simulation mode, center camera on simulated position
-    if (typeof isSimulating !== "undefined" && isSimulating) {
-      if (targetMap && typeof riderLocation !== "undefined") {
-        targetMap.flyTo([riderLocation.lat, riderLocation.lng], 16, { animate: true, duration: 0.8 });
-      }
-      return;
-    }
 
     // Actively query fresh real-time GPS coordinates
     if ("geolocation" in navigator && typeof navigator.geolocation.getCurrentPosition === "function") {
@@ -665,8 +648,6 @@ window.openReportPoliceModal = function() {
   }
 };
 
-// Note: window.toggleSimDevPanel and window.closeSimDevPanel defined at top-level
-
 window.leaveActiveTour = async function() {
   try {
     if (typeof playSound === "function") playSound("click");
@@ -927,72 +908,6 @@ function markAlertAsDismissed(alertId) {
   } catch (e) {}
 }
 window.markAlertAsDismissed = markAlertAsDismissed;
-
-// PC Simulator & Dev Tools State
-let isSimulating = false;
-let simInterval = null;
-let simRouteIndex = 0;
-let simProgress = 0;
-let simSpeed = 75; // km/h
-let currentSimRouteKey = "mawa";
-let isTeleportClickActive = false; // PC Click map to move
-
-// Simulation Highway Waypoints & Road Profiles
-const SIM_ROUTES = {
-  mawa: {
-    name: "Dhaka - Mawa Expressway (N8)",
-    type: "National Highway (N8)",
-    speedLimit: 80,
-    coords: [
-      [23.6708, 90.3922],
-      [23.6540, 90.3860],
-      [23.6395, 90.3801],
-      [23.6180, 90.3720],
-      [23.5976, 90.3644],
-      [23.5740, 90.3490],
-      [23.5512, 90.3341],
-      [23.5240, 90.3175],
-      [23.4981, 90.3015],
-      [23.4735, 90.2789],
-      [23.4542, 90.2605]
-    ]
-  },
-  purbachal: {
-    name: "Purbachal 300ft Expressway",
-    type: "Expressway Highway",
-    speedLimit: 70,
-    coords: [
-      [23.8223, 90.4358],
-      [23.8260, 90.4490],
-      [23.8291, 90.4612],
-      [23.8325, 90.4740],
-      [23.8354, 90.4856],
-      [23.8385, 90.4980],
-      [23.8415, 90.5102],
-      [23.8445, 90.5225],
-      [23.8472, 90.5348],
-      [23.8521, 90.5590]
-    ]
-  },
-  hatirjheel: {
-    name: "Hatirjheel Scenic Ring Loop",
-    type: "City Arterial Loop",
-    speedLimit: 50,
-    coords: [
-      [23.7745, 90.4085],
-      [23.7730, 90.4140],
-      [23.7702, 90.4180],
-      [23.7675, 90.4165],
-      [23.7665, 90.4140],
-      [23.7645, 90.4090],
-      [23.7630, 90.4030],
-      [23.7655, 90.3995],
-      [23.7680, 90.3980],
-      [23.7715, 90.4020],
-      [23.7745, 90.4085]
-    ]
-  }
-};
 
 // ==========================================
 // 3. SOUND SYNTHESIZER (Native WebAudio API)
@@ -1281,11 +1196,25 @@ function clearPendingPolicePhoto() {
   }
 }
 
+// SECURITY (MEDIUM-1): a stored police photo must be a plain data-URL image.
+// Anything else (javascript:, data:text/html, quote-breaking payloads) is
+// rejected and never rendered or opened.
+function isValidPolicePhotoData(value) {
+  if (typeof value !== "string" || !value) return null;
+  const m = value.match(/^(data:image\/(?:jpeg|png);base64,)([A-Za-z0-9+/=]+)$/);
+  if (!m) return null;
+  if (m[2].length % 4 !== 0) return null;
+  return value;
+}
+
 window.openPolicePhotoViewer = function(src) {
   if (!src) return;
+  const safeSrc = isValidPolicePhotoData(src) ||
+    (typeof src === "string" && /^https?:\/\//.test(src) ? src : null);
+  if (!safeSrc) return;
   const modal = document.getElementById("policePhotoViewerModal");
   const img = document.getElementById("policePhotoViewerImg");
-  if (img) img.src = src;
+  if (img) img.src = safeSrc;
   if (modal) {
     modal.classList.remove("hidden");
     modal.style.display = "flex";
@@ -1307,15 +1236,22 @@ function createPolicePopupHtml(report) {
   const timeStr = report.created_at
     ? new Date(report.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     : "Just now";
+  // Vote counts are numbers only — a stored string must never reach the HTML.
+  const trueVotes = Number(report.true_votes) || 1;
+  const falseVotes = Number(report.false_votes) || 0;
+  // Only a validated image data-URL is ever rendered (see isValidPolicePhotoData).
+  const safePhoto = isValidPolicePhotoData(report.photo_data);
+  const safeReportId = escapeHtml(String(report.id || ""));
 
-  const photoHtml = report.photo_data
+  const photoHtml = safePhoto
     ? `
     <div class="mt-2 relative">
-      <img 
-        src="${report.photo_data}" 
-        alt="Police Checkpost" 
-        class="police-popup-photo" 
-        onclick="window.openPolicePhotoViewer('${report.photo_data}')"
+      <img
+        src="${escapeHtml(safePhoto)}"
+        alt="Police Checkpost"
+        class="police-popup-photo"
+        data-action="view-photo"
+        data-photo="${escapeHtml(safePhoto)}"
         title="Tap to view full screen"
       />
       <div class="text-[9px] text-cyan-300 flex items-center justify-center gap-1 mt-1 font-mono">
@@ -1335,13 +1271,14 @@ function createPolicePopupHtml(report) {
         <div>Reported by: <span class="font-bold text-cyan-300">${reporter}</span></div>
         <div class="text-[10px] text-slate-400 flex items-center justify-between">
           <span>Time: ${timeStr}</span>
-          <span class="text-emerald-400 font-bold">👍 ${report.true_votes || 1} | 👎 ${report.false_votes || 0}</span>
+          <span class="text-emerald-400 font-bold">👍 ${trueVotes} | 👎 ${falseVotes}</span>
         </div>
       </div>
       ${photoHtml}
-      <button 
-        type="button" 
-        onclick="window.openVerifyPoliceModal('${report.id}')"
+      <button
+        type="button"
+        data-action="verify-report"
+        data-report-id="${safeReportId}"
         class="w-full mt-2.5 py-1.5 px-2 rounded-lg bg-red-600/90 hover:bg-red-500 text-white font-cyber font-bold text-[10px] uppercase flex items-center justify-center gap-1.5 shadow transition-all active:scale-95 cursor-pointer"
       >
         <i class="fa-solid fa-check-to-slot"></i>
@@ -1351,9 +1288,28 @@ function createPolicePopupHtml(report) {
   `;
 }
 
+// SECURITY (LOW-2): client-side cooldowns against spam.
+const POLICE_REPORT_COOLDOWN_MS = 60000;
+const PTT_SEND_MIN_GAP_MS = 3000;
+let lastPoliceReportAt = 0;
+let lastPttSentAt = 0;
+try {
+  lastPoliceReportAt = Number(localStorage.getItem("cholo_ghuri_last_police_report_at") || 0) || 0;
+} catch (e) {}
+
 async function reportPoliceCheckpost() {
   const reporterName = currentSession.riderName || "Rider";
   const photoData = window.pendingPolicePhotoData || null;
+
+  const nowMs = Date.now();
+  const waitMs = POLICE_REPORT_COOLDOWN_MS - (nowMs - lastPoliceReportAt);
+  if (waitMs > 0) {
+    const waitSec = Math.ceil(waitMs / 1000);
+    showRadarToast("SLOW DOWN", `Wait ${waitSec}s before reporting another checkpost.`);
+    return;
+  }
+  lastPoliceReportAt = nowMs;
+  try { localStorage.setItem("cholo_ghuri_last_police_report_at", String(nowMs)); } catch (e) {}
 
   const newReport = {
     id: generateUUID(),
@@ -1573,7 +1529,6 @@ function addOrUpdatePoliceMarker(report) {
   report.circle = circle;
   policeReportsMap.set(reportId, report);
 
-  updateSimTargetPoliceInfo();
 }
 
 function removePoliceMarker(reportId) {
@@ -1590,8 +1545,7 @@ function removePoliceMarker(reportId) {
       closeVerifyPoliceModal();
     }
 
-    updateSimTargetPoliceInfo();
-    evaluatePoliceProximity();
+      evaluatePoliceProximity();
   }
 }
 
@@ -1665,11 +1619,13 @@ function openVerifyPoliceModal(reportId) {
   const trueBarEl = document.getElementById("verifyTrueBar");
   const falseBarEl = document.getElementById("verifyFalseBar");
 
-  // Show checkpost photo in verify modal if available
+  // Show checkpost photo in verify modal if available (validated first — a
+  // stored photo_data value is never trusted as-is).
   const photoContainer = document.getElementById("verifyPolicePhotoContainer");
   const photoEl = document.getElementById("verifyPolicePhoto");
-  if (report.photo_data) {
-    if (photoEl) photoEl.src = report.photo_data;
+  const safeVerifyPhoto = isValidPolicePhotoData(report.photo_data);
+  if (safeVerifyPhoto) {
+    if (photoEl) photoEl.src = safeVerifyPhoto;
     if (photoContainer) photoContainer.classList.remove("hidden");
   } else {
     if (photoEl) photoEl.src = "";
@@ -1694,6 +1650,17 @@ function openVerifyPoliceModal(reportId) {
 
   if (trueBarEl) trueBarEl.style.width = `${truePercent}%`;
   if (falseBarEl) falseBarEl.style.width = `${falsePercent}%`;
+
+  // One vote per rider: disable both vote buttons if this rider already voted.
+  const alreadyVotedHere = hasVotedForReport(reportId);
+  const voteTrueBtnEl = document.getElementById("voteTrueBtn");
+  const voteFalseBtnEl = document.getElementById("voteFalseBtn");
+  [voteTrueBtnEl, voteFalseBtnEl].forEach((btn) => {
+    if (!btn) return;
+    btn.disabled = Boolean(alreadyVotedHere);
+    btn.style.opacity = alreadyVotedHere ? "0.5" : "";
+    btn.style.cursor = alreadyVotedHere ? "not-allowed" : "";
+  });
 
   if (modal) {
     modal.style.display = "flex";
@@ -2153,9 +2120,51 @@ window.dismissMiniAlert = function(type, alertId, event) {
   }
 };
 
+// SECURITY (LOW-1): one vote per rider per report. Voters are tracked locally
+// (per riderId, persisted) so one person cannot stuff 10 false votes and
+// trigger auto-removal. True server-side enforcement needs the
+// police_report_votes table in supabase-rls-policies.sql (optional section).
+const POLICE_VOTES_STORAGE_KEY = "cholo_ghuri_police_votes";
+function loadPoliceVotes() {
+  try {
+    const raw = localStorage.getItem(POLICE_VOTES_STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : {};
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch (e) { return {}; }
+}
+function savePoliceVotes(votes) {
+  try {
+    const keys = Object.keys(votes);
+    const trimmed = {};
+    keys.slice(-200).forEach((k) => { trimmed[k] = votes[k]; });
+    localStorage.setItem(POLICE_VOTES_STORAGE_KEY, JSON.stringify(trimmed));
+  } catch (e) {}
+}
+function hasVotedForReport(reportId) {
+  if (!reportId) return null;
+  const votes = loadPoliceVotes();
+  const entry = votes[reportId];
+  if (!entry) return null;
+  if (currentSession && entry.voter && entry.voter !== currentSession.riderId) return null;
+  return entry.vote || null;
+}
+function recordPoliceVote(reportId, isTrue) {
+  const votes = loadPoliceVotes();
+  votes[reportId] = { voter: currentSession ? currentSession.riderId : null, vote: isTrue ? "true" : "false", at: Date.now() };
+  savePoliceVotes(votes);
+}
+
 async function submitPoliceVote(reportId, isTrue) {
   const report = policeReportsMap.get(reportId);
   if (!report) return;
+
+  const alreadyVoted = hasVotedForReport(reportId);
+  if (alreadyVoted) {
+    showRadarToast("ALREADY VOTED", alreadyVoted === "true" ? "You already verified this checkpost." : "You already voted this checkpost as fake.");
+    openVerifyPoliceModal(reportId);
+    return;
+  }
+  recordPoliceVote(reportId, isTrue);
 
   if (isTrue) {
     report.true_votes = (report.true_votes || 1) + 1;
@@ -2183,7 +2192,6 @@ async function submitPoliceVote(reportId, isTrue) {
 
   checkAutoRemovalCondition(report);
   openVerifyPoliceModal(reportId);
-  updateSimTargetPoliceInfo();
 }
 
 async function checkAutoRemovalCondition(report) {
@@ -2408,6 +2416,26 @@ window.kickRiderFromConvoy = async function(targetRiderId, targetRiderName) {
   if (targetRiderId === currentSession.riderId) {
     if (typeof showRadarToast === "function") {
       showRadarToast("ACTION DENIED", "You cannot kick yourself from the convoy.");
+    }
+    return;
+  }
+
+  // SECURITY (MEDIUM-2): the local isLeader flag is not proof. The leader row
+  // stored in Supabase is the source of truth — a kick only proceeds when the
+  // DB says this rider is the room's leader. Fails closed on any error.
+  let leaderVerified = false;
+  try {
+    const leaders = await supabaseRest(
+      `riders?room_code=eq.${encodeURIComponent(currentSession.roomCode)}&is_leader=eq.true&select=id&limit=1`
+    );
+    leaderVerified = Array.isArray(leaders) && leaders.length > 0 && leaders[0].id === currentSession.riderId;
+  } catch (verifyErr) {
+    console.debug("[Kick leader verify error]", verifyErr);
+    leaderVerified = false;
+  }
+  if (!leaderVerified) {
+    if (typeof showRadarToast === "function") {
+      showRadarToast("ACTION DENIED", "Leader status could not be verified. Kick cancelled.");
     }
     return;
   }
@@ -3223,9 +3251,9 @@ async function fetchExistingRiders() {
         }
       });
 
-      // Cleanup any riders in allConvoyRiders not returned in DB query (unless simulated ghost rider)
+      // Cleanup any riders in allConvoyRiders not returned in DB query
       allConvoyRiders.forEach((val, key) => {
-        if (key !== currentSession.riderId && !key.startsWith("biker_") && !activeDbIds.has(key)) {
+        if (key !== currentSession.riderId && !activeDbIds.has(key)) {
           allConvoyRiders.delete(key);
           removeRemoteRiderMarker(key);
         }
@@ -3584,12 +3612,26 @@ function initMap() {
         updateRecenterButtonUI();
       });
 
-      // PC Teleport / Click-to-move listener
-      map.on("click", (e) => {
-        if (isTeleportClickActive) {
-          teleportBikerTo(e.latlng.lat, e.latlng.lng);
-        }
+      // Police popup actions: popup HTML is a string, so its buttons carry
+      // data-* attributes and get real listeners here (no inline onclick, so
+      // a stored report can never inject script through the popup).
+      map.on("popupopen", (e) => {
+        const el = e.popup && e.popup.getElement ? e.popup.getElement() : null;
+        if (!el) return;
+        el.querySelectorAll("[data-action]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const action = btn.getAttribute("data-action");
+            if (action === "view-photo") {
+              const photo = btn.getAttribute("data-photo");
+              if (photo) window.openPolicePhotoViewer(photo);
+            } else if (action === "verify-report") {
+              const rid = btn.getAttribute("data-report-id");
+              if (rid) window.openVerifyPoliceModal(rid);
+            }
+          });
+        });
       });
+
     }
 
     updateUserMarker(riderLocation.lat || 23.8103, riderLocation.lng || 90.4125, riderLocation.heading || 0);
@@ -3733,7 +3775,7 @@ function handleGeolocationSuccess(pos, isFallback = false) {
     console.warn("GPS position update error handled:", posErr);
   }
 
-  if (!isSimulating && typeof startGPSTracking === "function") {
+  if (typeof startGPSTracking === "function") {
     startGPSTracking();
   }
 }
@@ -3743,7 +3785,7 @@ function handleGeolocationError(err, source = "primary") {
 
   if (err.code === 1) {
     // 1: PERMISSION_DENIED
-    // Do NOT load demo mode or simulation! Show permission modal with instructions
+    // Show the GPS permission modal with instructions
     if (typeof window.showGpsPermissionModal === "function") {
       window.showGpsPermissionModal(true);
     }
@@ -3785,7 +3827,6 @@ function handleGeolocationError(err, source = "primary") {
 }
 
 function requestQuickGeolocation() {
-  if (isSimulating) return;
 
   if (!("geolocation" in navigator) || typeof navigator.geolocation.getCurrentPosition !== "function") {
     console.warn("[Geolocation] Geolocation API not supported in this browser.");
@@ -3812,7 +3853,6 @@ function requestQuickGeolocation() {
 }
 
 function startGPSTracking() {
-  if (isSimulating) return;
 
   if (!("geolocation" in navigator) || typeof navigator.geolocation.watchPosition !== "function") {
     console.warn("Geolocation API not supported.");
@@ -3834,8 +3874,6 @@ function startGPSTracking() {
 
   watchId = navigator.geolocation.watchPosition(
     (pos) => {
-      if (isSimulating) return;
-
       const { latitude, longitude, speed, heading, accuracy } = pos.coords;
       const speedKmH = speed !== null && speed >= 0 ? speed * 3.6 : 0;
       const validHeading = heading !== null && !isNaN(heading) ? heading : (riderLocation.heading || 0);
@@ -3880,193 +3918,6 @@ function stopGPSTracking() {
 }
 
 // ==========================================
-// 14. PC TESTING SIMULATOR (DEV TOOLS)
-// ==========================================
-function teleportBikerTo(lat, lng) {
-  riderLocation.lat = lat;
-  riderLocation.lng = lng;
-
-  updateUserMarker(lat, lng, riderLocation.heading);
-  detectRoadTransition(lat, lng, true);
-
-  broadcastCurrentLocation();
-  upsertLiveRiderData();
-  evaluateConvoyDistances();
-  evaluatePoliceProximity();
-
-  showRadarToast("BIKER TELEPORTED", `Moved to [${lat.toFixed(4)}, ${lng.toFixed(4)}]`);
-  playSound("click");
-}
-
-function toggleTeleportMode() {
-  isTeleportClickActive = !isTeleportClickActive;
-  const body = document.body;
-  const statusText = document.getElementById("teleportStatusText");
-  const dot = document.getElementById("teleportIndicatorDot");
-  const btn = document.getElementById("simTeleportToggleBtn");
-
-  if (isTeleportClickActive) {
-    body.classList.add("teleport-active");
-    if (statusText) statusText.textContent = "Click Map";
-    if (dot) dot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-ping";
-    if (btn) btn.className = "px-3 py-1.5 rounded-lg bg-emerald-950/80 border border-emerald-500 text-[11px] font-cyber font-bold text-emerald-300 transition-all flex items-center gap-1.5 shadow-lg shadow-emerald-500/20";
-    showRadarToast("TELEPORT ACTIVE", "Click anywhere on map to move your biker!");
-  } else {
-    body.classList.remove("teleport-active");
-    if (statusText) statusText.textContent = "Disabled";
-    if (dot) dot.className = "w-2 h-2 rounded-full bg-slate-500";
-    if (btn) btn.className = "px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-[11px] font-cyber font-bold text-slate-300 transition-all flex items-center gap-1.5";
-  }
-  playSound("click");
-}
-
-function startHighwaySimulation() {
-  stopGPSTracking();
-  isSimulating = true;
-
-  const routeData = SIM_ROUTES[currentSimRouteKey] || SIM_ROUTES.mawa;
-  currentRoadName = routeData.name;
-  speedLimit = routeData.speedLimit;
-  currentRoadType = routeData.type;
-
-  const roadNameEl = document.getElementById("currentRoadName") || document.getElementById("currentRoadBanner");
-  if (roadNameEl) roadNameEl.textContent = currentRoadName;
-  const speedLimitVal = document.getElementById("speedLimitVal");
-  if (speedLimitVal) speedLimitVal.textContent = speedLimit;
-
-  const simBtn = document.getElementById("simToggleRideBtn");
-  if (simBtn) {
-    simBtn.innerHTML = '<i class="fa-solid fa-pause"></i><span>Pause Sim</span>';
-    simBtn.className = "px-3 py-2 bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold rounded-lg transition-colors flex items-center justify-center gap-1.5";
-  }
-
-  if (simInterval) clearInterval(simInterval);
-
-  simInterval = setInterval(() => {
-    const coords = routeData.coords;
-    if (simRouteIndex >= coords.length - 1) {
-      simRouteIndex = 0;
-      simProgress = 0;
-    }
-
-    simProgress += 0.05 * (simSpeed / 60);
-    if (simProgress >= 1) {
-      simProgress = 0;
-      simRouteIndex++;
-    }
-
-    const currP1 = coords[simRouteIndex] || coords[0];
-    const currP2 = coords[simRouteIndex + 1] || coords[coords.length - 1];
-
-    const currentLat = currP1[0] + (currP2[0] - currP1[0]) * simProgress;
-    const currentLng = currP1[1] + (currP2[1] - currP1[1]) * simProgress;
-    const calcHeading = calculateBearing(currP1[0], currP1[1], currP2[0], currP2[1]);
-
-    riderLocation.lat = currentLat;
-    riderLocation.lng = currentLng;
-    riderLocation.speed = simSpeed;
-    riderLocation.heading = calcHeading;
-
-    updateUserMarker(currentLat, currentLng, calcHeading);
-    updateSpeedometerDisplay(simSpeed);
-    evaluateOverspeed(simSpeed);
-    updateCompassHeading(calcHeading);
-
-    broadcastCurrentLocation();
-    upsertLiveRiderData();
-    evaluateConvoyDistances();
-    evaluatePoliceProximity();
-  }, 350);
-}
-
-function stopHighwaySimulation() {
-  isSimulating = false;
-  if (simInterval) {
-    clearInterval(simInterval);
-    simInterval = null;
-  }
-
-  const simBtn = document.getElementById("simToggleRideBtn");
-  if (simBtn) {
-    simBtn.innerHTML = '<i class="fa-solid fa-play"></i><span>Start Sim</span>';
-    simBtn.className = "px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold rounded-lg transition-colors flex items-center justify-center gap-1.5";
-  }
-
-  startGPSTracking();
-}
-
-function spawnDummyFriendFarAway() {
-  const ghostId = `dummy_far_${Date.now()}`;
-  const ghostLat = riderLocation.lat - 0.020;
-  const ghostLng = riderLocation.lng - 0.005;
-
-  const dummyFriend = {
-    id: ghostId,
-    rider_name: "Farhan_GSX_Straggler",
-    is_leader: false,
-    lat: ghostLat,
-    lng: ghostLng,
-    heading: riderLocation.heading,
-    speed: 45,
-    updated_at: new Date().toISOString()
-  };
-
-  allConvoyRiders.set(ghostId, dummyFriend);
-  updateRemoteRiderMarker(dummyFriend);
-  evaluateConvoyDistances();
-
-  showRadarToast("CONVOY DISTANCE SIMULATOR", "🏍️ Farhan_GSX placed 2.2 km away. Convoy alert triggered!");
-  playSound("join");
-}
-
-function updateSimTargetPoliceInfo() {
-  const targetInfoEl = document.getElementById("simTargetPoliceInfo");
-  const counterEl = document.getElementById("simFalseVoteCounter");
-
-  if (!targetInfoEl) return;
-
-  const reports = Array.from(policeReportsMap.values());
-  if (reports.length === 0) {
-    targetInfoEl.textContent = "No Report Target";
-    if (counterEl) counterEl.textContent = "0/10";
-    return;
-  }
-
-  const target = reports[reports.length - 1];
-  targetInfoEl.textContent = `${target.reported_by || "Report"} (${target.false_votes || 0}/10)`;
-  if (counterEl) counterEl.textContent = `${target.false_votes || 0}/10`;
-}
-
-async function simulateFalseVoteOnReport() {
-  const reports = Array.from(policeReportsMap.values());
-  if (reports.length === 0) {
-    dropTestPoliceCheckpostAhead();
-    return;
-  }
-
-  const target = reports[reports.length - 1];
-  await submitPoliceVote(target.id, false);
-}
-
-function dropTestPoliceCheckpostAhead() {
-  const testReport = {
-    id: generateUUID(),
-    lat: riderLocation.lat + 0.002,
-    lng: riderLocation.lng + 0.001,
-    reported_by: "TestRider_Highway",
-    true_votes: 1,
-    false_votes: 0,
-    created_at: new Date().toISOString()
-  };
-
-  addOrUpdatePoliceMarker(testReport);
-  showRadarToast("POLICE CHECKPOST CREATED", "Dropped 220m ahead for testing!");
-  playSound("police");
-  evaluatePoliceProximity();
-  updateSimTargetPoliceInfo();
-}
-
-// ==========================================
 // 15. HUD & SESSION HELPERS
 // ==========================================
 function updateSpeedometerDisplay(speedKmH) {
@@ -4108,10 +3959,22 @@ function updateRidersCount() {
   if (topRightEl) topRightEl.textContent = `${total}`;
 }
 
+// Room codes are unguessable on purpose: 6 characters from A-Z + 0-9 drawn with
+// crypto.getRandomValues — 36^6 = 2,176,782,336 (~2.18 billion) combinations.
+// The old format was 7 prefixes x 900 numbers = ~6,300 codes. Joining an
+// old-format code (e.g. DHAKA101) still works: joining only matches the typed
+// code, it never checks the format.
 function generateRoomCode() {
-  const prefixes = ["DHAKA", "CHOLO", "RADAR", "CONVOY", "PADMA", "VIPER", "TURBO"];
-  const randNum = Math.floor(Math.random() * 900) + 100;
-  return `${prefixes[Math.floor(Math.random() * prefixes.length)]}${randNum}`;
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  const bytes = new Uint8Array(6);
+  if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function") {
+    crypto.getRandomValues(bytes);
+  } else {
+    for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
+  }
+  let code = "";
+  for (let i = 0; i < 6; i++) code += alphabet[bytes[i] % alphabet.length];
+  return code;
 }
 
 function generateUUID() {
@@ -4395,12 +4258,10 @@ function applySessionUI() {
 
   joinSupabaseRoom(currentSession.roomCode);
 
-  if (!isSimulating) {
-    if (typeof requestQuickGeolocation === "function") {
-      requestQuickGeolocation();
-    } else {
-      startGPSTracking();
-    }
+  if (typeof requestQuickGeolocation === "function") {
+    requestQuickGeolocation();
+  } else {
+    startGPSTracking();
   }
 }
 
@@ -4465,7 +4326,7 @@ function showRadarToast(title, body) {
   const upperTitle = String(title || "").toUpperCase();
   if (toastIconBox && toastIcon) {
     toastIconBox.className = "alert-card-icon";
-    if (upperTitle.includes("LOCATING") || upperTitle.includes("TELEPORT") || upperTitle.includes("RIDER")) {
+    if (upperTitle.includes("LOCATING") || upperTitle.includes("RIDER")) {
       toastIconBox.classList.add("alert-card-icon-sky");
       toastIcon.className = "fa-solid fa-crosshairs text-sky-400";
     } else if (upperTitle.includes("POLICE") || upperTitle.includes("RADAR") || upperTitle.includes("VOTE") || upperTitle.includes("CHECKPOST")) {
@@ -4976,6 +4837,12 @@ function handlePttPressEnd(e) {
 
 async function sendPttVoiceMessage(audioData) {
   if (!audioData) return;
+  const nowMs = Date.now();
+  if (nowMs - lastPttSentAt < PTT_SEND_MIN_GAP_MS) {
+    console.debug("[PTT] voice message throttled (min 3s between clips)");
+    return;
+  }
+  lastPttSentAt = nowMs;
   const cleanRoom = (currentSession.roomCode || "").trim().toUpperCase();
   if (!cleanRoom || cleanRoom === "----") {
     showRadarToast("CONVOY REQUIRED", "Join or create a tour room first to use Walkie-Talkie.");
@@ -6815,7 +6682,6 @@ function initApp() {
   const recenterBtn = document.getElementById("recenterBtn");
   const reportPoliceBtn = document.getElementById("reportPoliceBtn");
   const leaveTourBtn = document.getElementById("leaveTourBtn") || document.getElementById("exitRoomBtn");
-  const simModeToggleBtn = document.getElementById("simModeToggleBtn");
   const openRidersDrawerBtn = document.getElementById("openRidersDrawerBtn");
   const closeRidersDrawerBtn = document.getElementById("closeRidersDrawerBtn");
   const topRidersCountBtn = document.getElementById("topRidersCountBtn");
@@ -6823,20 +6689,6 @@ function initApp() {
                        document.getElementById("groupDrawer") || 
                        document.getElementById("ridersDrawer");
   const drawerBackdrop = document.getElementById("drawerBackdrop");
-
-  // PC Dev Simulator Controls
-  const simPanel = document.getElementById("simPanel");
-  const closeSimPanelBtn = document.getElementById("closeSimPanelBtn");
-  const simTeleportToggleBtn = document.getElementById("simTeleportToggleBtn");
-  const simRouteSelect = document.getElementById("simRouteSelect");
-  const simSpeedSlider = document.getElementById("simSpeedSlider");
-  const simSpeedLabel = document.getElementById("simSpeedLabel");
-  const simToggleRideBtn = document.getElementById("simToggleRideBtn");
-  const simAddGhostRiderBtn = document.getElementById("simAddGhostRiderBtn");
-  const simSpawnFriend2kmBtn = document.getElementById("simSpawnFriend2kmBtn");
-  const simTriggerRoadChangeBtn = document.getElementById("simTriggerRoadChangeBtn");
-  const simDropTestPoliceBtn = document.getElementById("simDropTestPoliceBtn");
-  const simVoteFalsePoliceBtn = document.getElementById("simVoteFalsePoliceBtn");
 
   // Audio & Alerts
   const toggleAudioBtn = document.getElementById("toggleAudioBtn");
@@ -7169,119 +7021,6 @@ function initApp() {
   if (leaveTourBtn) {
     leaveTourBtn.addEventListener("click", () => {
       window.leaveActiveTour();
-    });
-  }
-
-  // Sim Mode Dev Tools Panel
-  if (simModeToggleBtn) {
-    simModeToggleBtn.addEventListener("click", (e) => {
-      window.toggleSimDevPanel(e);
-    });
-  }
-
-  if (closeSimPanelBtn) {
-    closeSimPanelBtn.addEventListener("click", (e) => {
-      window.closeSimDevPanel(e);
-    });
-  }
-
-  // PC Teleport Toggle
-  if (simTeleportToggleBtn) {
-    simTeleportToggleBtn.addEventListener("click", toggleTeleportMode);
-  }
-
-  if (simRouteSelect) {
-    simRouteSelect.addEventListener("change", (e) => {
-      currentSimRouteKey = e.target.value;
-      simRouteIndex = 0;
-      simProgress = 0;
-      if (isSimulating) {
-        startHighwaySimulation();
-      }
-    });
-  }
-
-  if (simSpeedSlider) {
-    simSpeedSlider.addEventListener("input", (e) => {
-      simSpeed = parseInt(e.target.value, 10);
-      if (simSpeedLabel) simSpeedLabel.textContent = `${simSpeed} km/h`;
-      riderLocation.speed = simSpeed;
-      updateSpeedometerDisplay(simSpeed);
-      evaluateOverspeed(simSpeed);
-      upsertLiveRiderData();
-      broadcastCurrentLocation();
-    });
-  }
-
-  if (simToggleRideBtn) {
-    simToggleRideBtn.addEventListener("click", () => {
-      playSound("click");
-      if (isSimulating) {
-        stopHighwaySimulation();
-      } else {
-        startHighwaySimulation();
-      }
-    });
-  }
-
-  if (simAddGhostRiderBtn) {
-    simAddGhostRiderBtn.addEventListener("click", () => {
-      playSound("click");
-      const ghostId = `biker_${Date.now()}`;
-      const ghostRider = {
-        id: ghostId,
-        rider_name: "RiderX_" + Math.floor(Math.random() * 90 + 10),
-        is_leader: false,
-        lat: riderLocation.lat + (Math.random() - 0.5) * 0.003,
-        lng: riderLocation.lng + (Math.random() - 0.5) * 0.003,
-        heading: riderLocation.heading,
-        speed: 70,
-        updated_at: new Date().toISOString()
-      };
-      allConvoyRiders.set(ghostId, ghostRider);
-      updateRemoteRiderMarker(ghostRider);
-      evaluateConvoyDistances();
-      showRadarToast("CONVOY COMPANION", `🏍️ ${ghostRider.rider_name} joined your convoy!`);
-      playSound("join");
-    });
-  }
-
-  // PC Dev Button: Spawn Dummy Friend > 2km Away
-  if (simSpawnFriend2kmBtn) {
-    simSpawnFriend2kmBtn.addEventListener("click", () => {
-      playSound("click");
-      spawnDummyFriendFarAway();
-    });
-  }
-
-  // PC Dev Button: Drop Police Checkpost
-  if (simDropTestPoliceBtn) {
-    simDropTestPoliceBtn.addEventListener("click", () => {
-      playSound("click");
-      dropTestPoliceCheckpostAhead();
-    });
-  }
-
-  // PC Dev Button: Simulate +1 False Vote on Police Report
-  if (simVoteFalsePoliceBtn) {
-    simVoteFalsePoliceBtn.addEventListener("click", () => {
-      playSound("click");
-      simulateFalseVoteOnReport();
-    });
-  }
-
-  let demoRoadIndex = 0;
-  const demoRoads = [
-    { name: "Purbachal 300ft Expressway (N8)", limit: 80, type: "Expressway Highway (80 km/h)" },
-    { name: "Mirpur - Airport Road Bypass", limit: 60, type: "Primary Arterial Highway (60 km/h)" },
-    { name: "Gulshan North Avenue", limit: 40, type: "City Urban Street (40 km/h)" }
-  ];
-
-  if (simTriggerRoadChangeBtn) {
-    simTriggerRoadChangeBtn.addEventListener("click", () => {
-      demoRoadIndex = (demoRoadIndex + 1) % demoRoads.length;
-      const road = demoRoads[demoRoadIndex];
-      triggerRoadTransitionPopup(road.name, road.limit, road.type);
     });
   }
 
