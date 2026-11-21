@@ -1097,6 +1097,9 @@
     var i = stopOrder.indexOf(value);
     if (on && i === -1) stopOrder.push(value);
     if (!on && i !== -1) stopOrder.splice(i, 1);
+    // A stop that is off shows nowhere: only points the rider actually
+    // added appear in the stop list — un-picking one removes its chip.
+    if (!on && c.parentNode) c.parentNode.removeChild(c);
   }
   function bindStopChip(c) {
     c.addEventListener("click", function () {
@@ -1174,6 +1177,9 @@
       else { var hrs = dist / 55; tt.textContent = hrs < 1 ? "≈ " + bnNum(Math.round(dist / 55 * 60)) + " মিনিট" : "≈ " + bnNum(hrs.toFixed(1)) + " ঘণ্টা"; }
     }
     var tc = $("tourStopsCount"); if (tc) tc.textContent = bnNum(stops.length) + "টা";
+    // The stop list shows only added points; when none are added, the hint shows instead.
+    var nsh = $("noStopsHint");
+    if (nsh) nsh.style.display = document.querySelectorAll("#stopChips .stop-chip").length ? "none" : "";
     buildChain($("tourRouteChain"), places, "preview");
     renderTourMap();
   }
@@ -1459,6 +1465,10 @@
   function init() {
     tourFrom = $("tourFrom"); tourTo = $("tourTo");
     populateTourSelects();
+    // Picking from the list recalculates distance/time/route at once,
+    // exactly like picking on the map does — no stale numbers.
+    tourFrom.addEventListener("change", renderTour);
+    tourTo.addEventListener("change", renderTour);
     document.querySelectorAll("#stopChips .stop-chip").forEach(bindStopChip);
     setPickMode("from");
     // Area names looked up for map pins earlier in this session.
