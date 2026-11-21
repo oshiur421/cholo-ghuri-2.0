@@ -963,11 +963,80 @@
     "Chattogram": [22.3569, 91.7832], "Cox's Bazar": [21.4272, 92.0058], "Bandarban": [22.1953, 92.2184],
     "Sajek": [23.3813, 92.2934], "Sylhet": [24.8949, 91.8687]
   };
-  function placeLabel(v) { return v && v.indexOf("MapPin-") === 0 ? "ম্যাপ পিন" : v; }
+  // All 64 districts of Bangladesh (name + district HQ lat/lng), so the
+  // Tour from/to lists are real choices, not a handful of demo places.
+  var DISTRICTS = [
+    ["Bagerhat", 22.6516, 89.7855], ["Bandarban", 22.1953, 92.2184], ["Barguna", 22.0953, 90.1121],
+    ["Barishal", 22.7010, 90.3535], ["Bhola", 22.6850, 90.6480], ["Bogura", 24.8510, 89.3711],
+    ["Brahmanbaria", 23.9608, 91.1115], ["Chandpur", 23.2513, 90.8518], ["Chapai Nawabganj", 24.5965, 88.2791],
+    ["Chattogram", 22.3569, 91.7832], ["Chuadanga", 23.6400, 88.8418], ["Cox's Bazar", 21.4272, 92.0058],
+    ["Cumilla", 23.4683, 91.1788], ["Dhaka", 23.8103, 90.4125], ["Dinajpur", 25.6277, 88.6332],
+    ["Faridpur", 23.6071, 89.8429], ["Feni", 23.0159, 91.3976], ["Gaibandha", 25.3297, 89.5429],
+    ["Gazipur", 24.0023, 90.4264], ["Gopalganj", 23.0053, 89.8266], ["Habiganj", 24.3747, 91.4157],
+    ["Jamalpur", 24.9375, 89.9371], ["Jashore", 23.1664, 89.2081], ["Jhalokati", 22.5721, 90.1860],
+    ["Jhenaidah", 23.5450, 89.1726], ["Joypurhat", 25.0947, 89.0297], ["Khagrachhari", 23.1193, 91.9886],
+    ["Khulna", 22.8456, 89.5403], ["Kishoreganj", 24.4260, 90.7828], ["Kurigram", 25.8055, 89.6363],
+    ["Kushtia", 23.9013, 89.1200], ["Lakshmipur", 22.9444, 90.8252], ["Lalmonirhat", 25.9923, 89.2847],
+    ["Madaripur", 23.1645, 90.1897], ["Magura", 23.4856, 89.4231], ["Manikganj", 23.8617, 90.0003],
+    ["Meherpur", 23.7623, 88.6318], ["Moulvibazar", 24.4829, 91.7777], ["Munshiganj", 23.5422, 90.5305],
+    ["Mymensingh", 24.7471, 90.4203], ["Naogaon", 24.7936, 88.9318], ["Narail", 23.1725, 89.5120],
+    ["Narayanganj", 23.6238, 90.5000], ["Narsingdi", 23.9226, 90.7175], ["Natore", 24.4102, 89.0078],
+    ["Netrokona", 24.8831, 90.7290], ["Nilphamari", 25.8486, 88.9414], ["Noakhali", 22.8242, 91.1017],
+    ["Pabna", 24.0035, 89.2492], ["Panchagarh", 26.3411, 88.5542], ["Patuakhali", 22.3596, 90.3299],
+    ["Pirojpur", 22.5795, 89.9754], ["Rajbari", 23.7574, 89.6444], ["Rajshahi", 24.3745, 88.6042],
+    ["Rangamati", 22.7324, 92.2985], ["Rangpur", 25.7439, 89.2752], ["Satkhira", 22.7185, 89.0685],
+    ["Shariatpur", 23.2423, 90.4348], ["Sherpur", 25.0205, 90.0155], ["Sirajganj", 24.4534, 89.7006],
+    ["Sunamganj", 25.0719, 91.3992], ["Sylhet", 24.8949, 91.8687], ["Tangail", 24.2513, 89.9167],
+    ["Thakurgaon", 26.0338, 88.4616]
+  ];
+  DISTRICTS.forEach(function (d) { if (!PLACE_LATLNG[d[0]]) PLACE_LATLNG[d[0]] = [d[1], d[2]]; });
+  // Area names looked up for map pins (pin id -> real place name).
+  var pinNames = {};
+  function placeLabel(v) {
+    if (!v) return "";
+    if (pinNames[v]) return pinNames[v];
+    return v.indexOf("MapPin-") === 0 ? "ম্যাপ পিন" : v;
+  }
+  // A map pin shows the name of the area it landed in, not "ম্যাপ পিন".
+  // The name arrives a moment after the tap (reverse lookup); the route
+  // chain, dropdowns and stop chips are updated in place when it lands.
+  function geocodePin(id, lat, lng) {
+    fetch("https://nominatim.openstreetmap.org/reverse?format=json&zoom=14&lat=" + lat + "&lon=" + lng, { headers: { "Accept": "application/json" } })
+      .then(function (res) { if (!res.ok) throw new Error("geocode " + res.status); return res.json(); })
+      .then(function (j) {
+        var name = "";
+        if (j && j.address) {
+          var a = j.address;
+          name = a.road || a.neighbourhood || a.quarter || a.suburb || a.village || a.hamlet ||
+            a.city_district || a.town || a.city || a.county || a.state_district || a.state || "";
+        }
+        if (!name && j && j.display_name) name = String(j.display_name).split(",")[0];
+        if (!name && j && j.name) name = j.name;
+        if (name) {
+          pinNames[id] = name;
+          try { sessionStorage.setItem("cg_pin_names", JSON.stringify(pinNames)); } catch (e) {}
+          [tourFrom, tourTo].forEach(function (sel) {
+            if (!sel) return;
+            for (var i = 0; i < sel.options.length; i++) if (sel.options[i].value === id) sel.options[i].textContent = name;
+          });
+          document.querySelectorAll("#stopChips .stop-chip").forEach(function (c) {
+            if (c.getAttribute("data-stop") === id) c.textContent = name;
+          });
+          renderTour();
+        }
+      })
+      .catch(function () {});
+  }
   function legDist(a, b) {
     if (a === b) return 0;
     var d = DIST[a + "|" + b] || DIST[b + "|" + a];
     if (d) return d;
+    // Real distance between any two known points (all 64 districts and
+    // map pins carry lat/lng), so the tour total is real for any route.
+    // Straight-line distance x1.2 approximates the road: Dhaka–Chattogram
+    // is 214 km as the crow flies, 248 km by road.
+    var la = PLACE_LATLNG[a], lb = PLACE_LATLNG[b];
+    if (la && lb) return Math.max(5, Math.round(haversineKm(la[0], la[1], lb[0], lb[1]) * 1.2));
     var ca = PLACE_COORDS[a], cb = PLACE_COORDS[b];
     if (ca && cb) {
       var dx = ca.x - cb.x, dy = ca.y - cb.y;
@@ -980,7 +1049,9 @@
     for (var i = 0; i < places.length - 1; i++) total += legDist(places[i], places[i + 1]);
     return total;
   }
-  var tourFrom = null, tourTo = null, stopOrder = ["Mawa", "Cumilla"];
+  // The Tour starts empty: no start, no destination, no stops pre-picked.
+  // Anything shown comes only from what the rider actually picked.
+  var tourFrom = null, tourTo = null, stopOrder = [];
   var activeTourPlan = null;
   try { var at = sessionStorage.getItem("cg_active_tour_plan"); if (at) activeTourPlan = JSON.parse(at); } catch (e) {}
   function selectedStops() {
@@ -990,7 +1061,18 @@
     });
     return stopOrder.filter(function (s) { return pressed[s] && s !== tourFrom.value && s !== tourTo.value; });
   }
-  function chainPlaces() { return [tourFrom.value].concat(selectedStops(), [tourTo.value]); }
+  function chainPlaces() {
+    var p = [];
+    if (tourFrom.value) p.push(tourFrom.value);
+    p = p.concat(selectedStops());
+    if (tourTo.value) p.push(tourTo.value);
+    return p;
+  }
+  function populateTourSelects() {
+    if (!tourFrom || !tourTo) return;
+    DISTRICTS.forEach(function (d) { ensureOption(tourFrom, d[0], d[0]); ensureOption(tourTo, d[0], d[0]); });
+    ["Mawa", "Bhanga", "Sajek"].forEach(function (p) { ensureOption(tourFrom, p, p); ensureOption(tourTo, p, p); });
+  }
   function ensureOption(sel, value, label) {
     for (var i = 0; i < sel.options.length; i++) if (sel.options[i].value === value) return;
     var o = document.createElement("option"); o.value = value; o.textContent = label;
@@ -1036,15 +1118,59 @@
       el.appendChild(d);
     });
   }
+  /* ---------- Live ride clock: real elapsed time while a tour is running ---------- */
+  var rideStartAt = null, rideTimerId = null;
+  function fmtElapsed(ms) {
+    var s = Math.floor(ms / 1000);
+    var m = Math.floor(s / 60), h = Math.floor(m / 60);
+    if (h > 0) return bnNum(h) + " ঘণ্টা " + bnNum(m % 60) + " মিনিট";
+    if (m > 0) return bnNum(m) + " মিনিট";
+    return bnNum(s) + " সেকেন্ড";
+  }
+  function updateRideClock() {
+    if (!rideStartAt) return;
+    var el = fmtElapsed(Date.now() - rideStartAt);
+    var tt = $("tourTime");
+    if (tt && tourFrom && tourTo && tourFrom.value && tourTo.value && tourFrom.value !== tourTo.value) tt.textContent = el + " · চলছে";
+    var rtl = $("rideTourLeft");
+    if (rtl && activeTourPlan) rtl.textContent = "মোট ট্যুর " + bnNum(activeTourPlan.distance_km) + " km · " + el;
+  }
+  function startRideClock(fromMs) {
+    rideStartAt = fromMs || Date.now();
+    if (rideTimerId) clearInterval(rideTimerId);
+    rideTimerId = setInterval(updateRideClock, 1000);
+    updateRideClock();
+  }
+  // Put a saved/active tour plan back into the Tour screen (selects, stops,
+  // and the ride clock when the ride already started).
+  function restoreTourPlan(plan) {
+    if (!plan || !tourFrom || !tourTo) return;
+    if (plan.from) { ensureOption(tourFrom, plan.from, placeLabel(plan.from)); tourFrom.value = plan.from; }
+    if (plan.to) { ensureOption(tourTo, plan.to, placeLabel(plan.to)); tourTo.value = plan.to; }
+    (plan.stops || []).forEach(function (s) {
+      ensureOption(tourFrom, s, placeLabel(s));
+      ensureOption(tourTo, s, placeLabel(s));
+      setStop(s, true);
+    });
+    renderTour();
+    if (plan.started_at) {
+      var st = Date.parse(plan.started_at);
+      if (st && Date.now() - st < 12 * 3600 * 1000) startRideClock(st);
+    }
+  }
   function renderTour() {
     if (!tourFrom || !tourTo) return;
     var from = tourFrom.value, to = tourTo.value;
     var stops = selectedStops(), places = chainPlaces();
-    var dist = routeDist(places);
-    var td = $("tourDist"); if (td) td.textContent = from === to ? "—" : bnNum(dist) + " km";
+    // Nothing picked yet means no demo numbers: distance/time stay blank
+    // and the stop count is the real number of stops picked (0 to start).
+    var hasRoute = !!(from && to && from !== to);
+    var dist = hasRoute ? routeDist(places) : 0;
+    var td = $("tourDist"); if (td) td.textContent = hasRoute ? bnNum(dist) + " km" : "—";
     var tt = $("tourTime");
     if (tt) {
-      if (from === to) tt.textContent = "—";
+      if (!hasRoute) tt.textContent = "—";
+      else if (rideStartAt) tt.textContent = fmtElapsed(Date.now() - rideStartAt) + " · চলছে";
       else { var hrs = dist / 55; tt.textContent = hrs < 1 ? "≈ " + bnNum(Math.round(dist / 55 * 60)) + " মিনিট" : "≈ " + bnNum(hrs.toFixed(1)) + " ঘণ্টা"; }
     }
     var tc = $("tourStopsCount"); if (tc) tc.textContent = bnNum(stops.length) + "টা";
@@ -1178,10 +1304,12 @@
       Object.keys(PLACE_LATLNG).forEach(function (p) {
         if (p === id) return;
         var ll = PLACE_LATLNG[p];
-        DIST[id + "|" + p] = Math.max(5, Math.round(haversineKm(latlng.lat, latlng.lng, ll[0], ll[1])));
+        DIST[id + "|" + p] = Math.max(5, Math.round(haversineKm(latlng.lat, latlng.lng, ll[0], ll[1]) * 1.2));
       });
       ensureOption(tourFrom, id, "ম্যাপ পিন");
       ensureOption(tourTo, id, "ম্যাপ পিন");
+      // Look up the area name for this pin so the route shows it, not "ম্যাপ পিন".
+      geocodePin(id, latlng.lat, latlng.lng);
     }
     if (applyPick(id)) toast($("rideToast"), "ম্যাপ পিন Tour-এ যোগ হলো");
     else toast($("rideToast"), "এই পয়েন্টটা যোগ হলো না — আরেকটু দূরে চাপ দাও");
@@ -1214,6 +1342,7 @@
   }
   async function applyTour(goRide) {
     var from = tourFrom.value, to = tourTo.value;
+    if (!from || !to) { toast($("tourToast"), "আগে শুরু আর গন্তব্য বাছো — তালিকা বা ম্যাপ থেকে"); return; }
     if (from === to) { toast($("tourToast"), "শুরু আর গন্তব্য একই জায়গা হতে পারে না — গন্তব্য বদলাও"); return; }
     var stops = selectedStops(), places = chainPlaces();
     var next = stops.length ? stops[0] : to;
@@ -1243,10 +1372,14 @@
       from: from, to: to, stops: stops, places: places,
       distance_km: dist, status: "active",
       created_by: currentSession.riderId || null,
+      started_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
     activeTourPlan = tourPlan;
     try { sessionStorage.setItem("cg_active_tour_plan", JSON.stringify(tourPlan)); } catch (e) {}
+    // The ride starts now: the Tour time box and the Riding screen switch
+    // from the estimate to the real ticking ride time.
+    startRideClock();
     ensureRidingMap();
     drawTourRouteOnRidingMap(tourPlan);
     if (realtimeChannel) {
@@ -1316,6 +1449,7 @@
       if (Array.isArray(plans) && plans[0]) {
         activeTourPlan = plans[0];
         try { sessionStorage.setItem("cg_active_tour_plan", JSON.stringify(plans[0])); } catch (e) {}
+        restoreTourPlan(plans[0]);
         drawTourRouteOnRidingMap(plans[0]);
       }
     } catch (e) {}
@@ -1324,8 +1458,12 @@
   /* ---------- init ---------- */
   function init() {
     tourFrom = $("tourFrom"); tourTo = $("tourTo");
+    populateTourSelects();
     document.querySelectorAll("#stopChips .stop-chip").forEach(bindStopChip);
     setPickMode("from");
+    // Area names looked up for map pins earlier in this session.
+    try { var pn = JSON.parse(sessionStorage.getItem("cg_pin_names") || "{}"); if (pn && typeof pn === "object") pinNames = pn; } catch (e) {}
+    if (activeTourPlan) restoreTourPlan(activeTourPlan);
     renderTour();
     var rc = $("roomCode");
     // No auto-filled code: the field stays empty until the user taps
