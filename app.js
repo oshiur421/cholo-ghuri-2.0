@@ -258,6 +258,10 @@
       riderLocation.heading = pos.coords.heading || 0;
       var sp = $("speedNum");
       if (sp) sp.textContent = String(Math.round(riderLocation.speed));
+      // Show the live coordinates at once, so the "তুমি এখন" card never
+      // stays blank while the place name is still being looked up.
+      var ws0 = $("whereSub");
+      if (ws0) ws0.textContent = riderLocation.lat.toFixed(4) + ", " + riderLocation.lng.toFixed(4);
       updateMyMarker();
       if (window.map && currentSession.riderId) {
         // keep the map loosely following the rider without yanking it every fix
@@ -298,19 +302,34 @@
     try {
       var res = await fetch("https://nominatim.openstreetmap.org/reverse?format=json&zoom=14&lat=" +
         riderLocation.lat + "&lon=" + riderLocation.lng, { headers: { "Accept": "application/json" } });
+      if (!res.ok) throw new Error("geocode " + res.status);
       var j = await res.json();
       var name = "";
       if (j && j.address) {
-        name = j.address.road || j.address.suburb || j.address.city_district || j.address.town || j.address.city || "";
+        var a = j.address;
+        // Wide fallback chain: highway/rural addresses often have no
+        // road/suburb/city, only a village, quarter or county — the old
+        // narrow chain returned "" there and the name never appeared.
+        name = a.road || a.neighbourhood || a.quarter || a.suburb || a.village ||
+          a.hamlet || a.city_district || a.town || a.city || a.county ||
+          a.state_district || a.state || "";
       }
+      if (!name && j && j.display_name) name = String(j.display_name).split(",")[0];
+      if (!name && j && j.name) name = j.name;
       if (name) {
         var w = $("whereNow"); if (w) w.textContent = name;
         var ws = $("whereSub");
         if (ws) ws.textContent = riderLocation.lat.toFixed(4) + ", " + riderLocation.lng.toFixed(4);
         var rl = $("reportLocText");
         if (rl) rl.textContent = name + " — এই জায়গাটাই গ্রুপ দেখবে";
+      } else {
+        // No name found — retry sooner instead of waiting out the 30s throttle.
+        lastGeocodeAt = now - 20000;
       }
-    } catch (e) {}
+    } catch (e) {
+      // Lookup failed — retry sooner instead of waiting out the 30s throttle.
+      lastGeocodeAt = Date.now() - 20000;
+    }
   }
   on("recenterBtn", "click", function () {
     ensureRidingMap();
