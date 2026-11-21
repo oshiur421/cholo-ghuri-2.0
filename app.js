@@ -1097,6 +1097,8 @@
   document.querySelectorAll(".pick-mode-btn").forEach(function (b) {
     b.addEventListener("click", function () { setPickMode(b.getAttribute("data-mode")); });
   });
+  // Returns true when the pick actually stuck, false when it was refused
+  // (same place as start/destination) — the caller shows that on screen.
   function applyPick(value) {
     if (pickMode === "from") {
       ensureOption(tourFrom, value, placeLabel(value));
@@ -1104,7 +1106,7 @@
       setPickMode("to");
       toast($("tourToast"), "শুরু বসেছে: " + placeLabel(value) + " — এখন ম্যাপে গন্তব্যে চাপ দাও");
     } else if (pickMode === "to") {
-      if (value === tourFrom.value) { toast($("tourToast"), "শুরু আর গন্তব্য একই জায়গা হতে পারে না"); return; }
+      if (value === tourFrom.value) { toast($("tourToast"), "শুরু আর গন্তব্য একই জায়গা হতে পারে না"); return false; }
       ensureOption(tourTo, value, placeLabel(value));
       tourTo.value = value;
       setPickMode("stop");
@@ -1112,12 +1114,13 @@
     } else {
       if (value === tourFrom.value || value === tourTo.value) {
         toast($("tourToast"), "এটা তোমার শুরু/গন্তব্য — থামা হিসেবে যোগ হবে না");
-        return;
+        return false;
       }
       var c = ensureStopChip(value);
       setStop(value, c.getAttribute("aria-pressed") !== "true");
     }
     renderTour();
+    return true;
   }
   function handleTourMapTap(x, y, latlng) {
     var nearest = null, nd = 1e9;
@@ -1146,9 +1149,14 @@
       var d = haversineKm(latlng.lat, latlng.lng, ll[0], ll[1]);
       if (d < nd) { nd = d; nearest = p; }
     });
-    if (nearest && nd <= 15) {
-      applyPick(nearest);
-      toast($("rideToast"), placeLabel(nearest) + " Tour-এ যোগ হলো");
+    // Don't snap onto the start/destination itself: tapping a different
+    // spot in the same city must still set a destination/stop, as its own
+    // pin — otherwise every tap near the start was silently refused.
+    var clashes = (pickMode === "to" && nearest === tourFrom.value) ||
+      (pickMode === "stop" && (nearest === tourFrom.value || nearest === tourTo.value));
+    if (nearest && nd <= 15 && !clashes) {
+      if (applyPick(nearest)) toast($("rideToast"), placeLabel(nearest) + " Tour-এ যোগ হলো");
+      else toast($("rideToast"), "এটা শুরুর জায়গাই — গন্তব্যের জন্য আরও দূরে চাপ দাও");
       return;
     }
     // No known place nearby — drop a map pin here and use it as the point.
@@ -1164,8 +1172,8 @@
       ensureOption(tourFrom, id, "ম্যাপ পিন");
       ensureOption(tourTo, id, "ম্যাপ পিন");
     }
-    applyPick(id);
-    toast($("rideToast"), "ম্যাপ পিন Tour-এ যোগ হলো");
+    if (applyPick(id)) toast($("rideToast"), "ম্যাপ পিন Tour-এ যোগ হলো");
+    else toast($("rideToast"), "এই পয়েন্টটা যোগ হলো না — আরেকটু দূরে চাপ দাও");
   }
   function openRideMapPick() {
     tourPickActive = true;
