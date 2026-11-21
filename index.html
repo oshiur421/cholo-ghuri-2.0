@@ -1,1409 +1,328 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="bn">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#1b1915">
-  <link rel="manifest" href="manifest.webmanifest">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="icon-192.png">
-  <meta name="description" content="Cholo Ghuri - Mobile-first biker group tour convoy and real-time highway police radar web application.">
-  <title>Cholo Ghuri — Biker convoy &amp; highway radar</title>
-
-  <!-- Tailwind CSS CDN -->
-  <!-- Tailwind Play CDN. NOTE: do NOT add crossorigin="anonymous" here:
-       cdn.tailwindcss.com sends no Access-Control-Allow-Origin header, so a
-       CORS fetch with SRI is refused by real browsers and ALL Tailwind
-       utilities silently die (giant logo, unpadded Join card, tiny START
-       button, lost fixed positioning). Plain classic-script load works. -->
-  <script src="https://cdn.tailwindcss.com/3.4.16" integrity="sha384-mS5Uq7sE90lgbBDN8xgf34ibEgbZo4gB3tfLY40ZRle+M188BQw8onzNHg6GUZaA"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            'cyber-dark': '#1b1915',
-            'cyber-card': '#fffdf7',
-            'neon-green': '#17684a',
-            'neon-orange': '#9a6206',
-            'police-blue': '#2f6fb2',
-            'police-red': '#b3372a'
-          },
-          fontFamily: {
-            hud: ['"IBM Plex Mono"', 'monospace'],
-            cyber: ['"Hind Siliguri"', 'sans-serif'],
-            sans: ['"Hind Siliguri"', 'sans-serif']
-          }
-        }
-      }
-    }
-  </script>
-
-  <!-- Hind Siliguri + IBM Plex Mono -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-
-  <!-- FontAwesome 6 CDN -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-
-  <!-- Custom CSS -->
-  <link rel="stylesheet" href="style.css">
-
-  <!-- Instant Modal & Drawer Trigger Script (Available immediately upon HTML parse) -->
-  <script>
-    window.openJoinModal = function() {
-      var modal = document.getElementById("onboardingModal");
-      if (modal) {
-        modal.classList.remove("hidden", "opacity-0", "pointer-events-none");
-        modal.style.removeProperty("display");
-        modal.style.removeProperty("opacity");
-        modal.style.removeProperty("pointer-events");
-        modal.style.display = "flex";
-        modal.style.zIndex = "99999";
-        modal.style.opacity = "1";
-        modal.style.pointerEvents = "auto";
-      }
-      var roomCodeInput = document.getElementById("roomCodeInput");
-      if (roomCodeInput && roomCodeInput.value && typeof window.checkRoomLeaderStatus === "function") {
-        window.checkRoomLeaderStatus(roomCodeInput.value);
-      }
-    };
-    window.closeJoinModal = function() {
-      var modal = document.getElementById("onboardingModal");
-      if (modal) {
-        modal.classList.add("hidden", "opacity-0", "pointer-events-none");
-        if (typeof modal.style.removeProperty === "function") {
-          modal.style.removeProperty("display");
-          modal.style.removeProperty("opacity");
-          modal.style.removeProperty("pointer-events");
-        }
-        modal.style.display = "none";
-        modal.style.opacity = "0";
-        modal.style.pointerEvents = "none";
-        modal.style.visibility = "hidden";
-        modal.setAttribute("aria-hidden", "true");
-      }
-    };
-    window.showGpsPermissionModal = function(show) {
-      var modal = document.getElementById("gpsPermissionModal");
-      if (!modal) return;
-      if (show !== false) {
-        modal.classList.remove("hidden", "opacity-0", "pointer-events-none");
-        modal.style.display = "flex";
-        modal.style.zIndex = "100010";
-        modal.style.opacity = "1";
-        modal.style.pointerEvents = "auto";
-      } else {
-        modal.classList.add("hidden", "opacity-0", "pointer-events-none");
-        modal.style.display = "none";
-        modal.style.opacity = "0";
-        modal.style.pointerEvents = "none";
-      }
-    };
-    window.closeGpsPermissionModal = function() {
-      window.showGpsPermissionModal(false);
-    };
-    window.submitOnboarding = function(event) {
-      if (event) {
-        if (typeof event.preventDefault === "function") event.preventDefault();
-        if (typeof event.stopPropagation === "function") event.stopPropagation();
-      }
-      var riderNameInput = document.getElementById("riderNameInput");
-      var roomCodeInput = document.getElementById("roomCodeInput");
-      var isLeaderCheckbox = document.getElementById("isLeaderCheckbox");
-
-      var name = riderNameInput ? riderNameInput.value.trim() : "";
-      if (!name) {
-        // Name is required — never auto-generate one (used to create Rider_123).
-        if (typeof window.showToast === "function") window.showToast("নাম দিন", "Ride শুরু করতে তোমার নাম লিখো।");
-        else if (typeof alert === "function") alert("Ride শুরু করতে তোমার নাম লিখো।");
-        if (riderNameInput) { riderNameInput.focus(); riderNameInput.style.borderColor = "#b3372a"; }
-        return;
-      }
-      if (riderNameInput) riderNameInput.style.borderColor = "";
-      var code = roomCodeInput ? roomCodeInput.value.trim().toUpperCase() : "";
-      if (!code || code === "----") {
-        code = (function () { var a = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"; var b = new Uint8Array(6); if (typeof crypto !== "undefined" && crypto.getRandomValues) { crypto.getRandomValues(b); } else { for (var i = 0; i < 6; i++) b[i] = Math.floor(Math.random() * 256); } var c = ""; for (var j = 0; j < 6; j++) c += a[b[j] % 36]; return c; })();
-        if (roomCodeInput) roomCodeInput.value = code;
-      }
-      var isLeader = isLeaderCheckbox ? Boolean(isLeaderCheckbox.checked) : false;
-
-      try {
-        var session = {
-          riderId: "rider_" + Date.now(),
-          riderName: name,
-          roomCode: code,
-          isLeader: isLeader
-        };
-        sessionStorage.setItem("cholo_ghuri_session", JSON.stringify(session));
-      } catch (e) {}
-
-      window.closeJoinModal();
-
-      var activeRoomCode = document.getElementById("activeRoomCode");
-      if (activeRoomCode) activeRoomCode.textContent = code;
-
-      if (typeof window.map !== "undefined" && window.map) {
-        window.map.invalidateSize();
-      }
-    };
-    window.closeSimDevPanel = function(e) {
-      if (e && e.stopPropagation) e.stopPropagation();
-    };
-
-    window.toggleSimDevPanel = function(e) {
-      if (e && e.stopPropagation) e.stopPropagation();
-    };
-
-    window.openGroupDrawer = function() {
-      try {
-        var drawer = document.getElementById("convoyDrawer") || 
-                     document.getElementById("groupDrawer") || 
-                     document.getElementById("ridersDrawer");
-        if (!drawer) return;
-        drawer.classList.remove("hidden", "-translate-x-full", "pointer-events-none");
-        drawer.classList.add("translate-x-0", "open");
-        drawer.style.display = "flex";
-        drawer.style.transform = "translateX(0%)";
-        drawer.style.zIndex = "99999";
-        drawer.style.opacity = "1";
-        drawer.style.pointerEvents = "auto";
-
-        var backdrop = document.getElementById("drawerBackdrop");
-        if (backdrop) {
-          backdrop.classList.remove("hidden", "pointer-events-none");
-          backdrop.classList.add("active", "open");
-          backdrop.style.setProperty("display", "block", "important");
-          backdrop.style.setProperty("opacity", "1", "important");
-          backdrop.style.setProperty("pointer-events", "auto", "important");
-        }
-        if (typeof evaluateConvoyDistances === "function") evaluateConvoyDistances();
-      } catch (e) {
-        console.warn("openGroupDrawer notice:", e);
-      }
-    };
-
-    window.closeGroupDrawer = function() {
-      try {
-        var drawer = document.getElementById("convoyDrawer") || 
-                     document.getElementById("groupDrawer") || 
-                     document.getElementById("ridersDrawer");
-        if (drawer) {
-          drawer.classList.remove("translate-x-0", "open");
-          drawer.classList.add("hidden", "-translate-x-full", "pointer-events-none");
-          drawer.style.display = "none";
-          drawer.style.transform = "translateX(-100%)";
-          drawer.style.pointerEvents = "none";
-        }
-        var backdrop = document.getElementById("drawerBackdrop");
-        if (backdrop) {
-          backdrop.classList.remove("active", "open");
-          backdrop.classList.add("hidden", "pointer-events-none");
-          backdrop.style.setProperty("display", "none", "important");
-          backdrop.style.setProperty("opacity", "0", "important");
-          backdrop.style.setProperty("pointer-events", "none", "important");
-        }
-      } catch (e) {
-        console.warn("closeGroupDrawer notice:", e);
-      }
-    };
-
-    window.toggleGroupDrawer = function(forceOpen) {
-      try {
-        var now = Date.now();
-        var lastToggle = window._lastGroupDrawerToggleMs || 0;
-        if (forceOpen === undefined && (now - lastToggle) < 250) {
-          return;
-        }
-        window._lastGroupDrawerToggleMs = now;
-
-        var drawer = document.getElementById("convoyDrawer") || 
-                     document.getElementById("groupDrawer") || 
-                     document.getElementById("ridersDrawer");
-        if (!drawer) return;
-
-        if (forceOpen === true) {
-          window.openGroupDrawer();
-          return;
-        }
-        if (forceOpen === false) {
-          window.closeGroupDrawer();
-          return;
-        }
-
-        // Drawer toggle logic conforming to exact requirements
-        drawer.classList.remove("hidden", "-translate-x-full", "pointer-events-none");
-        drawer.style.display = "flex";
-        drawer.style.transform = "translateX(0%)";
-        drawer.style.zIndex = "99999";
-        drawer.style.opacity = "1";
-        drawer.style.pointerEvents = "auto";
-        var isNowOpen = drawer.classList.toggle("translate-x-0");
-
-        if (isNowOpen) {
-          drawer.classList.add("open");
-          var backdrop = document.getElementById("drawerBackdrop");
-          if (backdrop) {
-            backdrop.classList.remove("hidden", "pointer-events-none");
-            backdrop.classList.add("active", "open");
-            backdrop.style.setProperty("display", "block", "important");
-            backdrop.style.setProperty("opacity", "1", "important");
-            backdrop.style.setProperty("pointer-events", "auto", "important");
-          }
-          if (typeof evaluateConvoyDistances === "function") evaluateConvoyDistances();
-        } else {
-          window.closeGroupDrawer();
-        }
-      } catch (e) {
-        console.warn("toggleGroupDrawer notice:", e);
-      }
-    };
-    window.toggleRidersDrawer = window.toggleGroupDrawer;
-
-    // Universal Touch & Click Event Binding for mobile phones and desktop
-    function setupGroupButtonTriggers() {
-      var groupBtns = document.querySelectorAll('#topRidersCountBtn, .group-trigger-btn');
-      groupBtns.forEach(function(btn) {
-        if (!btn) return;
-        btn.style.pointerEvents = 'auto';
-        btn.addEventListener('click', function(e) {
-          e.stopPropagation();
-          if (typeof window.toggleGroupDrawer === 'function') window.toggleGroupDrawer();
-        });
-        btn.addEventListener('touchend', function(e) {
-          e.stopPropagation();
-          e.preventDefault();
-          if (typeof window.toggleGroupDrawer === 'function') window.toggleGroupDrawer();
-        }, { passive: false });
-      });
-    }
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', setupGroupButtonTriggers);
-    } else {
-      setupGroupButtonTriggers();
-    }
-  </script>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>Cholo Ghuri — Biker Convoy &amp; Highway Radar</title>
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<link rel="stylesheet" href="style.css" />
 </head>
-<body class="bg-cyber-dark text-slate-100 flex flex-col h-screen w-screen overflow-hidden select-none">
-
-  <!-- ==================== IN-APP BROWSER (FACEBOOK/INSTAGRAM) WARNING BANNER ==================== -->
-  <div id="iabWarningBanner" class="hidden fixed top-0 left-0 right-0 z-[100020] bg-slate-950/95 border-b-2 border-amber-500 shadow-[0_4px_25px_rgba(245,158,11,0.5)] px-3 py-2.5 sm:px-4 sm:py-3 text-slate-100 flex flex-col sm:flex-row items-center justify-between gap-2.5 backdrop-blur-xl">
-    <div class="flex items-start sm:items-center gap-2.5 min-w-0 flex-1">
-      <div class="iab-icon-box w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/50 flex items-center justify-center text-amber-400 flex-shrink-0">
-        <i class="fa-solid fa-triangle-exclamation" style="color:#fbbf24"></i>
-      </div>
-      <div class="flex flex-col min-w-0 text-left">
-        <span class="font-cyber font-bold text-xs sm:text-sm text-amber-300 tracking-wider flex items-center gap-1.5">
-          In-app browser GPS restriction
-        </span>
-        <p id="iabWarningText" class="font-sans text-[11px] sm:text-xs text-slate-200 mt-0.5 leading-snug">
-          Facebook's in-app browser blocks GPS! To get your real location, tap the three dots on the top right and select <strong>'Open in system browser / Chrome'</strong>.
-        </p>
-      </div>
-    </div>
-    <div class="flex items-center gap-2 w-full sm:w-auto justify-end flex-shrink-0">
-      <button id="iabOpenChromeBtn" type="button" class="hidden px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-cyber font-bold text-xs shadow-[0_0_15px_rgba(0,255,135,0.4)] flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap active:scale-95">
-        <i class="fa-brands fa-chrome"></i>
-        <span>Open in Chrome</span>
-      </button>
-      <button id="dismissIabBannerBtn" type="button" class="p-1.5 px-2.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors cursor-pointer text-xs" title="Dismiss notice">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-    </div>
-  </div>
-
-  <!-- ==================== LEAFLET MAP CONTAINER ==================== -->
-  <div id="map" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1;" class="fixed inset-0 z-[1] w-screen h-screen"></div>
-
-  <!-- ==================== FLOATING MINIMIZED ALERT DOCK ==================== -->
-  <div id="miniAlertDock" class="mini-alert-dock" aria-label="Active floating alerts"></div>
-
-  <!-- ==================== TOP FLOATING HUD BAR ==================== -->
-  <header class="hud-top-bar fixed top-0 left-0 right-0 z-[10000] p-1.5 sm:p-3 pointer-events-none w-full max-w-full overflow-x-hidden" style="pointer-events: none !important; z-index: 10000 !important;">
-    <div class="hud-top-container max-w-7xl mx-auto flex flex-col gap-1.5 sm:gap-2.5 w-full pointer-events-none" style="pointer-events: none !important;">
-
-      <!-- Row 1: Brand chip (left) + exact location card (right) -->
-      <div class="hud-row-1 flex items-start justify-between gap-1.5 sm:gap-3 w-full pointer-events-auto" style="pointer-events: auto !important; position: relative; z-index: 10005;">
-
-        <!-- Brand chip -->
-        <div class="brand-panel glass-panel-neon rounded-xl sm:rounded-2xl p-1.5 sm:px-3 sm:py-2 flex items-center gap-1.5 sm:gap-2.5 pointer-events-auto shadow-2xl flex-shrink min-w-0">
-          <div class="brand-logo w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden p-0.5" title="Cholo Ghuri">
-            <img src="logo.png" alt="Cholo Ghuri" class="w-full h-full object-contain block" />
-          </div>
-          <div class="flex flex-col min-w-0">
-            <div class="flex items-center gap-1">
-              <span class="brand-name font-cyber font-bold tracking-wider text-[11px] sm:text-sm text-slate-100 truncate">Cholo Ghuri</span>
-              <span id="captainBadge" class="hidden px-1 py-0.2 text-[8px] sm:text-[9px] font-bold rounded whitespace-nowrap">
-                <i class="fa-solid fa-crown text-[7px] mr-0.5"></i>Captain
-              </span>
-            </div>
-            <div class="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs">
-              <button id="roomCodeBadgeBtn" title="Click to copy tour room code" class="room-code-btn font-hud font-bold tracking-wider hover:underline flex items-center gap-0.5 cursor-pointer">
-                <span id="activeRoomCode">----</span>
-                <i class="fa-regular fa-copy text-[8px] sm:text-[9px] text-slate-400"></i>
-              </button>
-              <button id="topJoinRoomBtn" onclick="window.openJoinModal()" title="Join convoy or change room" class="join-btn px-1.5 sm:px-2 py-0.5 rounded text-[9px] sm:text-[11px] font-cyber font-bold tracking-wider transition-all flex items-center gap-0.5 cursor-pointer pointer-events-auto whitespace-nowrap">
-                <i class="fa-solid fa-plus text-[8px]"></i>
-                <span>Join</span>
-              </button>
-              <button id="topShareRoomBtn" onclick="window.copyInviteLink && window.copyInviteLink()" title="Copy tour invite link" class="invite-btn px-1.5 py-0.5 rounded text-[9px] sm:text-[10px] font-cyber font-bold flex items-center gap-1 cursor-pointer pointer-events-auto transition-colors whitespace-nowrap">
-                <i class="fa-solid fa-share-nodes text-[8px]"></i>
-                <span class="hidden sm:inline">Invite</span>
-              </button>
-              <!-- DB Sync Status Dot -->
-              <span id="dbSyncStatusWrapper" class="flex items-center gap-1 pl-0.5" title="DB sync: connected">
-                <span id="dbSyncDot" class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(0,255,136,0.85)] transition-all duration-300"></span>
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Exact location card (was: current road banner) -->
-        <div id="currentRoadBanner" class="loc-top glass-panel rounded-xl sm:rounded-2xl px-2.5 py-1.5 sm:px-3 sm:py-2 flex items-start gap-2 shadow-2xl flex-shrink-0">
-          <div class="loc-pin w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center flex-shrink-0">
-            <i id="compassIcon" class="fa-solid fa-location-dot text-[11px] sm:text-xs transition-transform duration-300"></i>
-          </div>
-          <div class="flex flex-col min-w-0 text-left flex-1 overflow-hidden">
-            <span class="loc-label text-[10px] sm:text-[11px] font-bold leading-tight whitespace-nowrap">তুমি এখন</span>
-            <div id="currentRoadName" class="loc-name font-cyber font-bold text-xs sm:text-sm truncate" title="Dhaka - Mawa Expressway (N8)">
-              Dhaka - Mawa Expressway (N8)
-            </div>
-            <span id="locSub" class="loc-sub text-[10px] sm:text-[11px] truncate">ট্যুর সেট করলে পরের থামা এখানে দেখাবে</span>
-          </div>
-        </div>
-
-        <!-- Hidden duplicate group button (kept for JS compat) -->
-        <button id="topRightGroupBtn" class="hidden" style="display: none !important; pointer-events: none !important;" aria-hidden="true" tabindex="-1">
-          <span id="topRightRidersCount">1</span>
-        </button>
-      </div>
-
-      <!-- Hidden header buttons — replaced by the bottom tabs, kept in DOM for JS bindings -->
-      <button id="openTourPlannerBtn" class="hidden" style="display: none !important; pointer-events: none !important;" aria-hidden="true" tabindex="-1">Tour</button>
-      <button id="topRidersCountBtn" class="hidden group-trigger-btn" style="display: none !important; pointer-events: none !important;" aria-hidden="true" tabindex="-1">Group</button>
-
-      <!-- Ride sheet: tour progress + alert cards (shown at the bottom of the map) -->
-      <div id="subRoadAlertSection" class="sub-road-alert-section pointer-events-auto">
-        <!-- 0. Live Tour Route Progress Strip -->
-        <div id="tourProgressStrip" class="sub-road-alert-card tour-progress-card hidden">
-          <div class="alert-card-left flex items-center gap-2.5 min-w-0 flex-1">
-            <div class="alert-card-icon alert-card-icon-cyan tour-pulsing-icon">
-              <i class="fa-solid fa-route text-cyan-400"></i>
-            </div>
-            <div class="alert-card-text flex flex-col min-w-0 flex-1">
-              <div class="flex items-center justify-between gap-2">
-                <span id="tourProgressLabel" class="alert-card-label text-cyan-400 font-bold tracking-wider text-[10px] sm:text-xs truncate">
-                  Tour: Dhaka → Bandarban
-                </span>
-                <span id="tourSubgroupTag" class="text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-hud">
-                  All riders
-                </span>
-              </div>
-              <!-- Chain breadcrumb -->
-              <div id="tourChainBreadcrumb" class="font-cyber font-semibold text-[10.5px] sm:text-xs text-slate-200 truncate mt-0.5">
-                Dhaka → Cumilla → Chattogram → Bandarban
-              </div>
-              <!-- Next stoppage highlight with live distance -->
-              <div id="tourNextStopHighlight" class="text-[10px] sm:text-[11px] font-cyber text-emerald-300 font-bold flex items-center gap-1.5 mt-0.5">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-                <span id="tourNextStopText">Next: Cumilla (Regroup) • 18.4 km</span>
+<body>
+<div id="app">
+  <main id="screens">
+<!-- ===== Screen 1 : Join ===== -->
+          <div class="screen active" id="screen-join" role="tabpanel" aria-label="Join screen">
+            <div class="join-hero">
+              <div class="join-hero-art" aria-hidden="true"></div>
+              <div class="scrim">
+                <div class="wordmark">Cholo Ghuri<small>একসঙ্গে রাইড করি, সুন্দর একটা বাংলাদেশ গড়ি</small></div>
               </div>
             </div>
-          </div>
-          <div class="alert-card-actions flex items-center gap-1.5 flex-shrink-0">
-            <button id="viewTourNextStopBtn" type="button" class="sub-alert-btn sub-alert-btn-action sub-alert-btn-cyan" title="Pan to next tour stop">
-              <i class="fa-solid fa-location-crosshairs text-[10px]"></i>
-              <span>View</span>
-            </button>
-            <button id="openTourPlannerFromStripBtn" type="button" class="sub-alert-btn sub-alert-btn-min" title="Edit tour plan">
-              <i class="fa-solid fa-map text-[10px]"></i>
-            </button>
-            <button id="endTourFromStripBtn" type="button" class="sub-alert-btn sub-alert-btn-action sub-alert-btn-rose" title="End &amp; clear active tour">
-              <i class="fa-solid fa-trash-can text-[10px]"></i>
-              <span>End tour</span>
-            </button>
-            <button id="minimizeTourProgressBtn" type="button" class="sub-alert-btn sub-alert-btn-min" title="Minimize tour progress">
-              <i class="fa-solid fa-minus text-[10px]"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- 0.1 Tour Arrival & Proximity Alert Card (Within 1.0 km of Regroup / Refuel) -->
-        <div id="tourProximityAlertCard" class="sub-road-alert-card tour-proximity-alert-card hidden">
-          <div class="alert-card-left flex items-center gap-2.5 min-w-0 flex-1">
-            <div id="tourProximityIconBox" class="alert-card-icon alert-card-icon-amber">
-              <span id="tourProximityIcon" class="text-base">🤝</span>
-            </div>
-            <div class="alert-card-text flex flex-col min-w-0 flex-1">
-              <div class="flex items-center gap-2">
-                <span id="tourProximityBadge" class="alert-card-label text-amber-400 font-bold tracking-wider text-[10px] sm:text-xs">
-                  Regroup point ahead
-                </span>
-                <span id="tourProximityDistanceBadge" class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 font-hud">
-                  450m
-                </span>
+            <div class="join-body">
+              <div class="field">
+                <label for="riderName">তোমার নাম</label>
+                <input id="riderName" type="text" placeholder="যেমন: Shawon" autocomplete="off" />
+                <p class="field-error" id="joinError" role="alert" hidden>তোমার নাম লিখো — নাম ছাড়া Ride শুরু হবে না।</p>
               </div>
-              <span id="tourProximityText" class="alert-card-desc font-cyber font-bold text-xs sm:text-sm text-slate-100 truncate">
-                Regroup point: Cumilla (2/3 riders arrived)
-              </span>
-            </div>
-          </div>
-          <div class="alert-card-actions flex items-center gap-1.5 flex-shrink-0">
-            <button id="locateTourStopBtn" type="button" class="sub-alert-btn sub-alert-btn-action sub-alert-btn-amber" title="Locate waypoint">
-              <i class="fa-solid fa-location-crosshairs text-[10px]"></i>
-              <span>Locate</span>
-            </button>
-            <button id="markTourStopDoneBtn" type="button" class="sub-alert-btn sub-alert-btn-action sub-alert-btn-emerald" title="Mark stoppage reached &amp; proceed">
-              <i class="fa-solid fa-check text-[10px]"></i>
-              <span>Mark done</span>
-            </button>
-            <button id="minimizeTourAlertBtn" type="button" class="sub-alert-btn sub-alert-btn-min" title="Minimize alert to dock">
-              <i class="fa-solid fa-minus text-[10px]"></i>
-            </button>
-            <button id="dismissTourAlertBtn" type="button" class="sub-alert-btn sub-alert-btn-close" title="Dismiss proximity alert">
-              <i class="fa-solid fa-xmark text-xs"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- 1. Convoy Distance Gap Alert Card -->
-        <div id="distanceAlertBanner" data-alias="convoyAlertBanner stragglerAlertBanner" class="sub-road-alert-card convoy-alert-card hidden">
-          <div class="alert-card-left flex items-center gap-2.5 min-w-0">
-            <div class="alert-card-icon alert-card-icon-amber">
-              <i class="fa-solid fa-triangle-exclamation"></i>
-            </div>
-            <div class="alert-card-text flex flex-col min-w-0">
-              <span class="alert-card-label text-amber-400 font-bold tracking-wider">Convoy gap alert</span>
-              <span id="convoyAlertText" class="alert-card-desc font-cyber font-bold text-xs sm:text-sm text-slate-100 truncate">
-                Rider 1.5 km দূরে আছে!
-              </span>
-            </div>
-          </div>
-          <div class="alert-card-actions flex items-center gap-1.5 flex-shrink-0">
-            <button id="viewStragglerBtn" type="button" class="sub-alert-btn sub-alert-btn-action sub-alert-btn-amber" title="Locate straggler rider">
-              <i class="fa-solid fa-location-crosshairs text-[10px]"></i>
-              <span>Locate</span>
-            </button>
-            <button id="minimizeConvoyAlertBtn" type="button" class="sub-alert-btn sub-alert-btn-min" title="Minimize alert to dock">
-              <i class="fa-solid fa-minus text-[10px]"></i>
-            </button>
-            <button id="dismissConvoyAlertBtn" type="button" class="sub-alert-btn sub-alert-btn-close" title="Permanently dismiss alert">
-              <i class="fa-solid fa-xmark text-xs"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- 2. Police Checkpost Alert Card -->
-        <div id="radarAlertBanner" data-alias="approachingPoliceBanner policeAlertBanner" class="sub-road-alert-card police-alert-card hidden">
-          <div class="alert-card-left flex items-center gap-2.5 min-w-0">
-            <div class="alert-card-icon alert-card-icon-rose">
-              <i class="fa-solid fa-shield-halved"></i>
-            </div>
-            <div class="alert-card-text flex flex-col min-w-0">
-              <span class="alert-card-label text-rose-400 font-bold tracking-wider">Police radar alert</span>
-              <span id="approachingPoliceText" class="alert-card-desc font-cyber font-bold text-xs sm:text-sm text-slate-100 truncate">
-                Police checkpost • 850m সামনে (by Sakib)
-              </span>
-            </div>
-          </div>
-          <div class="alert-card-actions flex items-center gap-1.5 flex-shrink-0">
-            <button id="verifyApproachingBtn" type="button" class="sub-alert-btn sub-alert-btn-action sub-alert-btn-rose" title="Verify police checkpost">
-              <i class="fa-solid fa-circle-check text-[10px]"></i>
-              <span>Verify</span>
-            </button>
-            <button id="minimizeApproachingBtn" type="button" class="sub-alert-btn sub-alert-btn-min" title="Minimize alert to dock">
-              <i class="fa-solid fa-minus text-[10px]"></i>
-            </button>
-            <button id="dismissApproachingBtn" type="button" class="sub-alert-btn sub-alert-btn-close" title="Permanently dismiss alert">
-              <i class="fa-solid fa-xmark text-xs"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- 3. Speed Limit / Road Alert Card -->
-        <div id="roadTransitionPopup" class="sub-road-alert-card road-alert-card hidden">
-          <div class="alert-card-left flex items-center gap-2.5 min-w-0">
-            <div class="alert-card-icon alert-card-icon-cyan">
-              <i class="fa-solid fa-road"></i>
-            </div>
-            <div class="alert-card-text flex flex-col min-w-0">
-              <span class="alert-card-label text-cyan-400 font-bold tracking-wider">Speed / road alert</span>
-              <span id="roadTransitionAlertText" class="alert-card-desc font-cyber font-bold text-xs sm:text-sm text-slate-100 truncate">
-                Dhaka - Mawa Expressway (N8) • Speed limit 80 km/h
-              </span>
-            </div>
-          </div>
-          <div class="alert-card-actions flex items-center gap-1.5 flex-shrink-0">
-            <button id="viewRoadDetailsBtn" type="button" class="sub-alert-btn sub-alert-btn-action sub-alert-btn-cyan" title="View road details modal">
-              <i class="fa-solid fa-circle-info text-[10px]"></i>
-              <span>Details</span>
-            </button>
-            <button id="minimizeRoadAlertBtn" type="button" class="sub-alert-btn sub-alert-btn-min" title="Minimize alert to dock">
-              <i class="fa-solid fa-minus text-[10px]"></i>
-            </button>
-            <button id="dismissRoadAlertBtn" type="button" class="sub-alert-btn sub-alert-btn-close" title="Permanently dismiss alert">
-              <i class="fa-solid fa-xmark text-xs"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- 4. PTT Active Radio / Walkie-Talkie Status Card -->
-        <div id="pttRadioBanner" class="sub-road-alert-card ptt-alert-card hidden">
-          <div class="alert-card-left flex items-center gap-2.5 min-w-0">
-            <div id="pttAlertCardIcon" class="alert-card-icon alert-card-icon-emerald">
-              <i class="fa-solid fa-walkie-talkie"></i>
-            </div>
-            <div class="alert-card-text flex flex-col min-w-0">
-              <span class="alert-card-label text-emerald-400 font-bold tracking-wider">Walkie-talkie radio</span>
-              <div class="flex items-center gap-2 min-w-0">
-                <div class="ptt-audio-wave inline-flex flex-shrink-0" aria-hidden="true">
-                  <span class="wave-bar"></span>
-                  <span class="wave-bar"></span>
-                  <span class="wave-bar"></span>
-                  <span class="wave-bar"></span>
+              <div class="field">
+                <label for="roomCode">রুম কোড</label>
+                <div class="code-row">
+                  <input id="roomCode" class="mono" type="text" value="" placeholder="যেমন: X7K2P9" aria-label="রুম কোড" />
+                  <button type="button" id="genCodeBtn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="m15 15 6 6"/><path d="M4 4l5 5"/></svg>
+                    নতুন কোড
+                  </button>
                 </div>
-                <span id="pttRadioBannerText" class="alert-card-desc font-cyber font-bold text-xs sm:text-sm text-slate-100 truncate">
-                  Rider transmitting...
-                </span>
+                <p class="hint">বন্ধুরা এই কোড দিয়েই তোমার গ্রুপে ঢুকবে</p>
+              </div>
+              <div class="captain-row">
+                <div class="txt">
+                  <b>আমি আজকের Captain</b>
+                  <span>Captain-এর পিন ম্যাপে আলাদা দেখাবে, বাকিরা তাকে ফলো করবে</span>
+                </div>
+                <button type="button" class="switch" id="captainToggle" aria-pressed="false" aria-label="Captain হিসেবে যোগ দাও"></button>
+              </div>
+              <button type="button" class="btn btn-primary" id="startRideBtn">
+                Ride শুরু করো
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+              </button>
+              <a class="btn btn-quiet" href="cholo-ghuri.apk" download="cholo-ghuri.apk" id="apkDownloadBtn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
+                Android app ডাউনলোড
+              </a>
+              <p class="join-foot">Ride শুরু করলেই লোকেশন শুধু তোমার গ্রুপের কাছেই যাবে</p>
+            </div>
+          </div>
+
+          <!-- ===== Screen 2 : Riding — full-screen map ===== -->
+          <div class="screen screen-riding" id="screen-riding" role="tabpanel" aria-label="Riding screen">
+            <div class="map-zone"><div id="map"></div><div class="map-fade"></div><div class="stop-badge" style="left:12px; top:118px"><i>১</i><span id="mapNextBadge">Cumilla</span></div></div>
+            <div class="riding-ui">
+              <div class="map-topbar">
+                <div class="map-chip">
+                  <div class="wm">Cholo Ghuri</div>
+                  <div class="sub"><span class="live-dot"></span> <span id="roomChip">DHK-248 · সংযুক্ত</span></div>
+                </div>
+                <div class="loc-top" role="status" aria-label="তুমি এখন Dhaka–Mawa Expressway-তে আছো">
+                  <span class="pin"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 22s7-6.1 7-12a7 7 0 1 0-14 0c0 5.9 7 12 7 12Z"/><circle cx="12" cy="10" r="2.6" fill="#fffdf7"/></svg></span>
+                  <span><span class="loc-label">তুমি এখন</span><span class="loc-name" id="whereNow">Dhaka–Mawa Expressway</span><span class="loc-sub" id="whereSub">Mawa-র কাছে · সামনে ১৪ km সোজা</span></span>
+                </div>
+              </div>
+              <div class="map-tools">
+                <div class="speed-dial" aria-label="গতি ৬২ কিলোমিটার প্রতি ঘণ্টা, সীমা ৮০">
+                  <div class="num" id="speedNum">0</div>
+                  <div class="unit">km/h</div>
+                  <div class="lim" id="speedLim">সীমা 80</div>
+                </div>
+                <button type="button" class="tool-btn" id="compassBtn" aria-label="উত্তর দিকে ঘোরাও">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5 5-2Z"/></svg>
+                </button>
+                <button type="button" class="tool-btn" id="recenterBtn" aria-label="ম্যাপ আমার কাছে আনো">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+                </button>
+              </div>
+              <div class="ride-sheet">
+                <div class="sheet-grab" aria-hidden="true"></div>
+                <div class="tour-progress">
+                  <div class="tp-top"><b>পরের থামা: <span id="rideNextStop">Cumilla · ১৮.৪ km</span></b><span id="rideTourLeft">মোট বাকি ১৯২ km</span></div>
+                  <div class="tp-bar" aria-hidden="true"><i id="rideTpBar"></i></div>
+                  <div class="tp-stops" id="rideTpStops"><span>Dhaka ✓</span><span class="on">Mawa · এখন</span><span>Cumilla</span><span>Chattogram</span></div>
+                </div>
+                <div class="alert-card" id="policeCard">
+                  <div class="row">
+                    <div class="ic">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.7 9a.6.6 0 0 1-.6 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 .7-1c2.4-.6 4.6-1.5 6.6-2.7a1 1 0 0 1 1 0c2 1.2 4.2 2.1 6.6 2.7a1 1 0 0 1 .7 1Z"/><path d="m9 12 2 2 4-4"/></svg>
+                    </div>
+                    <div>
+                      <b>সামনে পুলিশ চেকপোস্ট · ১.২ km</b>
+                      <p>Rifat ৪ মিনিট আগে জানিয়েছে — গতি সীমার মধ্যে থাকো।</p>
+                    </div>
+                  </div>
+                  <div class="alert-actions">
+                    <button type="button" class="solid" id="seenBtn">দেখেছি, ঠিক আছে</button>
+                    <button type="button" id="goneBtn">এখন আর নেই</button>
+                  </div>
+                </div>
+                <div class="toast" id="rideToast" role="status"></div>
+                <div class="ride-actions">
+                  <button type="button" id="photoReportBtn" aria-label="ক্যামেরা খুলে ছবি তুলে চেকপোস্ট রিপোর্ট করো">
+                    <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3Z"/><circle cx="12" cy="13" r="3.5"/></svg>
+                  </button>
+                  <button type="button" class="report" id="reportBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.7 9a.6.6 0 0 1-.6 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 .7-1c2.4-.6 4.6-1.5 6.6-2.7a1 1 0 0 1 1 0c2 1.2 4.2 2.1 6.6 2.7a1 1 0 0 1 .7 1Z"/></svg>
+                    চেকপোস্ট জানাও
+                  </button>
+                  <button type="button" id="pttBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><path d="M12 18v4"/></svg>
+                    চেপে কথা বলো
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-          <div class="alert-card-actions flex items-center gap-1.5 flex-shrink-0">
-            <button id="dismissPttRadioBtn" type="button" class="sub-alert-btn sub-alert-btn-close" title="Dismiss radio status">
-              <i class="fa-solid fa-xmark text-xs"></i>
-            </button>
-          </div>
-        </div>
 
-        <!-- 5. Universal Toast / Notification Card (LOCATING RIDER, System Toast, etc.) -->
-        <div id="radarToast" data-alias="systemToastAlert locatingRiderPopup" class="sub-road-alert-card toast-alert-card hidden">
-          <div class="alert-card-left flex items-center gap-2.5 min-w-0">
-            <div id="toastIconBox" class="alert-card-icon alert-card-icon-sky">
-              <i id="toastIcon" class="fa-solid fa-crosshairs text-sky-400"></i>
+          <!-- ===== Screen 3 : Group ===== -->
+          <div class="screen" id="screen-group" role="tabpanel" aria-label="Group screen">
+            <div class="group-head">
+              <h3 id="groupTitle">তোমার গ্রুপ</h3>
+              <p id="groupSub">এখনো রুমে যোগ দাওনি</p>
             </div>
-            <div class="alert-card-text flex flex-col min-w-0">
-              <span id="toastTitle" class="alert-card-label text-sky-400 font-bold tracking-wider truncate">Locating rider</span>
-              <span id="toastBody" class="alert-card-desc font-cyber font-bold text-xs sm:text-sm text-slate-100 truncate">
-                Focused on Rider_471
-              </span>
+            <div class="next-stop">
+              <div class="lab">পরের থামা · Tour থেকে সেট করা</div>
+              <div class="place" id="groupNextPlace">Cumilla — সবাই মিলব এখানে · ১৮.৪ km</div>
+              <div class="route-chain" id="groupRouteChain" aria-label="ট্যুরের থামাগুলো">
+                <div class="stop done">Dhaka<br />ছেড়েছ</div>
+                <div class="stop now">Mawa<br />এখন এখানে</div>
+                <div class="stop">Cumilla<br />১৮.৪ km</div>
+                <div class="stop">Chattogram<br />১৯২ km</div>
+              </div>
             </div>
+            <ul class="rider-list" id="riderList"></ul>
           </div>
-          <div class="alert-card-actions flex items-center gap-1.5 flex-shrink-0">
-            <button id="dismissToastBtn" type="button" class="sub-alert-btn sub-alert-btn-close" title="Close notification">
-              <i class="fa-solid fa-xmark text-xs"></i>
-            </button>
-          </div>
-        </div>
-      </div>
 
-    </div>
-  </header>
-
-  <!-- ==================== SPEED DIAL (on the map, right edge) ==================== -->
-  <div class="speed-dial-wrap" aria-label="Speedometer">
-    <div class="speed-dial">
-      <span id="liveSpeedDisplay" class="font-hud font-black text-xl sm:text-3xl leading-none">00</span>
-      <span class="speed-unit">km/h</span>
-      <span class="speed-lim"><span id="speedLimitSign" class="speed-limit-sign" title="Highway speed limit"><span id="speedLimitVal" class="speed-limit-number">80</span></span> সীমা</span>
-    </div>
-    <span id="speedStatusLabel" class="speed-status">Cruising</span>
-  </div>
-
-  <!-- ==================== MAP TOOLS (right edge) ==================== -->
-  <div id="mapTools" class="map-tools">
-    <button id="recenterBtn" onclick="window.recenterCamera && window.recenterCamera()" title="Recenter camera on rider" class="tool-btn" type="button" aria-label="Recenter map on me">
-      <i id="lockTargetIcon" class="fa-solid fa-crosshairs"></i>
-    </button>
-    <button id="mapThemeToggleBtn" class="tool-btn theme-toggle-btn" title="Switch day/night map" type="button" aria-label="Switch day or night map">
-      <span class="theme-opt night-opt active"><i class="fa-solid fa-moon"></i></span>
-      <span class="theme-opt day-opt"><i class="fa-solid fa-sun"></i></span>
-    </button>
-  </div>
-
-  <!-- ==================== SCREEN BORDER OVERSPEED FLASH ==================== -->
-  <div id="overspeedBorderAlert" class="opacity-0"></div>
-
-  <!-- ==================== LEFT FLOATING RIDERS BUTTON (Removed to avoid duplicate) ==================== -->
-  <button id="openRidersDrawerBtn" class="hidden" style="display: none !important; pointer-events: none !important;" aria-hidden="true" tabindex="-1">
-    <span id="drawerRidersCountBadge">1</span>
-  </button>
-
-  <!-- ==================== MOBILE DRAWER BACKDROP OVERLAY ==================== -->
-  <div id="drawerBackdrop" class="hidden fixed inset-0 z-[99990] bg-black/65 backdrop-blur-sm transition-opacity duration-300" onclick="window.closeGroupDrawer ? window.closeGroupDrawer() : (window.toggleGroupDrawer && window.toggleGroupDrawer(false))" style="display: none !important; opacity: 0; pointer-events: none;"></div>
-
-  <!-- ==================== LEFT COLLAPSIBLE GROUP RIDERS DRAWER ==================== -->
-  <aside id="convoyDrawer" data-group-drawer="true" data-alias="ridersDrawer groupDrawer" class="hidden -translate-x-full glass-panel-neon flex flex-col border-r shadow-[0_0_50px_rgba(0,0,0,0.95)]" style="display: none; transform: translateX(-100%); pointer-events: none;">
-    <!-- Drawer Header -->
-    <div class="drawer-head p-3.5 sm:p-4 border-b flex flex-col gap-2.5">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2.5">
-          <div class="drawer-head-icon w-8 h-8 rounded-lg flex items-center justify-center">
-            <i class="fa-solid fa-users-viewfinder text-sm"></i>
-          </div>
-          <div>
-            <h3 class="font-cyber font-black text-sm tracking-wider">তোমার গ্রুপ</h3>
-            <span class="text-[10px] font-hud font-bold tracking-widest" id="drawerRoomCode">Room: ----</span>
-          </div>
-        </div>
-        <button id="closeRidersDrawerBtn" onclick="window.closeGroupDrawer ? window.closeGroupDrawer() : (window.toggleGroupDrawer && window.toggleGroupDrawer(false))" title="Close riders drawer" class="drawer-close w-8 h-8 rounded-lg flex items-center justify-center text-xs cursor-pointer transition-all">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-
-      <!-- Quick + Invite Friend Button -->
-      <button onclick="window.copyInviteLink && window.copyInviteLink()" title="Copy tour invite link to share" class="invite-friend-btn w-full py-2 px-3 rounded-xl font-cyber font-bold text-xs tracking-wider flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer">
-        <i class="fa-solid fa-user-plus text-xs"></i>
-        <span>+ বন্ধুকে ইনভাইট করো</span>
-      </button>
-    </div>
-
-    <!-- Next stop (mirrors the live tour) -->
-    <div class="drawer-next-stop px-4 pt-3">
-      <div class="next-stop-card">
-        <span class="lab">পরের থামা</span>
-        <div class="place" id="drawerNextStop">ট্যুর সেট করলে এখানে দেখাবে</div>
-        <div class="chain" id="drawerChain"></div>
-      </div>
-    </div>
-
-    <!-- Convoy Leader Status Banner -->
-    <div class="drawer-leader px-4 py-2 border-b flex items-center justify-between text-xs">
-      <div class="flex items-center gap-1.5 font-cyber font-bold">
-        <i class="fa-solid fa-crown text-xs"></i>
-        <span id="drawerLeaderName">Leader: খুঁজছি...</span>
-      </div>
-      <span class="text-[10px]">সর্বোচ্চ গ্যাপ: <strong>1.5 km</strong></span>
-    </div>
-
-    <!-- Connected Riders Subheader -->
-    <div class="px-4 pt-2.5 pb-1 flex items-center justify-between text-[10px] font-cyber font-bold tracking-wider uppercase">
-      <span>কানেক্টেড রাইডার</span>
-      <span class="flex items-center gap-1 text-[9px] font-medium lowercase">
-        <i class="fa-solid fa-location-crosshairs text-[9px]"></i> চাপ দিলে লোকেট হবে
-      </span>
-    </div>
-
-    <!-- Scrollable Riders List -->
-    <div id="ridersListContainer" class="flex-1 overflow-y-auto p-3 space-y-2.5">
-      <!-- Dynamic Rider Cards inserted via JS -->
-      <div class="text-center text-xs py-6">কনভয় টেলিমেট্রি লোড হচ্ছে...</div>
-    </div>
-
-    <!-- Drawer Footer -->
-    <div class="drawer-foot p-3 border-t flex items-center justify-between text-[11px]">
-      <span>Supabase দিয়ে অটো-সিঙ্ক</span>
-      <span class="flex items-center gap-1">
-        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Live
-      </span>
-    </div>
-  </aside>
-
-  <!-- ==================== ROAD TRANSITION POPUP MODAL ==================== -->
-  <div id="roadTransitionModal" class="road-change-modal hidden opacity-0 pointer-events-none">
-    <div class="road-change-card">
-      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-cyber font-bold mb-2 road-change-pill">
-        <i class="fa-solid fa-road"></i> নতুন রাস্তায় ঢুকেছ
-      </div>
-      <h2 id="popupRoadName" class="font-cyber font-black text-2xl sm:text-3xl my-2 tracking-wide leading-tight">
-        Dhaka - Mawa Expressway (N8)
-      </h2>
-      <div id="popupRoadType" class="text-xs font-semibold tracking-wider mb-2">
-        Expressway / Trunk Highway
-      </div>
-
-      <!-- Giant Circular Speed Limit Sign -->
-      <div class="giant-speed-sign">
-        <span id="popupSpeedLimit" class="giant-speed-num">80</span>
-        <span class="giant-speed-unit">সীমা km/h</span>
-      </div>
-
-      <p id="popupVoiceSubtext" class="text-xs font-bold mt-2 flex items-center justify-center gap-1.5">
-        <i class="fa-solid fa-volume-high"></i>
-        <span id="popupVoiceMsg">ঘোষণা: স্পিড লিমিট বদলেছে!</span>
-      </p>
-
-      <div class="mt-4 flex items-center justify-center gap-2.5">
-        <button id="minimizeRoadPopupBtn" type="button" class="px-5 py-2.5 rounded-xl text-xs font-cyber font-bold bg-slate-800/90 hover:bg-slate-700 text-cyan-300 border border-cyan-500/40 shadow-lg cursor-pointer flex items-center gap-1.5 transition-all">
-          <i class="fa-solid fa-compress text-[11px]"></i> ছোট করো
-        </button>
-        <button id="dismissRoadPopupBtn" type="button" class="neon-btn-green px-6 py-2.5 rounded-xl text-xs font-cyber font-bold shadow-lg cursor-pointer">
-          ঠিক আছে
-        </button>
-      </div>
-
-      <!-- 5-second countdown progress bar -->
-      <div id="roadProgressBar" class="road-progress-bar"></div>
-    </div>
-  </div>
-
-
-  <!-- ==================== PUSH-TO-TALK (PTT) WALKIE-TALKIE DOCK ==================== -->
-  <div id="pttWalkieDock" class="ptt-walkie-dock" style="position: fixed; left: 12px; bottom: 150px; z-index: 9500; display: flex; flex-direction: column; align-items: center; gap: 8px;" aria-label="Walkie-talkie voice communicator">
-    <!-- Speaker Mute/Unmute Toggle Button -->
-    <button id="pttMuteSpeakerBtn" type="button" class="ptt-speaker-btn" title="Mute/unmute incoming radio audio" aria-label="Mute or unmute walkie-talkie audio">
-      <span id="pttSpeakerIcon" class="ptt-speaker-icon">🔊</span>
-    </button>
-
-    <!-- Main Glove-Friendly PTT Button -->
-    <button id="pttTalkBtn" type="button" class="ptt-talk-btn" title="Push to talk (tap or hold to talk)" aria-label="Push to talk voice communicator">
-      <div class="ptt-talk-content">
-        <i class="fa-solid fa-walkie-talkie ptt-talk-icon" id="pttTalkIcon"></i>
-        <span id="pttTalkLabel" class="ptt-talk-label">PTT</span>
-        <span id="pttCountdownBadge" class="ptt-countdown-badge hidden">10s</span>
-      </div>
-      <div class="ptt-pulse-ring"></div>
-    </button>
-  </div>
-
-  <!-- ==================== BOTTOM GLOVE-FRIENDLY HUD CONTROL BAR ==================== -->
-  <div id="bottomControlBar" class="hud-bottom-bar">
-
-    <!-- Camera: take a checkpost photo and report -->
-    <button id="cameraReportBtn" type="button" title="ছবি তুলে চেকপোস্ট জানাও" class="camera-btn glove-btn active:scale-95 rounded-xl sm:rounded-2xl px-2.5 sm:px-4 py-2 sm:py-3 flex items-center justify-center gap-1 sm:gap-2 transition-all shadow-xl cursor-pointer pointer-events-auto flex-initial" aria-label="ছবি তুলে চেকপোস্ট জানাও">
-      <i class="fa-solid fa-camera text-base sm:text-lg"></i>
-    </button>
-
-    <!-- Center Massive Glove Button: Report Police Checkpost -->
-    <button id="reportPoliceBtn" onclick="window.openReportPoliceModal && window.openReportPoliceModal()" title="Report police checkpost to convoy" class="police-btn glove-btn active:scale-95 rounded-xl sm:rounded-3xl px-3 sm:px-6 py-2 sm:py-3.5 flex items-center justify-center gap-2 sm:gap-2.5 transition-all shadow-2xl cursor-pointer pointer-events-auto flex-1 min-w-0">
-      <div class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl flex items-center justify-center text-sm sm:text-base shadow-inner flex-shrink-0 report-shield">
-        <i class="fa-solid fa-shield-halved animate-pulse"></i>
-      </div>
-      <div class="flex flex-col text-left min-w-0">
-        <span class="font-cyber font-black text-[13px] sm:text-sm tracking-wider whitespace-nowrap">
-          চেকপোস্ট জানাও
-        </span>
-        <span class="text-[9px] sm:text-[10px] font-semibold tracking-wide hidden sm:block whitespace-nowrap">
-          গ্রুপের সবাইকে জানাও
-        </span>
-      </div>
-    </button>
-
-    <!-- Leave Tour Button -->
-    <button id="leaveTourBtn" data-id="exitRoomBtn" onclick="window.leaveActiveTour && window.leaveActiveTour()" title="Leave active convoy room" class="glove-btn glass-panel active:scale-95 rounded-xl sm:rounded-2xl px-2.5 sm:px-3.5 py-2 sm:py-3 flex items-center justify-center gap-1 transition-all shadow-xl cursor-pointer pointer-events-auto flex-initial">
-      <i class="fa-solid fa-arrow-right-from-bracket text-xs sm:text-sm"></i>
-      <span class="hidden sm:inline font-cyber font-bold text-xs">Exit</span>
-    </button>
-  </div>
-
-  <!-- ==================== ONBOARDING (JOIN) MODAL ==================== -->
-  <div id="onboardingModal" style="position: fixed; inset: 0; z-index: 99999;" class="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-xl transition-all duration-300">
-    <div class="join-card glass-panel-neon w-full max-w-md rounded-3xl p-6 sm:p-8 border shadow-[0_0_50px_rgba(0,0,0,0.9)] relative overflow-hidden">
-
-      <!-- Close / Dismiss Modal Button -->
-      <button type="button" id="closeOnboardingModalBtn" onclick="window.closeJoinModal()" title="Close modal" class="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center transition-colors z-10 cursor-pointer join-close-btn">
-        <i class="fa-solid fa-xmark text-sm"></i>
-      </button>
-
-      <!-- Header & Branding -->
-      <div class="text-center mb-6 relative">
-        <div class="cholo-ghuri-brand-logo">
-          <img src="logo.png" alt="Cholo Ghuri" class="brand-logo-img">
-        </div>
-        <h1 class="font-cyber font-black text-2xl sm:text-3xl tracking-wider flex items-center justify-center gap-2">
-          Cholo Ghuri
-        </h1>
-        <p class="join-tagline font-cyber font-bold text-sm sm:text-base mt-1">
-          একসঙ্গে রাইড করি, সুন্দর একটা বাংলাদেশ গড়ি
-        </p>
-        <p class="text-xs mt-1 max-w-xs mx-auto join-sub">
-          Biker convoy &amp; highway radar — একসাথে চলা, লাইভ GPS আর চেকপোস্ট অ্যালার্ট।
-        </p>
-      </div>
-
-      <!-- Form Inputs -->
-      <form id="onboardingForm" onsubmit="window.submitOnboarding(event); return false;" class="space-y-4">
-
-        <!-- Input 1: Rider Name -->
-        <div>
-          <label for="riderNameInput" class="block font-cyber font-bold text-xs tracking-wider mb-1.5">
-            <i class="fa-solid fa-helmet-safety mr-1"></i> তোমার নাম
-          </label>
-          <div class="relative">
-            <input
-              type="text"
-              id="riderNameInput"
-              value=""
-              placeholder="যেমন: Sakib, RiderX, Tornado"
-              maxlength="20"
-              autocomplete="off"
-              autocorrect="off"
-              autocapitalize="off"
-              spellcheck="false"
-              class="join-input w-full rounded-xl px-4 py-3 text-sm placeholder-slate-500 outline-none transition-colors font-medium shadow-inner"
-            >
-          </div>
-        </div>
-
-        <!-- Input 2: Tour Room Code + Generate Code Button -->
-        <div>
-          <label for="roomCodeInput" class="block font-cyber font-bold text-xs tracking-wider mb-1.5">
-            <i class="fa-solid fa-key mr-1"></i> ট্যুর রুম কোড
-          </label>
-          <div class="flex gap-2">
-            <input
-              type="text"
-              id="roomCodeInput"
-              placeholder="যেমন: K7Q2M9"
-              maxlength="16"
-              autocomplete="off"
-              class="join-input flex-1 uppercase rounded-xl px-4 py-3 text-sm font-hud font-bold tracking-widest placeholder-slate-600 outline-none transition-colors shadow-inner"
-            >
-            <button
-              type="button"
-              id="generateCodeBtn"
-              title="Generate a random tour code"
-              class="gen-code-btn px-3.5 py-3 rounded-xl transition-all flex items-center justify-center gap-1.5 text-xs font-cyber font-bold whitespace-nowrap shadow-md"
-            >
-              <i class="fa-solid fa-dice text-sm"></i>
-              <span>নতুন কোড</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Toggle: I am Ride Leader (Captain) -->
-        <div id="leaderToggleContainer" class="leader-toggle rounded-xl p-3 flex items-center justify-between transition-all duration-200">
-          <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-lg flex items-center justify-center leader-crown">
-              <i class="fa-solid fa-crown text-sm"></i>
+          <!-- ===== Screen 4 : Tour ===== -->
+          <div class="screen" id="screen-tour" role="tabpanel" aria-label="Tour screen">
+            <div class="tour-head">
+              <h3>Tour — কোথা থেকে কোথায়?</h3>
+              <p>ম্যাপে সরাসরি চাপ দিয়ে শুরু, গন্তব্য আর মাঝের থামা বসাও — তৈরি তালিকায় আটকে থাকতে হবে না। সেট করলেই Group আর Riding-এ একই পথ দেখাবে।</p>
             </div>
-            <div>
-              <span class="block font-cyber font-bold text-xs">Ride leader (Captain)</span>
-              <span class="block text-[10px]">Captain-এর পিন ম্যাপে আলাদা দেখাবে</span>
+            <div class="tour-body">
+              <div class="tour-map-card">
+                <div class="tour-sec-lab" style="margin-bottom:8px">ম্যাপ থেকে সরাসরি বাছো — একে একে তিনটেই</div>
+                <div class="pick-modes" role="group" aria-label="ম্যাপে এখন কী বসাচ্ছো">
+                  <button type="button" class="pick-mode-btn" data-mode="from" aria-pressed="true">১ · শুরু<small>কোথা থেকে</small></button>
+                  <button type="button" class="pick-mode-btn" data-mode="to" aria-pressed="false">২ · গন্তব্য<small>কোথায় যাবে</small></button>
+                  <button type="button" class="pick-mode-btn" data-mode="stop" aria-pressed="false">৩ · থামা<small>মাঝে যেখানে থামবে</small></button>
+                </div>
+                <p class="pick-hint" id="pickHint" role="status"></p>
+                <div class="tour-map" id="tourMap" role="group" aria-label="ট্যুরের ম্যাপ — চাপ দিয়ে শুরু, গন্তব্য আর থামা বসাও">
+                  <div id="tourLeaflet"></div>
+                  <div class="tm-shade" aria-hidden="true"></div>
+                  <svg class="tm-route" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                    <polyline id="tourMapLineCase" fill="none" stroke="#fffdf7" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" opacity=".92" points=""/>
+                    <polyline id="tourMapLine" fill="none" stroke="#17684a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 2.4" points=""/>
+                  </svg>
+                  <div class="tm-pins" id="tourMapPins"></div>
+                </div>
+                <div class="tour-map-selected" id="tourMapSelected" aria-label="ম্যাপে বেছে নেওয়া পথ"></div>
+                <p class="tour-map-note">নামের পিনে চাপ দিলে সেই জায়গাটাই বসবে। নাম নেই এমন জায়গা হলে ম্যাপের খালি জায়গায় চাপ দাও — নিজের পিন পড়বে, তাই যেকোনো জায়গা থেকে যেকোনো জায়গায় ট্যুর সাজানো যায়। থামা মোডে পিনে আবার চাপ দিলে থামাটা বাদ যাবে।</p>
+                <div class="tour-map-actions">
+                  <button type="button" id="clearStopsBtn">সব থামা মুছো</button>
+                  <button type="button" id="resetPickBtn">শুরু থেকে আবার বাছো</button>
+                </div>
+              </div>
+
+              <p class="rp-alt-lab">অথবা তালিকা থেকে বাছো — ম্যাপের পিন আর পথ সঙ্গে সঙ্গে মিলে যাবে</p>
+              <div class="route-picker">
+                <div class="rp-row">
+                  <div class="rp-dot"><i></i><span class="rp-line"></span></div>
+                  <div class="rp-field">
+                    <label for="tourFrom">কোথা থেকে শুরু</label>
+                    <select id="tourFrom">
+                      <option value="Dhaka" selected>Dhaka</option>
+                      <option value="Mawa">Mawa</option>
+                      <option value="Bhanga">Bhanga</option>
+                      <option value="Khulna">Khulna</option>
+                      <option value="Narsingdi">Narsingdi</option>
+                      <option value="Cumilla">Cumilla</option>
+                      <option value="Feni">Feni</option>
+                      <option value="Chattogram">Chattogram</option>
+                      <option value="Cox's Bazar">Cox's Bazar</option>
+                      <option value="Bandarban">Bandarban</option>
+                      <option value="Sajek">Sajek</option>
+                      <option value="Sylhet">Sylhet</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="rp-row" style="margin-top:10px">
+                  <div class="rp-dot end"><i></i></div>
+                  <div class="rp-field">
+                    <label for="tourTo">কোথায় যাবে</label>
+                    <select id="tourTo">
+                      <option value="Dhaka">Dhaka</option>
+                      <option value="Mawa">Mawa</option>
+                      <option value="Bhanga">Bhanga</option>
+                      <option value="Khulna">Khulna</option>
+                      <option value="Narsingdi">Narsingdi</option>
+                      <option value="Cumilla">Cumilla</option>
+                      <option value="Feni">Feni</option>
+                      <option value="Chattogram" selected>Chattogram</option>
+                      <option value="Cox's Bazar">Cox's Bazar</option>
+                      <option value="Bandarban">Bandarban</option>
+                      <option value="Sajek">Sajek</option>
+                      <option value="Sylhet">Sylhet</option>
+                    </select>
+                  </div>
+                </div>
+                <button type="button" class="swap-btn" id="swapTourBtn" aria-label="শুরু আর গন্তব্য অদলবদল করো">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 4-3 3 3 3"/><path d="M4 7h13"/><path d="m17 20 3-3-3-3"/><path d="M20 17H7"/></svg>
+                </button>
+              </div>
+
+              <div>
+                <div class="tour-sec-lab">মাঝে কোথায় থামবে? (ম্যাপে থামা মোডে চাপ দিলেও এখানে যোগ হবে)</div>
+                <div class="stop-chips" id="stopChips">
+                  <button type="button" class="stop-chip" data-stop="Mawa" aria-pressed="true">Mawa</button>
+                  <button type="button" class="stop-chip" data-stop="Cumilla" aria-pressed="true">Cumilla</button>
+                  <button type="button" class="stop-chip" data-stop="Feni" aria-pressed="false">Feni</button>
+                  <button type="button" class="stop-chip" data-stop="Bhanga" aria-pressed="false">Bhanga</button>
+                  <button type="button" class="stop-chip" data-stop="Narsingdi" aria-pressed="false">Narsingdi</button>
+                </div>
+              </div>
+
+              <div class="tour-summary" aria-label="ট্যুরের সারাংশ">
+                <div class="ts-box"><b id="tourDist">২৪৮ km</b><span>মোট দূরত্ব · আনুমানিক</span></div>
+                <div class="ts-box"><b id="tourTime">≈ ৪.৫ ঘণ্টা</b><span>রাইডের সময়</span></div>
+                <div class="ts-box"><b id="tourStopsCount">২টা</b><span>মাঝের থামা</span></div>
+              </div>
+
+              <div class="tour-preview">
+                <div class="lab" style="font-size:13px; font-weight:600; color:var(--green-deep)">তোমার পথ — Group-এও এভাবেই দেখাবে</div>
+                <div class="route-chain" id="tourRouteChain" aria-label="বেছে নেওয়া ট্যুরের পথ"></div>
+              </div>
+
+              <div class="toast" id="tourToast" role="status" style="margin:0"></div>
+              <button type="button" class="btn btn-primary" id="setTourBtn">
+                এই Tour সেট করো
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+              </button>
+              <button type="button" class="btn btn-quiet" id="startTourRideBtn">Tour সেট করে Riding শুরু করো</button>
+              <p class="tour-note">Captain Tour সেট করলে পুরো গ্রুপের কাছেই একই পথ চলে যায়</p>
             </div>
           </div>
-          <label class="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" id="isLeaderCheckbox" class="sr-only peer">
-            <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-300 after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500 peer-disabled:opacity-40 peer-disabled:cursor-not-allowed"></div>
-          </label>
-        </div>
 
-        <!-- Dynamic Notice: Leader already exists in room -->
-        <div id="leaderNotice" class="hidden text-[11px] font-cyber font-semibold rounded-xl px-3 py-2 flex items-center gap-2 -mt-1 shadow-sm transition-all duration-200 leader-notice">
-          <i class="fa-solid fa-crown text-xs flex-shrink-0"></i>
-          <span id="leaderNoticeText">এই রুমে Captain আগেই আছে — তুমি Rider হিসেবে ঢুকছ</span>
-        </div>
-
-        <!-- Big Action Button -->
-        <button
-          type="button"
-          id="startRidingBtn"
-          onclick="window.submitOnboarding(event)"
-          class="neon-btn-green w-full py-3.5 rounded-2xl font-cyber text-base tracking-wider flex items-center justify-center gap-2 mt-4 cursor-pointer"
-        >
-          <i class="fa-solid fa-bolt text-lg"></i>
-          <span>Ride শুরু করো</span>
-        </button>
-
-        <!-- Download Android App (APK) -->
-        <a
-          href="cholo-ghuri.apk"
-          download="cholo-ghuri.apk"
-          class="apk-btn w-full py-3 rounded-2xl font-cyber text-sm tracking-wider flex items-center justify-center gap-2 mt-2 cursor-pointer transition-all active:scale-95"
-        >
-          <i class="fa-brands fa-android text-base"></i>
-          <span>Android app ডাউনলোড</span>
-        </a>
-
-        <p class="text-center text-[10px] pt-1 join-foot">
-          Ride শুরু করলেই লোকেশন শুধু তোমার গ্রুপের কাছেই যাবে।
-        </p>
-      </form>
-
-    </div>
-  </div>
-
-  <!-- ==================== GPS PERMISSION REQUIRED MODAL ==================== -->
-  <div id="gpsPermissionModal" class="fixed inset-0 z-[100010] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md hidden transition-all duration-300">
-    <div class="glass-panel-neon max-w-sm w-full rounded-2xl p-6 border text-center relative shadow-[0_0_40px_rgba(245,158,11,0.35)]">
-      <div class="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center text-2xl mb-3 animate-pulse gps-modal-icon">
-        <i class="fa-solid fa-location-dot"></i>
-      </div>
-      <h3 class="font-cyber font-black text-lg tracking-wider">
-        আসল GPS লোকেশন দরকার
-      </h3>
-      <p class="text-xs mt-2 mb-4 leading-relaxed font-sans">
-        লোকেশন বন্ধ আছে বা অনুমতি দেওয়া হয়নি। কনভয়ের দূরত্ব আর চেকপোস্ট ঠিকমতো দেখাতে Cholo Ghuri-র আসল GPS লাগবে।
-      </p>
-
-      <div class="rounded-xl p-3 text-left mb-4 text-[11px] space-y-1.5 font-sans gps-steps">
-        <div class="flex items-start gap-2">
-          <span class="font-bold">১.</span>
-          <span>ওয়েবসাইটের ঠিকানার পাশে তালা/তথ্য আইকনে চাপ দাও।</span>
-        </div>
-        <div class="flex items-start gap-2">
-          <span class="font-bold">২.</span>
-          <span><strong>Location</strong> অনুমতি <strong>Allow</strong> করে দাও।</span>
-        </div>
-        <div class="flex items-start gap-2">
-          <span class="font-bold">৩.</span>
-          <span>নিচের <strong>আসল GPS চালু করো</strong> বোতামে চাপ দাও।</span>
-        </div>
-      </div>
-
-      <div class="flex flex-col gap-2">
-        <button id="retryGpsBtn" type="button" class="neon-btn-green w-full py-3 rounded-xl font-cyber font-bold text-xs flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95">
-          <i class="fa-solid fa-crosshairs text-sm"></i>
-          <span>আসল GPS চালু করো / আবার চেষ্টা করো</span>
-        </button>
-        <button id="closeGpsModalBtn" onclick="window.closeGpsPermissionModal && window.closeGpsPermissionModal()" type="button" class="w-full py-2.5 rounded-xl font-cyber font-bold text-xs border cursor-pointer transition-colors gps-dismiss-btn">
-          বাদ দাও
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ==================== POLICE REPORT CONFIRMATION MODAL ==================== -->
-  <div id="policeConfirmModal" class="fixed inset-0 z-[1600] flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md hidden">
-    <div class="glass-panel-neon max-w-sm w-full rounded-2xl p-5 border text-center relative shadow-2xl">
-      <div class="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center text-2xl mb-3 animate-bounce police-confirm-icon">
-        <i class="fa-solid fa-shield-halved"></i>
-      </div>
-      <h3 class="font-cyber font-black text-lg tracking-wider">চেকপোস্ট আছে নিশ্চিত করো</h3>
-      <p class="text-xs mt-1 mb-3">
-        <span id="confirmRoomCodeSpan" class="font-hud font-bold">----</span> রুমের সবাইকে এখনই জানাবে?
-      </p>
-
-      <!-- Glove-friendly Camera / Photo Section -->
-      <div class="mb-4 text-left">
-        <input type="file" id="policePhotoInput" accept="image/*" capture="environment" class="hidden">
-
-        <!-- Add Photo Trigger Button -->
-        <button
-          type="button"
-          id="triggerPolicePhotoBtn"
-          onclick="document.getElementById('policePhotoInput').click()"
-          class="photo-trigger-btn w-full py-2.5 px-3 rounded-xl text-xs font-cyber font-bold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-md cursor-pointer"
-        >
-          <i class="fa-solid fa-camera text-sm"></i>
-          <span>ছবি তোলো বা গ্যালারি থেকে নাও (ঐচ্ছিক)</span>
-        </button>
-
-        <!-- Photo Preview Container (Hidden initially) -->
-        <div id="policePhotoPreviewContainer" class="hidden mt-2 relative rounded-xl overflow-hidden border bg-slate-950/90 p-1.5 shadow-lg">
-          <img id="policePhotoPreview" src="" alt="Checkpost preview" class="w-full h-32 object-cover rounded-lg">
-          <div class="mt-1.5 flex items-center justify-between px-1 text-[10px] font-cyber">
-            <span class="flex items-center gap-1 font-mono">
-              <i class="fa-solid fa-image"></i> ছবি লাগানো হয়েছে
-            </span>
-            <button
-              type="button"
-              id="removePolicePhotoBtn"
-              class="font-bold flex items-center gap-1 active:scale-90 transition-transform cursor-pointer text-rose-400 hover:text-rose-300"
-            >
-              <i class="fa-solid fa-xmark"></i> ছবি সরাও
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-2 gap-3">
-        <button id="cancelPoliceReportBtn" class="py-2.5 rounded-xl font-cyber font-bold text-xs border cursor-pointer modal-cancel-btn">
-          বাতিল
-        </button>
-        <button id="confirmPoliceReportBtn" class="py-2.5 rounded-xl font-cyber font-bold text-xs shadow-lg cursor-pointer modal-confirm-btn">
-          সবাইকে জানাও
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ==================== VERIFY POLICE CHECKPOST MODAL ==================== -->
-  <div id="verifyPoliceModal" class="verify-police-modal hidden opacity-0 pointer-events-none">
-    <div class="verify-police-card text-center max-h-[90vh] overflow-y-auto">
-      <!-- Flashing Red/Blue Shield Icon -->
-      <div class="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center text-2xl mb-3 shadow-[0_0_25px_rgba(255,30,66,0.4)] verify-shield">
-        <i class="fa-solid fa-shield-halved animate-pulse"></i>
-      </div>
-      <h3 class="font-cyber font-black text-lg sm:text-xl tracking-wider">
-        চেকপোস্টটা কি এখনো আছে?
-      </h3>
-      <p id="verifyReportMeta" class="text-xs mt-1 mb-3">
-        জানিয়েছে <strong id="verifyReporterName" class="font-bold">Sakib</strong> • <span id="verifyDistanceText">120m দূরে</span>
-      </p>
-
-      <!-- Checkpost Photo in Verify Modal -->
-      <div id="verifyPolicePhotoContainer" class="hidden mb-3">
-        <img
-          id="verifyPolicePhoto"
-          src=""
-          alt="Checkpost photo"
-          onclick="if(this.src) window.openPolicePhotoViewer(this.src)"
-          class="max-h-40 w-full object-cover rounded-xl border cursor-pointer shadow-lg transition-colors"
-          title="Tap to view full screen"
-        >
-        <div class="text-[10px] flex items-center justify-center gap-1 mt-1 font-mono">
-          <i class="fa-solid fa-expand text-[9px]"></i> বড় করে দেখতে ছবিতে চাপ দাও
-        </div>
-      </div>
-
-      <!-- Score & Ratio Progress Bar -->
-      <div class="rounded-xl p-3 mb-4 verify-score-box">
-        <div class="flex justify-between items-center text-xs font-bold mb-1.5 font-hud">
-          <span class="flex items-center gap-1">
-            <i class="fa-solid fa-check"></i> সত্যি: <span id="verifyTrueVotes">1</span>
-          </span>
-          <span class="flex items-center gap-1">
-            <i class="fa-solid fa-xmark"></i> ভুয়া: <span id="verifyFalseVotes">0</span>
-          </span>
-        </div>
-        <div class="w-full h-2.5 rounded-full overflow-hidden flex verify-bar-track">
-          <div id="verifyTrueBar" class="bg-emerald-500 h-full transition-all duration-300" style="width: 100%;"></div>
-          <div id="verifyFalseBar" class="bg-rose-500 h-full transition-all duration-300" style="width: 0%;"></div>
-        </div>
-        <div class="flex justify-between items-center text-[10px] mt-2 font-medium">
-          <span>সবার মতামত</span>
-          <span id="verifyAutoDeleteThresholdText" class="font-bold">১০টা ভুয়া ভোট (৮০%+) পেলে নিজে থেকে মুছে যাবে</span>
-        </div>
-      </div>
-
-      <p class="font-cyber font-bold text-sm mb-4">
-        পুলিশ চেকপোস্টটা কি এখনো ওখানে আছে?
-      </p>
-
-      <!-- Two Large Glove-Friendly Voting Buttons -->
-      <div class="grid grid-cols-2 gap-3">
-        <button id="voteTrueBtn" class="vote-btn-yes py-3.5 rounded-xl font-cyber font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer">
-          <i class="fa-solid fa-thumbs-up text-sm"></i>
-          <span>হ্যাঁ, আসলেই আছে</span>
-        </button>
-        <button id="voteFalseBtn" class="vote-btn-no py-3.5 rounded-xl font-cyber font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer">
-          <i class="fa-solid fa-thumbs-down text-sm"></i>
-          <span>না, ভুয়া</span>
-        </button>
-      </div>
-
-      <!-- Action Buttons -->
-      <div class="mt-4 flex items-center justify-center gap-3">
-        <button id="minimizeVerifyModalBtn" type="button" class="text-xs font-cyber font-bold tracking-wider py-1.5 px-3.5 rounded-lg border cursor-pointer flex items-center gap-1.5 transition-colors verify-min-btn">
-          <i class="fa-solid fa-compress text-[10px]"></i> ছোট করো
-        </button>
-        <button id="closeVerifyModalBtn" type="button" class="text-xs font-cyber font-bold tracking-wider py-1.5 px-3.5 rounded-lg border cursor-pointer verify-close-btn">
-          বাদ দাও
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ==================== MAP PICKING BANNER OVERLAY ==================== -->
-  <div id="mapPickBanner" class="fixed top-4 left-1/2 -translate-x-1/2 z-[15000] hidden flex items-center gap-3 px-4 py-2.5 rounded-2xl backdrop-blur-md">
-    <div class="w-7 h-7 rounded-lg flex items-center justify-center animate-pulse text-sm map-pick-icon">
-      <i class="fa-solid fa-location-crosshairs"></i>
-    </div>
-    <div class="flex flex-col">
-      <span class="text-xs font-cyber font-bold tracking-wider">ম্যাপে চাপ দিয়ে জায়গা বেছে নাও</span>
-      <span id="mapPickSubtitle" class="text-[10px]">ওয়েপয়েন্টের জায়গা বাছছি...</span>
-    </div>
-    <button id="cancelMapPickBtn" type="button" onclick="window.cancelMapPick && window.cancelMapPick()" class="ml-2 px-3 py-1 rounded-xl text-xs font-cyber font-bold border transition-colors cursor-pointer map-pick-cancel">
-      বাতিল
-    </button>
-  </div>
-
-  <!-- ==================== GROUP TOUR & MULTI-STOP WAYPOINT PLANNER MODAL ==================== -->
-  <div id="tourPlannerModal" style="position: fixed; inset: 0; z-index: 10000;" class="fixed inset-0 z-[10000] flex items-center justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-xl hidden opacity-0 pointer-events-none transition-all duration-300">
-    <div class="tour-planner-card glass-panel-neon w-full max-w-2xl max-h-[92vh] flex flex-col rounded-3xl border shadow-[0_0_60px_rgba(0,0,0,0.95)] overflow-hidden relative">
-
-      <!-- Close Button -->
-      <button type="button" id="closeTourPlannerModalBtn" onclick="window.closeTourPlanner && window.closeTourPlanner()" title="Close tour planner" class="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center transition-colors z-20 cursor-pointer modal-x-btn">
-        <i class="fa-solid fa-xmark text-sm"></i>
-      </button>
-
-      <!-- Modal Header -->
-      <div class="tour-head p-4 sm:p-5 border-b flex items-center gap-3 relative z-10 flex-shrink-0">
-        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center text-lg tour-head-icon">
-          <i class="fa-solid fa-route"></i>
-        </div>
-        <div class="flex flex-col min-w-0 pr-8">
-          <h2 class="font-cyber font-black text-base sm:text-lg tracking-wider truncate">
-            Tour planner
-          </h2>
-          <p class="font-cyber font-semibold text-[10px] sm:text-xs tracking-widest truncate">
-            একাধিক থামা • একসাথে মেলার জায়গা • তেল নেওয়ার জায়গা
-          </p>
-        </div>
-      </div>
-
-      <!-- Modal Body (Scrollable) -->
-      <div class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 custom-scrollbar relative z-10">
-
-        <!-- Section 1: Tour Name & Assign Tour Subgroup -->
-        <div class="tour-config-card p-3.5 sm:p-4 space-y-3.5">
-          <div class="grid grid-cols-1 sm:grid-cols-12 gap-3.5 items-start">
-
-            <!-- Tour Name Input (7 cols on sm) -->
-            <div class="sm:col-span-7 flex flex-col gap-1.5">
-              <label for="tourPlanNameInput" class="text-[10.5px] font-cyber font-bold tracking-wider flex items-center gap-1.5">
-                <i class="fa-solid fa-route"></i> ট্যুরের নাম
-              </label>
-              <input
-                type="text"
-                id="tourPlanNameInput"
-                placeholder="যেমন: DHAKA101 Tour Plan"
-                class="tour-input w-full rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-cyber outline-none transition-all shadow-inner"
-              >
+          <!-- ===== Screen 5 : Photo report ===== -->
+          <div class="screen" id="screen-report" role="tabpanel" aria-label="ছবি দিয়ে রিপোর্ট screen">
+            <div class="report-head">
+              <h3>ছবি দিয়ে রিপোর্ট</h3>
+              <p>চেকপোস্ট, দুর্ঘটনা বা খারাপ রাস্তা — ছবি তুলে পাঠালেই গ্রুপের সবাই জায়গাসহ দেখতে পাবে।</p>
             </div>
+            <div class="report-body">
+              <input type="file" id="reportPhoto" accept="image/*" capture="environment" hidden />
+              <button type="button" class="photo-drop" id="photoDropBtn">
+                <span class="cam"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3Z"/><circle cx="12" cy="13" r="3.5"/></svg></span>
+                <b>ছবি তোলো বা গ্যালারি থেকে নাও</b>
+                <span>চাপ দিলেই ক্যামেরা খুলবে — ছবির সঙ্গে তোমার জায়গাটা নিজে থেকেই যুক্ত হয়ে যাবে</span>
+              </button>
+              <div class="photo-preview" id="photoPreview">
+                <img id="photoPreviewImg" alt="রিপোর্টের জন্য বেছে নেওয়া ছবি" />
+                <button type="button" class="retake" id="retakeBtn">আবার তোলো</button>
+                <div class="loc">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex:none"><path d="M12 22s7-6.1 7-12a7 7 0 1 0-14 0c0 5.9 7 12 7 12Z"/><circle cx="12" cy="10" r="2.6" fill="#24211c"/></svg>
+                  <span id="reportLocText">এই জায়গাটাই গ্রুপ দেখবে</span>
+                </div>
+              </div>
 
-            <!-- Target Subgroup Dropdown (5 cols on sm) -->
-            <div class="sm:col-span-5 flex flex-col gap-1.5">
-              <label for="tourSubgroupSelect" class="text-[10.5px] font-cyber font-bold tracking-wider flex items-center gap-1.5">
-                <i class="fa-solid fa-tower-broadcast"></i> এই ট্যুরটা যাদের জন্য
-              </label>
-              <select
-                id="tourSubgroupSelect"
-                class="tour-input w-full rounded-xl px-3 py-2.5 text-xs font-cyber outline-none transition-all cursor-pointer shadow-inner"
-              >
-                <option value="All Riders">সবাই (পুরো কনভয়)</option>
-                <option value="Alpha Squad">Alpha Squad</option>
-                <option value="Tour Group A">Tour Group A</option>
-                <option value="Tour Group B">Tour Group B</option>
-                <option value="Fast Squad">Fast Squad</option>
-                <option value="Cruisers">Cruisers</option>
-                <option value="__custom__">নতুন গ্রুপ বানাও...</option>
-              </select>
-              <input
-                type="text"
-                id="tourSubgroupCustomInput"
-                placeholder="নতুন গ্রুপের নাম লেখো..."
-                class="hidden w-full mt-1.5 rounded-xl px-3 py-2 text-xs font-cyber outline-none shadow-inner transition-all tour-input"
-              >
+              <div>
+                <div class="tour-sec-lab">কিসের রিপোর্ট?</div>
+                <div class="stop-chips" id="reportTypes">
+                  <button type="button" class="stop-chip" data-type="পুলিশ চেকপোস্ট" aria-pressed="true">পুলিশ চেকপোস্ট</button>
+                  <button type="button" class="stop-chip" data-type="দুর্ঘটনা" aria-pressed="false">দুর্ঘটনা</button>
+                  <button type="button" class="stop-chip" data-type="খারাপ রাস্তা" aria-pressed="false">খারাপ রাস্তা</button>
+                  <button type="button" class="stop-chip" data-type="জ্যাম" aria-pressed="false">জ্যাম</button>
+                  <button type="button" class="stop-chip" data-type="অন্যান্য" aria-pressed="false">অন্যান্য</button>
+                </div>
+              </div>
+
+              <div class="report-note-field">
+                <label for="reportNote">এক লাইনে লিখে দাও (না লিখলেও চলবে)</label>
+                <input id="reportNote" type="text" placeholder="যেমন: কাগজপত্র চেক হচ্ছে, লাইন লম্বা" autocomplete="off" />
+              </div>
+
+              <div class="toast" id="reportToast" role="status" style="margin:0"></div>
+              <button type="button" class="btn btn-primary" id="submitReportBtn" style="background:var(--red)">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                রিপোর্ট পাঠাও গ্রুপে
+              </button>
+
+              <div>
+                <div class="tour-sec-lab">গ্রুপে পাঠানো রিপোর্ট</div>
+                <div class="report-list" id="reportList"></div>
+                <p class="report-empty" id="reportEmpty">এখনো কোনো ছবির রিপোর্ট পাঠানো হয়নি — প্রথমটা তুমিই পাঠাও</p>
+              </div>
             </div>
-
           </div>
+
         </div>
-
-        <!-- Section 2: Quick Bangladesh Highway Waypoint Presets -->
-        <div class="space-y-1.5">
-          <div class="flex items-center justify-between">
-            <span class="text-[10px] font-cyber font-bold tracking-wider flex items-center gap-1">
-              <i class="fa-solid fa-bolt"></i> তাড়াতাড়ি যোগ করো (চাপ দিলেই থামা বসবে)
-            </span>
-            <span class="text-[9px]">বড় হাইওয়ের থামা</span>
-          </div>
-          <div id="tourPresetsContainer" class="flex flex-wrap gap-1.5">
-            <button type="button" class="preset-chip" data-name="Dhaka (Zero Point)" data-lat="23.7289" data-lng="90.4105" data-type="start">+ Dhaka</button>
-            <button type="button" class="preset-chip" data-name="Mawa Toll Plaza (Padma)" data-lat="23.4792" data-lng="90.2863" data-type="regroup">+ Mawa</button>
-            <button type="button" class="preset-chip" data-name="Cumilla (Highway Inn)" data-lat="23.4607" data-lng="91.1809" data-type="regroup">+ Cumilla</button>
-            <button type="button" class="preset-chip" data-name="Chattogram (City Gate)" data-lat="22.3850" data-lng="91.7760" data-type="refuel">+ Chattogram</button>
-            <button type="button" class="preset-chip" data-name="Bandarban (Hill View)" data-lat="22.1953" data-lng="92.2184" data-type="dest">+ Bandarban</button>
-            <button type="button" class="preset-chip" data-name="Cox's Bazar (Kolatoli)" data-lat="21.4272" data-lng="91.9800" data-type="dest">+ Cox's Bazar</button>
-            <button type="button" class="preset-chip" data-name="Sylhet (Keane Bridge)" data-lat="24.8949" data-lng="91.8687" data-type="dest">+ Sylhet</button>
-            <button type="button" class="preset-chip" data-name="Bogura (Banani)" data-lat="24.8465" data-lng="89.3777" data-type="regroup">+ Bogura</button>
-          </div>
-        </div>
-
-        <!-- Section 3: Waypoint Builder List (Point A, B, C, D...) -->
-        <div class="space-y-2">
-          <div class="flex items-center justify-between">
-            <label class="text-[11px] font-cyber font-bold tracking-wider flex items-center gap-1.5">
-              <i class="fa-solid fa-map-pin"></i> রুটের থামাগুলো
-            </label>
-            <span id="waypointCountBadge" class="text-[10px] font-hud px-2 py-0.5 rounded-full border">
-              0 থামা
-            </span>
-          </div>
-
-          <!-- Dynamic Waypoint Rows Container -->
-          <div id="waypointListContainer" class="space-y-2.5">
-            <!-- Dynamically populated rows inserted by JS -->
-          </div>
-
-          <!-- Builder Controls (Add, Use Current GPS, Clear) -->
-          <div class="flex flex-wrap items-center gap-2 pt-2">
-            <button
-              type="button"
-              id="addWaypointBtn"
-              class="tour-add-btn flex-1 min-w-[150px] py-2 px-3 rounded-xl active:scale-95 font-cyber font-bold text-xs tracking-wider flex items-center justify-center gap-1.5 transition-all shadow cursor-pointer"
-            >
-              <i class="fa-solid fa-plus text-xs"></i>
-              <span>+ থামা যোগ করো</span>
-            </button>
-            <button
-              type="button"
-              id="useCurrentGpsAsStartBtn"
-              title="Set your current GPS coordinates as Point A Start"
-              class="tour-gps-btn py-2 px-3 rounded-xl active:scale-95 font-cyber font-bold text-xs tracking-wider flex items-center gap-1.5 transition-all cursor-pointer"
-            >
-              <i class="fa-solid fa-crosshairs text-xs"></i>
-              <span>আমার GPS শুরুর জায়গা</span>
-            </button>
-            <button
-              type="button"
-              id="clearTourPlanBtn"
-              title="Clear all waypoints &amp; end tour"
-              class="tour-clear-btn py-2 px-3.5 rounded-xl active:scale-95 font-cyber font-bold text-xs tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-            >
-              <i class="fa-solid fa-trash-can text-xs"></i>
-              <span>সব মুছো / ট্যুর শেষ</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Section 4: Live Tour Route Distance & Time Estimate Summary -->
-        <div id="tourPlanSummaryBox" class="p-3 rounded-xl flex items-center justify-between text-xs font-cyber">
-          <div class="flex items-center gap-2">
-            <i class="fa-solid fa-road"></i>
-            <span id="tourSummaryDistance" class="font-bold">মোট: ~0.0 km</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <i class="fa-solid fa-clock"></i>
-            <span id="tourSummaryDuration" class="font-bold">আনুমানিক: ~0h 00m</span>
-          </div>
-          <div class="flex items-center gap-1.5 font-semibold">
-            <i class="fa-solid fa-satellite-dish text-[10px]"></i>
-            <span id="tourSyncEngineLabel">OSRM + Dual Sync</span>
-          </div>
-        </div>
-
       </div>
 
-      <!-- Modal Footer Action Bar -->
-      <div class="tour-foot p-3.5 sm:p-4 border-t flex items-center justify-between gap-3 relative z-10 flex-shrink-0">
-        <button
-          type="button"
-          id="closeTourPlannerFooterBtn"
-          onclick="window.closeTourPlanner && window.closeTourPlanner()"
-          class="px-4 py-2.5 rounded-xl font-cyber font-bold text-xs border cursor-pointer transition-colors tour-cancel-btn"
-        >
-          বাতিল
-        </button>
-        <button
-          type="button"
-          id="activateTourPlanBtn"
-          class="flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-cyber font-bold tracking-wider shadow-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2 tour-activate-btn"
-        >
-          <i class="fa-solid fa-paper-plane text-xs"></i>
-          <span>ট্যুর চালু করো ও সবাইকে জানাও</span>
-        </button>
-      </div>
+  </main>
 
-    </div>
-  </div>
-
-  <!-- ==================== POLICE PHOTO LIGHTBOX VIEWER ==================== -->
-  <div id="policePhotoViewerModal" class="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md hidden transition-all duration-300">
-    <div class="relative max-w-lg w-full bg-slate-900 border border-slate-700 rounded-2xl p-3 shadow-2xl flex flex-col items-center">
-      <button
-        type="button"
-        onclick="window.closePolicePhotoViewer()"
-        class="absolute -top-3 -right-3 w-9 h-9 rounded-full bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center font-bold shadow-lg text-sm z-10 active:scale-95 cursor-pointer"
-        title="Close photo viewer"
-      >
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-      <div class="w-full flex items-center justify-between px-2 pb-2 border-b border-slate-800 text-xs font-cyber text-slate-300">
-        <span class="flex items-center gap-1.5 text-rose-400 font-bold">
-          <i class="fa-solid fa-shield-halved"></i> চেকপোস্টের ছবি
-        </span>
-        <span class="text-[10px] text-slate-500">বন্ধ করতে বাইরে চাপ দাও বা ✕ দাও</span>
-      </div>
-      <div class="w-full overflow-hidden rounded-xl mt-2 flex items-center justify-center bg-black/70 max-h-[70vh]">
-        <img id="policePhotoViewerImg" src="" alt="Police checkpost" class="w-full max-h-[70vh] object-contain rounded-xl">
-      </div>
-    </div>
-  </div>
-
-  <!-- ==================== BOTTOM TAB BAR: JOIN / RIDING / GROUP / TOUR ==================== -->
-  <nav id="bottomTabBar" class="bottom-tab-bar" aria-label="মূল সেকশন">
-    <button type="button" id="tabJoin" data-tab="join" class="tab-btn active" aria-selected="true">
-      <i class="fa-solid fa-user-plus"></i>
-      <span>Join</span>
-    </button>
-    <button type="button" id="tabRiding" data-tab="riding" class="tab-btn" aria-selected="false">
-      <i class="fa-solid fa-motorcycle"></i>
-      <span>Riding</span>
-    </button>
-    <button type="button" id="tabGroup" data-tab="group" class="tab-btn" aria-selected="false">
-      <i class="fa-solid fa-users"></i>
-      <span>Group (<span id="activeRidersCount">1</span>)</span>
-    </button>
-    <button type="button" id="tabTour" data-tab="tour" class="tab-btn" aria-selected="false">
-      <i class="fa-solid fa-route"></i>
-      <span>Tour</span>
-      <span id="activeTourIndicatorDot" class="hidden tab-tour-dot"></span>
-    </button>
+  <nav class="bottom-tabs" role="tablist" aria-label="স্ক্রিন বেছে নাও">
+    <button type="button" role="tab" aria-selected="true" data-screen="screen-join">Join</button>
+    <button type="button" role="tab" aria-selected="false" data-screen="screen-riding">Ride</button>
+    <button type="button" role="tab" aria-selected="false" data-screen="screen-group">Group</button>
+    <button type="button" role="tab" aria-selected="false" data-screen="screen-tour">Tour</button>
   </nav>
-
-  <!-- ==================== SCRIPTS ==================== -->
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-  <!-- Supabase JS SDK v2 -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.2/dist/umd/supabase.js" integrity="sha384-A97u3Qnt9GZHURO9YJZRe7VQgGUeFzcv6I1oIGnUTxQrCxnpQMwR0/G8F2zt9abZ" crossorigin="anonymous"></script>
-  <!-- Main Application Logic -->
-  <script src="app.js"></script>
-  <!-- Tab bar wiring + live mirrors (no backend logic changed) -->
-  <script>
-    (function () {
-      function $(id) { return document.getElementById(id); }
-      var tabs = Array.prototype.slice.call(document.querySelectorAll('#bottomTabBar [data-tab]'));
-      function setActive(name) {
-        tabs.forEach(function (b) {
-          var on = b.getAttribute('data-tab') === name;
-          b.classList.toggle('active', on);
-          b.setAttribute('aria-selected', on ? 'true' : 'false');
-        });
-      }
-      function goRiding() {
-        if (window.closeGroupDrawer) window.closeGroupDrawer();
-        if (window.closeTourPlanner) window.closeTourPlanner();
-        if (window.closeJoinModal) window.closeJoinModal();
-        setActive('riding');
-        if (window.map) { try { window.map.invalidateSize(); } catch (e) {} }
-      }
-      function bind(id, fn) { var el = $(id); if (el) el.addEventListener('click', fn); }
-      bind('tabJoin', function () { setActive('join'); if (window.openJoinModal) window.openJoinModal(); });
-      bind('tabRiding', goRiding);
-      bind('tabGroup', function () { setActive('group'); if (window.toggleGroupDrawer) window.toggleGroupDrawer(true); });
-      bind('tabTour', function () { setActive('tour'); if (window.openTourPlanner) window.openTourPlanner(); });
-      // Camera button: open the police report modal and jump straight to the photo picker.
-      bind('cameraReportBtn', function () {
-        if (window.openReportPoliceModal) window.openReportPoliceModal();
-        setTimeout(function () { var b = $('triggerPolicePhotoBtn'); if (b) b.click(); }, 400);
-      });
-      // Keep the tab state in sync when overlays are closed from their own buttons.
-      bind('closeRidersDrawerBtn', function () { setActive('riding'); });
-      bind('closeTourPlannerModalBtn', function () { setActive('riding'); });
-      bind('closeTourPlannerFooterBtn', function () { setActive('riding'); });
-      bind('closeOnboardingModalBtn', function () { setActive('riding'); });
-      bind('startRidingBtn', function () { setTimeout(function () { setActive('riding'); }, 350); });
-      var backdrop = $('drawerBackdrop');
-      if (backdrop) backdrop.addEventListener('click', function () { setActive('riding'); });
-
-      // Live mirrors: next-stop + route chain shown in the location card and the Group drawer.
-      function stripEmoji(s) {
-        return (s || '').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{2190}-\u{21FF}]/gu, '').replace(/\s+/g, ' ').trim();
-      }
-      function cleanNextStop(s) {
-        var t = stripEmoji(s).replace(/^NEXT:\s*/i, '').replace(/^Next:\s*/i, '');
-        return t;
-      }
-      function syncMirrors() {
-        var nextEl = $('tourNextStopText'), chainEl = $('tourChainBreadcrumb');
-        var locSub = $('locSub'), dNext = $('drawerNextStop'), dChain = $('drawerChain');
-        var nextTxt = nextEl ? cleanNextStop(nextEl.textContent) : '';
-        var chainTxt = chainEl ? stripEmoji(chainEl.textContent).replace(/\s*➔\s*/g, ' → ') : '';
-        var strip = $('tourProgressStrip');
-        var tourOn = strip && !strip.classList.contains('hidden');
-        if (locSub) locSub.textContent = (tourOn && nextTxt) ? nextTxt : 'ট্যুর সেট করলে পরের থামা এখানে দেখাবে';
-        if (dNext) dNext.textContent = (tourOn && nextTxt) ? nextTxt : 'ট্যুর সেট করলে এখানে দেখাবে';
-        if (dChain) dChain.textContent = (tourOn && chainTxt) ? chainTxt : '';
-      }
-      if (window.MutationObserver) {
-        var obs = new MutationObserver(syncMirrors);
-        ['tourNextStopText', 'tourChainBreadcrumb', 'tourProgressStrip'].forEach(function (id) {
-          var el = $(id);
-          if (el) obs.observe(el, { childList: true, characterData: true, subtree: true, attributes: true, attributeFilter: ['class'] });
-        });
-      }
-      syncMirrors();
-      setActive('join');
-    })();
-  </script>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.2/dist/umd/supabase.js" integrity="sha384-A97u3Qnt9GZHURO9YJZRe7VQgGUeFzcv6I1oIGnUTxQrCxnpQMwR0/G8F2zt9abZ" crossorigin="anonymous"></script>
+<script src="app.js"></script>
 </body>
 </html>

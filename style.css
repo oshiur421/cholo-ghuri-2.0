@@ -1,847 +1,503 @@
-/* ============================================================
-   Cholo Ghuri — humanized theme (approved demo direction)
-   Paper + highway green + charcoal. No neon glow, no
-   uppercase tracked labels, glove-friendly 48px+ targets.
-   NOTE: app.js is untouched — every id/class it touches
-   keeps working. This file only re-skins.
-   ============================================================ */
 
-:root{
-  --bg:#f4f1e9;
-  --bg-soft:#ede8dc;
-  --card:#fffdf7;
-  --card-2:#f8f5ee;
-  --ink:#1e1b16;
-  --ink-2:#575046;
-  --ink-3:#7e7668;
-  --line:rgba(30,27,22,.12);
-  --line-strong:rgba(30,27,22,.22);
-  --green:#17684a;
-  --green-deep:#0f4f37;
-  --green-soft:#e3efe7;
-  --green-on-dark:#4db488;
-  --green-soft-dark:#8fd3b4;
-  --red:#b3372a;
-  --red-soft:#f9e9e5;
-  --red-on-dark:#f0a49a;
-  --amber:#9a6206;
-  --amber-soft:#f7ecd4;
-  --amber-on-dark:#eec27a;
-  --dark:#1b1915;
-  --dark-2:#24211c;
-  --dark-line:rgba(244,241,233,.16);
-  --paper-on-dark:#f2eee3;
-  --paper-dim:#c9c2b0;
-  --shadow:0 1px 2px rgba(30,27,22,.05), 0 12px 32px rgba(30,27,22,.08);
-  --shadow-dark:0 6px 20px rgba(0,0,0,.35);
-}
+  :root{
+    color-scheme: light dark;
+    --bg:#f4f1e9;
+    --bg-soft:#ede8dc;
+    --card:#fffdf7;
+    --card-2:#f8f5ee;
+    --ink:#1e1b16;
+    --ink-2:#575046;
+    --ink-3:#7e7668;
+    --line:rgba(30,27,22,.12);
+    --line-strong:rgba(30,27,22,.2);
+    --green:#17684a;
+    --green-deep:#0f4f37;
+    --green-soft:#e3efe7;
+    --red:#b3372a;
+    --red-soft:#f9e9e5;
+    --amber:#9a6206;
+    --amber-soft:#f7ecd4;
+    --phone-dark:#1b1915;
+    --phone-dark-2:#24211c;
+    --phone-dark-line:rgba(244,241,233,.14);
+    --paper-on-dark:#f2eee3;
+    --shadow:0 1px 2px rgba(30,27,22,.05), 0 12px 32px rgba(30,27,22,.07);
+    --shadow-phone:0 24px 60px rgba(30,27,22,.28), 0 4px 14px rgba(30,27,22,.18);
+  }@media (prefers-color-scheme: dark){
+    :root{
+      --bg:#16140f;
+      --bg-soft:#1d1a14;
+      --card:#211e17;
+      --card-2:#26231b;
+      --ink:#f0ebdf;
+      --ink-2:#bdb4a2;
+      --ink-3:#948a78;
+      --line:rgba(240,235,223,.13);
+      --line-strong:rgba(240,235,223,.24);
+      --green:#4db488;
+      --green-deep:#8fd3b4;
+      --green-soft:#223129;
+      --red:#e08a7d;
+      --red-soft:#38231f;
+      --amber:#e0aa4e;
+      --amber-soft:#332a18;
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.35);
+      --shadow-phone:0 24px 60px rgba(0,0,0,.6), 0 4px 14px rgba(0,0,0,.5);
+    }
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Hind Siliguri", system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size:16px;
+    line-height:1.55;
+  }
+  button, input{font:inherit}
+  button{min-height:44px}
+  :focus-visible{outline:3px solid var(--green); outline-offset:2px; border-radius:6px}
+  .mono{font-family:"IBM Plex Mono", ui-monospace, monospace; font-variant-numeric:tabular-nums}
+  h1{
+    font-size:clamp(30px, 5.4vw, 46px);
+    line-height:1.16; font-weight:700; letter-spacing:-.01em;
+    margin:18px 0 12px; max-width:17em;
+  }
+  h1 .thin{font-weight:500; color:var(--ink-2)}@media (min-width:920px){
+  }@media (min-width:920px){ }
+  .screen{display:none; flex-direction:column; flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain}
+  .screen.active{display:flex}@media (prefers-color-scheme: dark){
+  }
 
-*{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
-body{
-  margin:0;
-  background:var(--dark);
-  color:var(--ink);
-  font-family:"Hind Siliguri", system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-size:16px;
-  line-height:1.55;
-}
-button{font:inherit; min-height:44px}
-input, select{font:inherit}
-:focus-visible{outline:3px solid var(--green); outline-offset:2px; border-radius:6px}
-.mono, .font-hud{font-family:"IBM Plex Mono", ui-monospace, monospace; font-variant-numeric:tabular-nums}
+  
+  .join-hero{position:relative; flex:none}
+  .join-hero img{width:100%; height:218px; object-fit:cover; display:block}
+  .join-hero .scrim{
+    position:absolute; inset:auto 0 0 0; padding:34px 20px 14px;
+    background:linear-gradient(to top, rgba(14,13,10,.82), rgba(14,13,10,0));
+    color:#f5f1e6;
+  }
+  .wordmark{font-size:24px; font-weight:700; line-height:1.1; letter-spacing:-.01em}
+  .wordmark small{display:block; font-size:13.5px; font-weight:500; color:#d8d2c2; margin-top:3px}
+  .join-body{padding:20px 20px 24px; display:flex; flex-direction:column; gap:16px}
+  .field label{display:block; font-size:14.5px; font-weight:600; margin-bottom:6px}
+  .field .hint{font-size:13px; color:var(--ink-3); margin-top:5px}
+  .field input{
+    width:100%; min-height:52px; padding:12px 14px;
+    border:1.5px solid var(--line-strong); border-radius:10px;
+    background:var(--card); color:var(--ink); font-size:16.5px; font-weight:500;
+  }
+  .field input::placeholder{color:var(--ink-3); font-weight:400}
+  .code-row{display:flex; gap:8px}
+  .code-row input{flex:1; text-transform:uppercase; letter-spacing:.14em; font-weight:600}
+  .code-row button{
+    flex:none; padding:0 16px; border-radius:10px; cursor:pointer;
+    border:1.5px solid var(--line-strong); background:var(--card-2); color:var(--ink);
+    font-weight:600; font-size:14.5px; display:inline-flex; align-items:center; gap:7px;
+  }
+  .captain-row{
+    display:flex; align-items:center; gap:12px;
+    border:1px solid var(--line); border-radius:12px; padding:13px 14px; background:var(--card-2);
+  }
+  .captain-row .txt{flex:1; min-width:0}
+  .captain-row .txt b{display:block; font-size:15px; font-weight:600}
+  .captain-row .txt span{font-size:13px; color:var(--ink-2); line-height:1.4; display:block}
+  .switch{
+    flex:none; width:56px; height:34px; border-radius:999px; border:1.5px solid var(--line-strong);
+    background:var(--card); cursor:pointer; position:relative; padding:0; min-height:34px;
+  }
+  .switch::after{
+    content:""; position:absolute; top:3px; left:3px; width:25px; height:25px; border-radius:50%;
+    background:var(--ink-3); transition:transform .18s ease, background .18s ease;
+  }
+  .switch[aria-pressed="true"]{background:var(--green); border-color:var(--green)}
+  .switch[aria-pressed="true"]::after{transform:translateX(22px); background:#fff}
+  .btn{
+    display:flex; align-items:center; justify-content:center; gap:9px;
+    border-radius:12px; font-weight:600; font-size:16.5px; cursor:pointer;
+    min-height:54px; padding:12px 18px; border:1.5px solid transparent; width:100%;
+  }
+  .btn-primary{background:var(--green); color:#fff}@media (prefers-color-scheme: dark){ .btn-primary{color:#0e120e} }
+  .btn-quiet{background:var(--card); color:var(--ink); border-color:var(--line-strong)}
+  .join-foot{font-size:13px; color:var(--ink-3); text-align:center; margin:0}
 
-/* Sentence case everywhere — no shouty uppercase labels */
-.uppercase{text-transform:none !important}
-.tracking-widest, .tracking-wider{letter-spacing:.02em !important}
-/* Calm chrome: no looping/pulsing motion */
-.animate-ping, .animate-pulse{animation:none !important}
+  
+  .screen-riding{background:var(--phone-dark); color:var(--paper-on-dark); position:relative; overflow:hidden !important}
+  .map-zone{position:absolute; inset:0; overflow:hidden}
+  .map-zone > img{width:100%; height:100%; object-fit:cover; display:block; filter:saturate(.85) brightness(.94)}
+  .map-zone .map-fade{position:absolute; inset:0; background:linear-gradient(to bottom, rgba(20,18,14,.42), rgba(20,18,14,0) 26%, rgba(20,18,14,0) 52%, rgba(20,18,14,.18) 74%, rgba(20,18,14,.55))}
+  .route-svg{position:absolute; inset:0; width:100%; height:100%}
+  .rider-dot{
+    position:absolute; width:30px; height:30px; border-radius:50%;
+    background:#fffdf7; color:#1e1b16; font-size:11.5px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+    border:2px solid #17684a; box-shadow:0 2px 8px rgba(0,0,0,.35); z-index:3;
+  }
+  .rider-dot.me{background:#17684a; color:#fff; border-color:#fffdf7; width:36px; height:36px; font-size:10.5px}
+  .rider-dot.captain{background:#eec27a; border-color:#fffdf7; color:#241a08}
+  .stop-badge{
+    position:absolute; z-index:3; display:flex; align-items:center; gap:6px;
+    background:rgba(255,253,247,.96); color:#1e1b16; font-size:11.5px; font-weight:700;
+    padding:5px 9px 5px 6px; border-radius:999px; box-shadow:0 3px 10px rgba(0,0,0,.28);
+  }
+  .stop-badge i{font-style:normal; width:18px; height:18px; border-radius:50%; background:#17684a; color:#fff; display:flex; align-items:center; justify-content:center; font-size:10.5px}
+  .riding-ui{position:relative; z-index:4; display:flex; flex-direction:column; height:100%}
+  .map-topbar{
+    padding:40px 12px 0;
+    display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
+  }
+  .map-chip{
+    background:rgba(24,22,18,.9); border:1px solid var(--phone-dark-line);
+    border-radius:12px; padding:8px 11px; color:var(--paper-on-dark); backdrop-filter:blur(6px);
+  }
+  .map-chip .wm{font-weight:700; font-size:14.5px; line-height:1.15}
+  .map-chip .sub{font-size:12px; color:#c9c2b0; display:flex; align-items:center; gap:6px; margin-top:2px}
+  .live-dot{width:8px; height:8px; border-radius:50%; background:#57c98d; flex:none}
+  .tour-chip{
+    display:flex; align-items:center; gap:7px; max-width:178px;
+    background:rgba(255,253,247,.96); color:#1e1b16; border-radius:999px; padding:7px 11px 7px 8px;
+    font-size:12.5px; font-weight:700; line-height:1.25; box-shadow:0 4px 14px rgba(0,0,0,.25); cursor:pointer; border:0; text-align:left;
+  }
+  .tour-chip .tc-ic{width:24px; height:24px; flex:none; border-radius:50%; background:#17684a; color:#fff; display:flex; align-items:center; justify-content:center}
+  .tour-chip small{display:block; font-size:11px; font-weight:600; color:#6d6656}
+  .loc-top{
+    display:flex; align-items:flex-start; gap:7px; max-width:190px; flex:1; min-width:0;
+    background:rgba(255,253,247,.97); color:#1e1b16; border-radius:12px; padding:8px 10px 8px 8px;
+    box-shadow:0 4px 14px rgba(0,0,0,.25); line-height:1.3;
+  }
+  .loc-top .pin{width:22px; height:22px; flex:none; border-radius:50%; background:#b3372a; color:#fff; display:flex; align-items:center; justify-content:center; margin-top:1px}
+  .loc-top .loc-label{display:block; font-size:11px; font-weight:700; color:#6d6656}
+  .loc-top .loc-name{display:block; font-size:12.5px; font-weight:700; line-height:1.25}
+  .loc-top .loc-sub{display:block; font-size:11px; font-weight:500; color:#6d6656; margin-top:1px; line-height:1.3}
+  .map-tools{margin-top:14px; margin-left:auto; margin-right:12px; display:flex; flex-direction:column; gap:8px; align-items:center}
+  .tool-btn{
+    width:46px; height:46px; min-height:46px; border-radius:50%; border:1px solid var(--phone-dark-line);
+    background:rgba(24,22,18,.9); color:var(--paper-on-dark); cursor:pointer;
+    display:flex; align-items:center; justify-content:center; backdrop-filter:blur(6px);
+  }
+  .tool-btn:active{transform:scale(.96)}
+  .speed-dial{
+    width:76px; height:76px; border-radius:50%; background:rgba(24,22,18,.92);
+    border:2px solid rgba(244,241,233,.28); color:var(--paper-on-dark);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; backdrop-filter:blur(6px);
+    box-shadow:0 6px 18px rgba(0,0,0,.3);
+  }
+  .speed-dial .num{font-size:27px; font-weight:700; line-height:1; font-variant-numeric:tabular-nums}
+  .speed-dial .unit{font-size:10px; color:#c9c2b0; font-weight:600; margin-top:2px}
+  .speed-dial .lim{font-size:10px; font-weight:700; color:#f0a49a; margin-top:1px}
+  .where-pill{
+    align-self:flex-start; margin:auto 0 8px 12px;
+    display:inline-flex; align-items:center; gap:7px; max-width:calc(100% - 24px);
+    background:rgba(255,253,247,.97); color:#1e1b16; border-radius:999px; padding:7px 12px 7px 9px;
+    font-size:12.5px; font-weight:600; box-shadow:0 4px 14px rgba(0,0,0,.28); line-height:1.3;
+  }
+  .where-pill .pin{width:22px; height:22px; flex:none; border-radius:50%; background:#b3372a; color:#fff; display:flex; align-items:center; justify-content:center}
+  .where-pill small{font-weight:500; color:#6d6656}
+  .ride-sheet{
+    background:var(--phone-dark); border-top:1px solid var(--phone-dark-line);
+    border-radius:22px 22px 0 0; padding:8px 14px 14px; margin-top:auto;
+    box-shadow:0 -10px 30px rgba(0,0,0,.35);
+  }
+  .sheet-grab{width:40px; height:4px; border-radius:99px; background:rgba(244,241,233,.28); margin:2px auto 10px}
+  .tour-progress{margin-bottom:10px}
+  .tour-progress .tp-top{display:flex; justify-content:space-between; align-items:baseline; gap:10px}
+  .tour-progress .tp-top b{font-size:13.5px; font-weight:700}
+  .tour-progress .tp-top span{font-size:12px; color:#b7af9c; font-variant-numeric:tabular-nums}
+  .tp-bar{height:6px; border-radius:99px; background:#35312a; margin-top:7px; position:relative; overflow:hidden}
+  .tp-bar i{position:absolute; inset:0 auto 0 0; width:34%; background:#e0aa4e; border-radius:99px}
+  .tp-stops{display:flex; justify-content:space-between; font-size:11px; color:#948c76; margin-top:5px}
+  .tp-stops .on{color:#eec27a; font-weight:700}
+  .alert-card{
+    background:#2b2118; border:1px solid rgba(224,170,78,.4);
+    border-radius:12px; padding:10px 12px; margin-bottom:10px;
+  }
+  .alert-card .row{display:flex; gap:10px; align-items:center}
+  .alert-card .ic{
+    width:34px; height:34px; flex:none; border-radius:9px;
+    background:#3a2c17; display:flex; align-items:center; justify-content:center; color:#eec27a;
+  }
+  .alert-card b{display:block; font-size:14.5px; font-weight:600; line-height:1.3}
+  .alert-card p{margin:1px 0 0; font-size:12.5px; color:#cfc6ae; line-height:1.4}
+  .alert-actions{display:flex; gap:8px; margin-top:9px}
+  .alert-actions button{
+    flex:1; border-radius:9px; min-height:42px; cursor:pointer; font-weight:600; font-size:13.5px;
+    border:1px solid rgba(244,241,233,.25); background:transparent; color:var(--paper-on-dark);
+  }
+  .alert-actions button.solid{background:#eec27a; border-color:#eec27a; color:#241a08}
+  .ride-actions{display:grid; grid-template-columns:1fr 1.3fr 1fr; gap:8px}
+  .ride-actions button{
+    border-radius:13px; min-height:56px; cursor:pointer; padding:7px 4px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+    font-size:12.5px; font-weight:600; line-height:1.2;
+    background:var(--phone-dark-2); border:1px solid var(--phone-dark-line); color:var(--paper-on-dark);
+  }
+  .ride-actions button.report{background:#8c2f24; border-color:#a03a2d; color:#fdf3ee}
+  .ride-actions button:active{transform:scale(.98)}
+  .toast{
+    display:none; margin:0 0 10px; padding:10px 12px; border-radius:11px;
+    background:#e3efe7; color:#0f4f37; font-size:13.5px; font-weight:600; text-align:center;
+  }
+  .toast.show{display:block}
 
-/* ================= Map / Leaflet ================= */
-#map{background:var(--dark)}
-.leaflet-container{background:var(--dark); font-family:"Hind Siliguri", sans-serif}
-.leaflet-container a{color:var(--green)}
-.leaflet-control-attribution{background:rgba(24,22,18,.75) !important; color:#b7af9c !important; font-size:10px !important}
-.leaflet-control-attribution a{color:#b7af9c !important}
-.leaflet-control-zoom{display:none}
-.leaflet-popup-content-wrapper{background:var(--card); color:var(--ink); border-radius:12px; box-shadow:var(--shadow); border:1px solid var(--line)}
-.leaflet-popup-tip{background:var(--card)}
-.leaflet-popup-content{font-family:"Hind Siliguri", sans-serif; font-size:14px; line-height:1.45; margin:12px 14px}
-.police-custom-popup .leaflet-popup-content-wrapper{border-color:rgba(179,55,42,.4)}
-.police-custom-popup .leaflet-popup-content{margin:12px 14px}
-.police-custom-popup img{border-radius:10px}
+  
+  .tour-head{padding:46px 20px 2px}
+  .tour-head h3{margin:0; font-size:21px; font-weight:700}
+  .tour-head p{margin:3px 0 0; font-size:14px; color:var(--ink-2)}
+  .tour-body{padding:14px 16px 22px; display:flex; flex-direction:column; gap:14px}
+  .route-picker{border:1px solid var(--line); border-radius:16px; background:var(--card-2); padding:14px; position:relative}
+  .rp-row{display:flex; gap:11px; align-items:flex-start}
+  .rp-dot{width:26px; flex:none; display:flex; flex-direction:column; align-items:center; padding-top:4px}
+  .rp-dot i{width:13px; height:13px; border-radius:50%; border:3.5px solid var(--green); background:var(--card); display:block}
+  .rp-dot.end i{border-color:var(--red); border-radius:4px}
+  .rp-line{width:2px; height:34px; background:repeating-linear-gradient(to bottom, var(--ink-3) 0 4px, transparent 4px 8px); margin-top:5px}
+  .rp-field{flex:1; min-width:0}
+  .rp-field label{display:block; font-size:12.5px; font-weight:700; color:var(--ink-3); margin-bottom:3px}
+  .rp-field select{
+    width:100%; min-height:48px; padding:10px 34px 10px 12px; border:1.5px solid var(--line-strong); border-radius:10px;
+    background:var(--card); color:var(--ink); font:inherit; font-size:16.5px; font-weight:600; appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23575046' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 12px center;
+  }
+  .swap-btn{
+    position:absolute; right:14px; top:50%; transform:translateY(-50%);
+    width:44px; height:44px; min-height:44px; border-radius:50%; border:1.5px solid var(--line-strong);
+    background:var(--card); color:var(--green-deep); cursor:pointer; display:flex; align-items:center; justify-content:center;
+    box-shadow:var(--shadow);
+  }
+  .swap-btn:active{transform:translateY(-50%) scale(.95)}
+  .tour-sec-lab{font-size:13px; font-weight:700; color:var(--ink-2); margin-bottom:7px}
+  .stop-chips{display:flex; flex-wrap:wrap; gap:8px}
+  .stop-chip{
+    border:1.5px solid var(--line-strong); background:var(--card); color:var(--ink);
+    border-radius:999px; padding:9px 14px; min-height:44px; cursor:pointer; font-weight:600; font-size:14px;
+    display:inline-flex; align-items:center; gap:6px;
+  }
+  .stop-chip[aria-pressed="true"]{background:var(--green); border-color:var(--green); color:#fff}@media (prefers-color-scheme: dark){ .stop-chip[aria-pressed="true"]{color:#10130f} }
+  .tour-summary{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px}
+  .ts-box{border:1px solid var(--line); border-radius:12px; background:var(--card); padding:11px 8px; text-align:center}
+  .ts-box b{display:block; font-size:17px; font-weight:700; font-variant-numeric:tabular-nums; line-height:1.2}
+  .ts-box span{font-size:11.5px; color:var(--ink-3); font-weight:600}
+  .tour-preview{border:1px solid var(--line); border-radius:14px; background:var(--card-2); padding:14px 16px}
+  .tour-note{font-size:13px; color:var(--ink-3); text-align:center; margin:0}
 
-/* Biker markers on the map */
-.custom-biker-icon{background:transparent; border:0}
-.biker-marker-container{position:relative; width:28px; height:28px}
-.biker-marker-pulse{position:absolute; inset:-7px; border-radius:50%; border:2px solid rgba(77,180,136,.55)}
-.biker-marker-body{
-  width:28px; height:28px; border-radius:50%;
-  background:var(--green); color:#fff;
-  display:flex; align-items:center; justify-content:center;
-  border:2px solid #fffdf7; box-shadow:0 2px 8px rgba(0,0,0,.35);
-}
-.biker-marker-leader .biker-marker-body{background:var(--amber-on-dark); color:#241a08}
-.biker-heading-arrow{
-  position:absolute; top:-7px; left:50%; transform:translateX(-50%);
-  width:0; height:0; border-left:5px solid transparent; border-right:5px solid transparent;
-  border-bottom:7px solid #fffdf7;
-}
-.biker-tag{
-  position:absolute; top:30px; left:50%; transform:translateX(-50%);
-  white-space:nowrap; background:rgba(255,253,247,.96); color:var(--ink);
-  font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px;
-  box-shadow:0 2px 8px rgba(0,0,0,.3);
-}
+  
+  .tour-map-card{border:1px solid var(--line); border-radius:16px; background:var(--card-2); padding:14px}
+  .pick-modes{display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:4px}
+  .pick-modes button{
+    border:0; border-radius:9px; background:transparent; color:var(--ink-2); cursor:pointer;
+    font-weight:700; font-size:13.5px; padding:9px 4px; min-height:48px; line-height:1.25;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px;
+  }
+  .pick-modes button small{font-size:11px; font-weight:600; opacity:.75}
+  .pick-modes button[aria-pressed="true"]{background:var(--green); color:#fff}
+  .pick-modes button[data-mode="to"][aria-pressed="true"]{background:var(--red)}
+  .pick-modes button[data-mode="stop"][aria-pressed="true"]{background:var(--amber)}@media (prefers-color-scheme: dark){
+    .pick-modes button[aria-pressed="true"]{color:#10130f}
+    .pick-modes button[data-mode="to"][aria-pressed="true"], .pick-modes button[data-mode="stop"][aria-pressed="true"]{color:#171310}
+  }
+  .pick-hint{margin:10px 2px 8px; font-size:13.5px; font-weight:600; color:var(--ink); line-height:1.45}
+  .pick-hint span{color:var(--green-deep)}
+  .tour-map{
+    position:relative; height:318px; border-radius:14px; overflow:hidden; cursor:crosshair;
+    border:1px solid var(--line-strong); background:#2c2a24; touch-action:manipulation;
+  }
+  .tour-map > img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; filter:saturate(.72) brightness(.82) contrast(1.02)}
+  .tour-map .tm-shade{position:absolute; inset:0; background:linear-gradient(to bottom, rgba(18,16,12,.18), rgba(18,16,12,0) 34%, rgba(18,16,12,0) 62%, rgba(18,16,12,.34))}
+  .tour-map svg.tm-route{position:absolute; inset:0; width:100%; height:100%; pointer-events:none}
+  .tm-pins{position:absolute; inset:0}
+  .map-pin{
+    position:absolute; transform:translate(-50%,-100%); z-index:3;
+    border:0; background:transparent; cursor:pointer; padding:0; min-height:0;
+    display:flex; flex-direction:column; align-items:center; gap:2px; width:64px;
+  }
+  .tour-map-actions{display:flex; gap:8px; margin-top:10px}
+  .tour-map-actions button{
+    flex:1; border-radius:9px; min-height:44px; cursor:pointer; font-weight:600; font-size:13.5px;
+    border:1.5px solid var(--line-strong); background:var(--card); color:var(--ink);
+  }
+  .tour-map-actions button:active{transform:scale(.98)}
+  .map-pin .mp-label{
+    max-width:64px; overflow-wrap:break-word; text-align:center;
+    background:rgba(255,253,247,.94); color:#1e1b16; font-size:10px; font-weight:700; line-height:1.2;
+    padding:2.5px 6px; border-radius:999px; box-shadow:0 2px 7px rgba(0,0,0,.3); pointer-events:none;
+  }
+  .map-pin .mp-dot{
+    width:15px; height:15px; flex:none; border-radius:50% 50% 50% 4px; transform:rotate(-45deg);
+    background:#fffdf7; border:2.5px solid #575046; box-shadow:0 2px 7px rgba(0,0,0,.35); pointer-events:none;
+  }
+  .map-pin.is-from .mp-dot{width:21px; height:21px; background:var(--green); border-color:#fffdf7}
+  .map-pin.is-from .mp-label{background:var(--green); color:#fff}
+  .map-pin.is-to .mp-dot{width:21px; height:21px; background:var(--red); border-color:#fffdf7; border-radius:4px 50% 50% 50%}
+  .map-pin.is-to .mp-label{background:var(--red); color:#fff}
+  .map-pin.is-stop .mp-dot{background:#eec27a; border-color:#fffdf7}
+  .map-pin.is-stop .mp-label{background:#f7ecd4; color:#5f4305}
+  .map-pin:active .mp-dot{transform:rotate(-45deg) scale(1.18)}
+  .tour-map-selected{
+    margin-top:10px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+    font-size:14.5px; font-weight:700; line-height:1.35;
+  }
+  .tour-map-selected .tms-from{color:var(--green-deep)}
+  .tour-map-selected .tms-to{color:var(--red)}
+  .tour-map-selected .tms-arrow{color:var(--ink-3); font-weight:500}
+  .tour-map-selected .tms-stop{font-size:12.5px; font-weight:700; color:var(--amber); background:var(--amber-soft); border-radius:999px; padding:2px 8px}
+  .tour-map-note{margin:7px 2px 0; font-size:12.5px; color:var(--ink-2); line-height:1.5}
+  .rp-alt-lab{font-size:13px; font-weight:700; color:var(--ink-2); margin:2px 2px -4px}
 
-/* Police markers on the map */
-.custom-police-icon{background:transparent; border:0}
-.police-marker-container{position:relative; width:60px; height:60px}
-.police-marker-beacon{position:absolute; inset:6px; border-radius:50%; border:2px dashed rgba(179,55,42,.8)}
-.police-marker-body{
-  position:absolute; inset:14px; border-radius:50%;
-  background:var(--red); color:#fff;
-  display:flex; align-items:center; justify-content:center;
-  border:2px solid #fffdf7; box-shadow:0 3px 12px rgba(0,0,0,.4);
-}
+  
+  .report-head{padding:46px 20px 2px}
+  .report-head h3{margin:0; font-size:21px; font-weight:700}
+  .report-head p{margin:3px 0 0; font-size:14px; color:var(--ink-2)}
+  .report-body{padding:14px 16px 22px; display:flex; flex-direction:column; gap:14px}
+  .photo-drop{
+    border:2px dashed var(--line-strong); border-radius:16px; background:var(--card-2);
+    padding:18px 14px; text-align:center; cursor:pointer; width:100%; color:var(--ink);
+    display:flex; flex-direction:column; align-items:center; gap:7px;
+  }
+  .photo-drop .cam{
+    width:54px; height:54px; border-radius:50%; background:var(--red-soft); color:var(--red);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .photo-drop b{font-size:16px; font-weight:700}
+  .photo-drop span{font-size:13px; color:var(--ink-2); line-height:1.4}
+  .photo-drop:active{transform:scale(.99)}
+  .photo-preview{display:none; position:relative; border-radius:16px; overflow:hidden; border:1px solid var(--line)}
+  .photo-preview.show{display:block}
+  .photo-preview img{width:100%; height:190px; object-fit:cover; display:block}
+  .photo-preview .loc{
+    position:absolute; left:10px; bottom:10px; right:10px;
+    background:rgba(24,22,18,.88); color:#f2eee3; border-radius:10px; padding:7px 10px;
+    font-size:12.5px; font-weight:600; display:flex; align-items:center; gap:7px; line-height:1.35;
+  }
+  .photo-preview .retake{
+    position:absolute; top:10px; right:10px; min-height:38px; padding:6px 12px;
+    border-radius:999px; border:0; background:rgba(255,253,247,.95); color:#1e1b16;
+    font-size:13px; font-weight:700; cursor:pointer; box-shadow:0 3px 10px rgba(0,0,0,.25);
+  }
+  .sample-link{
+    align-self:center; border:0; background:transparent; color:var(--green-deep); cursor:pointer;
+    font-size:13.5px; font-weight:600; text-decoration:underline; text-underline-offset:3px; min-height:36px; padding:4px 8px;
+  }
+  .report-note-field label{display:block; font-size:14.5px; font-weight:600; margin-bottom:6px}
+  .report-note-field input{
+    width:100%; min-height:52px; padding:12px 14px;
+    border:1.5px solid var(--line-strong); border-radius:10px;
+    background:var(--card); color:var(--ink); font-size:16px;
+  }
+  .report-note-field input::placeholder{color:var(--ink-3)}
+  .report-list{display:flex; flex-direction:column; gap:10px}
+  .report-item{
+    display:flex; gap:12px; align-items:center;
+    border:1px solid var(--line); border-radius:14px; background:var(--card); padding:10px 12px;
+  }
+  .report-item img{width:58px; height:58px; flex:none; border-radius:10px; object-fit:cover}
+  .report-item .ri-txt{flex:1; min-width:0}
+  .report-item .ri-txt b{display:block; font-size:15px; font-weight:700; line-height:1.3}
+  .report-item .ri-txt span{font-size:12.5px; color:var(--ink-2); display:block; line-height:1.4}
+  .report-item .ri-sent{
+    flex:none; font-size:11.5px; font-weight:700; color:var(--green-deep); background:var(--green-soft);
+    border-radius:999px; padding:4px 9px;
+  }
+  .report-empty{font-size:13.5px; color:var(--ink-3); text-align:center; margin:0}
 
-/* Tour waypoint markers */
-.custom-tour-waypoint-icon{background:transparent; border:0}
+  
+  .group-head{padding:46px 20px 4px}
+  .group-head h3{margin:0; font-size:21px; font-weight:700}
+  .group-head p{margin:3px 0 0; font-size:14px; color:var(--ink-2)}
+  .next-stop{
+    margin:14px 16px 4px; border:1px solid var(--line); border-radius:14px;
+    background:var(--card-2); padding:15px 16px;
+  }
+  .next-stop .lab{font-size:13px; font-weight:600; color:var(--green-deep)}
+  .next-stop .place{font-size:18px; font-weight:700; margin-top:2px}
+  .route-chain{display:flex; align-items:flex-start; margin-top:14px}
+  .stop{flex:1; min-width:0; overflow-wrap:break-word; text-align:center; position:relative; padding-top:16px; padding-left:2px; padding-right:2px; font-size:12px; color:var(--ink-2); line-height:1.35}
+  .stop::before{content:""; position:absolute; top:5px; left:0; right:0; height:2px; background:var(--line-strong)}
+  .stop:first-child::before{left:50%}
+  .stop:last-child::before{right:50%}
+  .stop::after{
+    content:""; position:absolute; top:0; left:50%; transform:translateX(-50%);
+    width:12px; height:12px; border-radius:50%; background:var(--card); border:3px solid var(--ink-3);
+  }
+  .stop.done{color:var(--ink)}
+  .stop.done::after{background:var(--green); border-color:var(--green)}
+  .stop.now{color:var(--ink); font-weight:600}
+  .stop.now::after{background:var(--card); border-color:var(--green); box-shadow:0 0 0 3px var(--green-soft)}
+  .rider-list{list-style:none; margin:10px 0 0; padding:6px 16px 20px; display:flex; flex-direction:column}
+  .rider-list li{
+    display:flex; align-items:center; gap:12px; padding:13px 2px;
+    border-bottom:1px solid var(--line);
+  }
+  .rider-list li:last-child{border-bottom:0}
+  .avatar{
+    width:46px; height:46px; flex:none; border-radius:50%;
+    background:var(--green-soft); color:var(--green-deep);
+    display:flex; align-items:center; justify-content:center; font-weight:700; font-size:15px;
+  }
+  .avatar.leader{background:#f3e3bb; color:#7a5205}@media (prefers-color-scheme: dark){ .avatar.leader{background:#3d3520; color:#eec27a} }
+  .rider-list .who{flex:1; min-width:0}
+  .rider-list .who b{display:block; font-size:15.5px; font-weight:600; line-height:1.3}
+  .rider-list .who span{font-size:13px; color:var(--ink-2)}
+  .rider-list .dist{font-weight:600; font-size:14.5px; font-variant-numeric:tabular-nums; text-align:right}
+  .rider-list .dist small{display:block; font-weight:500; font-size:12px; color:var(--ink-3)}
+  .tag-leader{
+    font-size:11.5px; font-weight:700; color:#7a5205; background:#f7ecd4;
+    border-radius:5px; padding:1px 6px; margin-left:6px; vertical-align:2px;
+  }@media (prefers-color-scheme: dark){ .tag-leader{color:#eec27a; background:#332a18} }
+  .sw-green{background:#17684a; color:#fff; border-color:#17684a}
+  .sw-paper{background:#fffdf7; color:#1e1b16}
+  .sw-char{background:#24211c; color:#f2eee3; border-color:#24211c}
+  .sw-amber{background:#f7ecd4; color:#5f4305}
+  .sw-red{background:#b3372a; color:#fff; border-color:#b3372a}@media (prefers-reduced-motion: reduce){
+    *{transition:none !important; animation:none !important}
+  }
 
-/* ================= Panels ================= */
-/* Dark translucent chip (map chrome) */
-.glass-panel{
-  background:rgba(24,22,18,.92);
-  border:1px solid var(--dark-line);
-  color:var(--paper-on-dark);
-  backdrop-filter:blur(6px);
-}
-/* Light paper card (modals, drawer) */
-.glass-panel-neon{
-  background:var(--card);
-  border:1px solid var(--line-strong);
-  color:var(--ink);
-  box-shadow:var(--shadow);
-}
-.glass-panel-orange{
-  background:var(--amber-soft);
-  border:1px solid rgba(154,98,6,.45);
-  color:var(--ink);
-}
-
-/* ================= Top HUD ================= */
-.hud-top-bar{padding:10px 12px 0}
-.hud-top-container{gap:8px}
-.hud-row-1{align-items:flex-start}
-
-/* Brand chip (dark, on the map) */
-.brand-panel.glass-panel-neon{
-  background:rgba(24,22,18,.92);
-  border:1px solid var(--dark-line);
-  color:var(--paper-on-dark);
-  backdrop-filter:blur(6px);
-  box-shadow:var(--shadow-dark);
-}
-.brand-logo{background:var(--dark-2); border:1px solid var(--dark-line)}
-.brand-name{color:var(--paper-on-dark)}
-#captainBadge{background:var(--amber-soft); color:#7a5205; border:1px solid rgba(154,98,6,.4)}
-.room-code-btn{color:var(--green-on-dark); background:transparent; border:0; padding:0}
-.join-btn{background:var(--green); color:#fff; border:1px solid var(--green)}
-.join-btn:hover{background:var(--green-deep)}
-.invite-btn{background:transparent; color:var(--paper-on-dark); border:1px solid var(--dark-line)}
-.invite-btn:hover{border-color:rgba(244,241,233,.4)}
-#dbSyncDot{background:#57c98d !important; box-shadow:0 0 8px rgba(87,201,141,.8) !important}
-
-/* Exact-location card (white, top right) */
-#currentRoadBanner.glass-panel,
-.loc-top{
-  background:rgba(255,253,247,.97) !important;
-  border:1px solid var(--line) !important;
-  color:var(--ink) !important;
-  box-shadow:0 4px 14px rgba(0,0,0,.25) !important;
-  border-radius:12px !important;
-  max-width:210px;
-  backdrop-filter:blur(6px);
-}
-.loc-pin{background:var(--red); color:#fff; border-radius:50%}
-#compassIcon{color:#fff}
-.loc-label{color:#6d6656; font-weight:700}
-.loc-name{color:var(--ink)}
-.loc-sub{color:#6d6656}
-
-/* ================= Speed dial (right edge of map) ================= */
-.speed-dial-wrap{
-  position:fixed; right:12px; top:158px; z-index:9000;
-  display:flex; flex-direction:column; align-items:center; gap:6px;
-  pointer-events:none;
-}
-.speed-dial{
-  width:84px; height:84px; border-radius:50%;
-  background:rgba(24,22,18,.92); border:2px solid rgba(244,241,233,.28);
-  color:var(--paper-on-dark);
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  box-shadow:0 6px 18px rgba(0,0,0,.3); backdrop-filter:blur(6px);
-}
-.speed-dial #liveSpeedDisplay{font-size:28px; font-weight:700; line-height:1; font-variant-numeric:tabular-nums; color:var(--paper-on-dark)}
-.speed-unit{font-size:10px; color:var(--paper-dim); font-weight:600; margin-top:2px}
-.speed-lim{font-size:10px; font-weight:700; color:var(--red-on-dark); margin-top:1px}
-.speed-limit-sign{background:transparent !important; border:0 !important; box-shadow:none !important; width:auto !important; height:auto !important; border-radius:0 !important}
-.speed-limit-number{font-size:10px; font-weight:700; color:var(--red-on-dark)}
-.speed-status{
-  background:rgba(24,22,18,.92); color:var(--paper-on-dark);
-  border:1px solid var(--dark-line); border-radius:999px;
-  font-size:11px; font-weight:600; padding:3px 10px;
-}
-#liveSpeedDisplay.speedo-warning{color:#ff8a7a !important}
-#speedLimitSign.scale-110{transform:scale(1.05)}
-
-/* ================= Map tools (right edge) ================= */
-.map-tools{
-  position:fixed; right:12px; top:296px; z-index:9000;
-  display:flex; flex-direction:column; gap:8px; align-items:center;
-}
-.tool-btn{
-  width:46px; height:46px; min-height:46px; border-radius:50%;
-  border:1px solid var(--dark-line);
-  background:rgba(24,22,18,.92); color:var(--paper-on-dark);
-  cursor:pointer; display:flex; align-items:center; justify-content:center;
-  backdrop-filter:blur(6px); padding:0;
-}
-.tool-btn:active{transform:scale(.96)}
-.theme-toggle-btn{font-size:14px}
-.theme-opt{display:none; align-items:center; gap:4px; font-size:12px; font-weight:700}
-.theme-opt.active{display:inline-flex}
-.theme-divider{display:none}
-
-/* ================= Ride sheet (alert cards at bottom of map) ================= */
-#subRoadAlertSection{
-  position:fixed !important; left:8px; right:8px; bottom:138px; top:auto !important;
-  z-index:9400; display:flex; flex-direction:column; gap:8px;
-  pointer-events:none;
-}
-#subRoadAlertSection > *{pointer-events:auto}
-.sub-road-alert-card{
-  display:flex; align-items:center; gap:10px;
-  background:#2b2118; border:1px solid rgba(224,170,78,.35);
-  color:var(--paper-on-dark);
-  border-radius:14px; padding:11px 12px;
-  box-shadow:0 6px 20px rgba(0,0,0,.35);
-}
-.sub-road-alert-card.tour-progress-card{border-color:rgba(224,170,78,.35)}
-.sub-road-alert-card.police-alert-card{border-color:rgba(179,55,42,.55); background:#2b1d1a}
-.sub-road-alert-card.convoy-alert-card{border-color:rgba(224,170,78,.4)}
-.sub-road-alert-card.road-alert-card{border-color:rgba(77,180,136,.4); background:#1d2622}
-.sub-road-alert-card.ptt-alert-card{border-color:rgba(77,180,136,.4); background:#1d2622}
-.sub-road-alert-card.toast-alert-card{border-color:rgba(244,241,233,.25); background:#26241f}
-.alert-card-left{display:flex; align-items:center; gap:10px; min-width:0; flex:1}
-.alert-card-icon{
-  width:34px; height:34px; flex:none; border-radius:9px;
-  background:#3a2c17; display:flex; align-items:center; justify-content:center; color:var(--amber-on-dark);
-}
-.alert-card-icon-cyan{background:#1d2b26; color:var(--green-soft-dark)}
-.alert-card-icon-amber{background:#3a2c17; color:var(--amber-on-dark)}
-.alert-card-icon-rose{background:#3d2220; color:var(--red-on-dark)}
-.alert-card-icon-emerald{background:#1d2b26; color:var(--green-soft-dark)}
-.alert-card-icon-sky{background:#22262b; color:#a8c8e8}
-.alert-card-text{display:flex; flex-direction:column; min-width:0; flex:1}
-.alert-card-label{font-size:11px; font-weight:700; color:var(--amber-on-dark)}
-.alert-card-desc{font-size:13.5px; font-weight:600; color:var(--paper-on-dark); line-height:1.35}
-.alert-card-actions{display:flex; align-items:center; gap:6px; flex-shrink:0}
-.sub-alert-btn{
-  min-height:42px; border-radius:9px; cursor:pointer; font-weight:600; font-size:13px;
-  border:1px solid rgba(244,241,233,.25); background:transparent; color:var(--paper-on-dark);
-  padding:6px 11px; display:inline-flex; align-items:center; gap:5px;
-}
-.sub-alert-btn-action{background:var(--amber-soft); border-color:var(--amber-soft); color:#241a08}
-.sub-alert-btn-cyan{background:var(--green-soft); border-color:var(--green-soft); color:var(--green-deep)}
-.sub-alert-btn-amber{background:var(--amber-soft); border-color:var(--amber-soft); color:#5f4305}
-.sub-alert-btn-emerald{background:var(--green-soft); border-color:var(--green-soft); color:var(--green-deep)}
-.sub-alert-btn-rose{background:var(--red-soft); border-color:var(--red-soft); color:var(--red)}
-.sub-alert-btn-min{min-width:42px; padding:6px 9px}
-.sub-alert-btn-close{min-width:42px; padding:6px 9px}
-#tourChainBreadcrumb{color:#cfc6ae}
-#tourNextStopHighlight{color:var(--green-soft-dark)}
-#tourSubgroupTag{background:rgba(77,180,136,.16); color:var(--green-soft-dark); border:1px solid rgba(77,180,136,.35)}
-#tourProximityDistanceBadge{background:rgba(224,170,78,.16); color:var(--amber-on-dark); border:1px solid rgba(224,170,78,.4)}
-
-/* Dark-context text utility fixes (green/cyan/amber/rose on dark) */
-.brand-panel [class*="text-neon-green"],
-.hud-bottom-bar [class*="text-neon-green"],
-.sub-road-alert-card [class*="text-neon-green"],
-.speed-dial-wrap [class*="text-neon-green"]{color:var(--green-on-dark) !important}
-.sub-road-alert-card [class*="text-emerald-400"],
-.sub-road-alert-card [class*="text-emerald-300"]{color:var(--green-soft-dark) !important}
-.sub-road-alert-card [class*="text-cyan-400"],
-.sub-road-alert-card [class*="text-cyan-300"]{color:var(--green-soft-dark) !important}
-.sub-road-alert-card [class*="text-amber-400"],
-.sub-road-alert-card [class*="text-amber-300"]{color:var(--amber-on-dark) !important}
-.sub-road-alert-card [class*="text-rose-400"]{color:var(--red-on-dark) !important}
-.sub-road-alert-card [class*="text-sky-400"]{color:#a8c8e8 !important}
-.sub-road-alert-card [class*="text-slate-400"]{color:#b7af9c !important}
-
-/* ================= Minimized alert dock ================= */
-.mini-alert-dock{
-  position:fixed; left:12px; top:150px !important; z-index:9400;
-  display:flex; flex-direction:column; gap:8px;
-}
-.mini-alert-item{display:flex; align-items:center; gap:6px}
-.mini-alert-btn{
-  width:46px; height:46px; min-height:46px; border-radius:50%;
-  background:rgba(24,22,18,.92); color:var(--paper-on-dark);
-  border:1px solid var(--dark-line); cursor:pointer;
-  display:flex; align-items:center; justify-content:center; position:relative;
-  box-shadow:var(--shadow-dark);
-}
-.mini-alert-btn.police-alert, .mini-alert-btn.radar-alert{border-color:rgba(240,164,154,.6)}
-.mini-alert-btn.speed-alert{border-color:rgba(224,170,78,.6)}
-.mini-alert-btn.convoy-gap-alert{border-color:rgba(224,170,78,.6)}
-.mini-alert-badge{
-  position:absolute; top:-4px; right:-4px; min-width:18px; height:18px;
-  border-radius:999px; background:var(--red); color:#fff;
-  font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; padding:0 4px;
-}
-.mini-alert-badge.badge-police, .mini-alert-badge.badge-radar{background:var(--red)}
-.mini-alert-badge.badge-speed, .mini-alert-badge.badge-gap{background:var(--amber)}
-.mini-alert-badge.badge-road{background:var(--green)}
-.mini-alert-close{
-  width:26px; height:26px; min-height:26px; border-radius:50%;
-  background:rgba(24,22,18,.92); color:var(--paper-on-dark);
-  border:1px solid var(--dark-line); cursor:pointer; font-size:11px;
-  display:flex; align-items:center; justify-content:center;
-}
-.mini-alert-popin{animation:popin .18s ease}
-.mini-alert-popout{animation:popout .2s ease forwards}
-@keyframes popin{from{transform:scale(.85); opacity:0} to{transform:scale(1); opacity:1}}
-@keyframes popout{to{transform:scale(.85); opacity:0}}
-
-/* ================= Overspeed flash ================= */
-#overspeedBorderAlert{
-  position:fixed; inset:0; z-index:9300; pointer-events:none;
-  border:4px solid transparent; border-radius:0; opacity:0; transition:opacity .2s;
-}
-#overspeedBorderAlert.overspeed-active{border-color:rgba(179,55,42,.85); opacity:1}
-
-/* ================= Bottom control bar ================= */
-.hud-bottom-bar, #bottomControlBar{
-  position:fixed; left:12px; right:12px; bottom:72px; z-index:9500;
-  display:flex; gap:8px; align-items:stretch;
-}
-.glove-btn{min-height:56px; border-radius:13px}
-#bottomControlBar .glove-btn{border:1px solid var(--dark-line)}
-.camera-btn{
-  width:60px; flex:none;
-  background:var(--dark-2); color:var(--paper-on-dark);
-  display:flex; align-items:center; justify-content:center;
-}
-.camera-btn:active{transform:scale(.97)}
-.police-btn{
-  background:#8c2f24 !important; border:1px solid #a03a2d !important; color:#fdf3ee !important;
-  flex:1;
-}
-.police-btn span{color:#fdf3ee}
-.report-shield{background:rgba(0,0,0,.35); border:1px solid rgba(240,164,154,.4); color:#f0a49a}
-#bottomControlBar .glass-panel{
-  background:var(--dark-2); color:var(--paper-on-dark);
-}
-
-/* ================= Bottom tab bar ================= */
-.bottom-tab-bar{
-  position:fixed; left:0; right:0; bottom:0; z-index:100001;
-  height:calc(60px + env(safe-area-inset-bottom, 0px));
-  padding-bottom:env(safe-area-inset-bottom, 0px);
-  background:var(--card); border-top:1px solid var(--line-strong);
-  display:grid; grid-template-columns:repeat(4, 1fr);
-  box-shadow:0 -6px 20px rgba(30,27,22,.12);
-}
-.tab-btn{
-  border:0; background:transparent; color:var(--ink-2); cursor:pointer;
-  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
-  font-size:12.5px; font-weight:600; line-height:1.2; min-height:56px; padding:6px 2px;
-  position:relative;
-}
-.tab-btn i{font-size:17px}
-.tab-btn.active{color:var(--green-deep)}
-.tab-btn.active::before{
-  content:""; position:absolute; top:0; left:22%; right:22%; height:3px;
-  border-radius:0 0 4px 4px; background:var(--green);
-}
-.tab-tour-dot{
-  position:absolute; top:8px; right:calc(50% - 26px);
-  width:9px; height:9px; border-radius:50%; background:var(--green);
-  border:2px solid var(--card);
-}
-
-/* ================= Group drawer ================= */
-/* Fixed off-canvas drawer (restored from the original stylesheet — the
-   rewrite dropped the positioning, so the drawer rendered as a static
-   in-flow item underneath the fixed #map and was invisible). */
-#convoyDrawer{
-  position:fixed; top:0; left:0; bottom:0;
-  width:320px; max-width:85vw; z-index:99999;
-  transform:translateX(-100%);
-  background:var(--card); color:var(--ink);
-  border-right:1px solid var(--line-strong);
-  box-shadow:0 0 40px rgba(0,0,0,.35);
-}
-#ridersDrawer,
-#groupDrawer{
-  position:fixed; top:0; left:0; bottom:0;
-  width:320px; max-width:85vw; z-index:99999;
-  transform:translateX(-100%);
-}
-#convoyDrawer.translate-x-0,
-#convoyDrawer.open,
-#ridersDrawer.translate-x-0,
-#ridersDrawer.open,
-#groupDrawer.translate-x-0,
-#groupDrawer.open{
-  transform:translateX(0%) !important;
-  pointer-events:auto !important;
-}
-.drawer-head{color:var(--ink)}
-.drawer-head-icon{background:var(--green-soft); color:var(--green-deep)}
-.drawer-close{
-  background:var(--card-2); color:var(--ink-2); border:1px solid var(--line);
-  width:42px; height:42px; min-height:42px; border-radius:50%; cursor:pointer;
-}
-.invite-friend-btn{
-  background:var(--green); color:#fff; border:1px solid var(--green);
-  border-radius:11px; font-weight:600; cursor:pointer;
-}
-.drawer-next-stop{background:var(--bg); border:1px solid var(--line); border-radius:12px; color:var(--ink)}
-.drawer-next-stop .next-stop-card{color:var(--ink)}
-.drawer-leader{
-  background:var(--amber-soft); border:1px solid rgba(154,98,6,.4);
-  color:#5f4305; border-radius:11px;
-}
-.drawer-foot{color:var(--ink-3)}
-#drawerBackdrop{background:rgba(27,25,21,.55)}
-#ridersListContainer::-webkit-scrollbar{width:6px}
-#ridersListContainer::-webkit-scrollbar-thumb{background:rgba(30,27,22,.2); border-radius:3px}
-
-/* Rider cards (JS-generated, Tailwind utilities inside) */
-.rider-card{
-  background:var(--card-2); border:1px solid var(--line); border-radius:13px;
-}
-.rider-card.is-leader{background:var(--amber-soft); border-color:rgba(154,98,6,.45)}
-.rider-card.straggler{background:var(--red-soft); border-color:rgba(179,55,42,.45)}
-.kick-rider-btn{
-  background:var(--red-soft); color:var(--red); border:1px solid rgba(179,55,42,.35);
-  border-radius:8px; cursor:pointer; font-weight:600; min-height:36px;
-}
-
-/* Tour breadcrumb steps (JS-generated) */
-.tour-breadcrumb-step{
-  background:var(--card-2); border:1px solid var(--line); color:var(--ink-2);
-  font-weight:600; border-radius:999px;
-}
-.tour-breadcrumb-step.completed{background:var(--green-soft); border-color:rgba(23,104,74,.4); color:var(--green-deep)}
-.tour-breadcrumb-step.active{background:var(--amber-soft); border-color:rgba(154,98,6,.45); color:#5f4305}
-
-/* ================= Modals (generic paper cards) ================= */
-.modal-card{
-  background:var(--card); color:var(--ink);
-  border:1px solid var(--line-strong); border-radius:18px; box-shadow:var(--shadow);
-}
-.modal-x-btn{
-  width:42px; height:42px; min-height:42px; border-radius:50%;
-  background:var(--card-2); color:var(--ink-2); border:1px solid var(--line); cursor:pointer;
-}
-.modal-cancel-btn{
-  background:var(--card-2); color:var(--ink); border:1px solid var(--line-strong);
-  border-radius:12px; font-weight:600; cursor:pointer; min-height:50px;
-}
-.modal-confirm-btn{
-  background:var(--green); color:#fff; border:1px solid var(--green);
-  border-radius:12px; font-weight:700; cursor:pointer; min-height:50px;
-}
-.modal-confirm-btn:hover{background:var(--green-deep)}
-.modal-confirm-btn:disabled{opacity:.55; cursor:not-allowed}
-.modal-confirm-btn.danger{background:var(--red); border-color:var(--red)}
-
-/* ================= Join screen (onboarding modal) ================= */
-.join-card{background:var(--card); color:var(--ink); border:1px solid var(--line-strong); border-radius:20px; box-shadow:var(--shadow)}
-.join-tagline{color:var(--green-deep); font-weight:600}
-.join-sub{color:var(--ink-2)}
-.join-input{
-  background:var(--card-2); color:var(--ink);
-  border:1px solid var(--line-strong); border-radius:12px;
-  min-height:52px; font-size:16px;
-}
-.join-input:focus{border-color:var(--green); outline:none; box-shadow:0 0 0 3px rgba(23,104,74,.18)}
-.join-input::placeholder{color:var(--ink-3)}
-.gen-code-btn{
-  background:var(--green-soft); color:var(--green-deep);
-  border:1px solid rgba(23,104,74,.35); border-radius:11px; font-weight:700; cursor:pointer; min-height:52px;
-}
-.leader-toggle{
-  background:var(--card-2); border:1px solid var(--line); border-radius:13px; color:var(--ink);
-}
-.leader-crown{background:var(--amber-soft); color:var(--amber)}
-.leader-notice{
-  background:var(--amber-soft); border:1px solid rgba(154,98,6,.4);
-  color:#5f4305; border-radius:11px;
-}
-.join-close-btn{
-  background:var(--card-2); color:var(--ink-2); border:1px solid var(--line);
-  border-radius:50%; width:42px; height:42px; min-height:42px; cursor:pointer;
-}
-.join-foot{color:var(--ink-3)}
-.apk-btn{
-  background:var(--green-soft); color:var(--green-deep);
-  border:1px solid rgba(23,104,74,.35); border-radius:12px; font-weight:700;
-}
-.apk-btn:hover{background:#d6e8dd}
-
-/* ================= GPS permission modal ================= */
-.gps-modal-icon{background:var(--green-soft); color:var(--green-deep)}
-.gps-steps{color:var(--ink-2)}
-.gps-dismiss-btn{
-  background:var(--card-2); color:var(--ink); border:1px solid var(--line-strong);
-  border-radius:12px; font-weight:600; cursor:pointer; min-height:50px;
-}
-
-/* ================= Police report modal ================= */
-.police-confirm-icon{background:var(--red-soft); color:var(--red)}
-.photo-trigger-btn{
-  background:var(--red-soft); color:var(--red);
-  border:1px solid rgba(179,55,42,.4); border-radius:12px; font-weight:700; cursor:pointer;
-  display:flex; align-items:center; justify-content:center; gap:8px; min-height:52px;
-}
-
-/* ================= Verify police modal ================= */
-.verify-shield{background:var(--red-soft); color:var(--red)}
-.verify-score-box{background:var(--card-2); border:1px solid var(--line); border-radius:12px; color:var(--ink)}
-.verify-bar-track{background:rgba(30,27,22,.1); border-radius:999px; overflow:hidden}
-.verify-min-btn{
-  background:var(--card-2); color:var(--ink); border:1px solid var(--line);
-  border-radius:50%; width:42px; height:42px; min-height:42px; cursor:pointer;
-}
-.verify-close-btn{
-  background:var(--card-2); color:var(--ink-2); border:1px solid var(--line);
-  border-radius:50%; width:42px; height:42px; min-height:42px; cursor:pointer;
-}
-
-/* ================= Map-pick banner ================= */
-.map-pick-banner{
-  position:fixed; left:12px; right:12px; bottom:138px; z-index:9600;
-  background:var(--card); color:var(--ink);
-  border:1px solid var(--line-strong); border-radius:14px; box-shadow:var(--shadow);
-}
-.map-pick-icon{background:var(--green-soft); color:var(--green-deep)}
-.map-pick-cancel{
-  background:var(--card-2); color:var(--ink); border:1px solid var(--line-strong);
-  border-radius:10px; font-weight:600; cursor:pointer; min-height:44px;
-}
-
-/* ================= Tour planner modal ================= */
-.tour-planner-card{background:var(--card); color:var(--ink); border:1px solid var(--line-strong); border-radius:18px; box-shadow:var(--shadow)}
-.tour-head{color:var(--ink)}
-.tour-head-icon{background:var(--amber-soft); color:var(--amber)}
-.tour-config-card{background:var(--card-2); border:1px solid var(--line); border-radius:13px; color:var(--ink)}
-.tour-input{
-  background:var(--card); color:var(--ink);
-  border:1px solid var(--line-strong); border-radius:11px; min-height:48px;
-}
-.tour-input:focus{border-color:var(--green); outline:none; box-shadow:0 0 0 3px rgba(23,104,74,.18)}
-.tour-input::placeholder{color:var(--ink-3)}
-.tour-add-btn{
-  background:var(--green); color:#fff; border:1px solid var(--green);
-  border-radius:11px; font-weight:700; cursor:pointer; min-height:48px;
-}
-.tour-gps-btn{
-  background:var(--green-soft); color:var(--green-deep);
-  border:1px solid rgba(23,104,74,.35); border-radius:11px; font-weight:600; cursor:pointer; min-height:48px;
-}
-.tour-clear-btn{
-  background:var(--red-soft); color:var(--red);
-  border:1px solid rgba(179,55,42,.35); border-radius:11px; font-weight:600; cursor:pointer; min-height:48px;
-}
-.tour-foot{color:var(--ink-2)}
-.tour-cancel-btn{
-  background:var(--card-2); color:var(--ink); border:1px solid var(--line-strong);
-  border-radius:12px; font-weight:600; cursor:pointer; min-height:50px;
-}
-.tour-activate-btn{
-  background:var(--green); color:#fff; border:1px solid var(--green);
-  border-radius:12px; font-weight:700; cursor:pointer; min-height:50px;
-}
-.tour-activate-btn:hover{background:var(--green-deep)}
-.tour-activate-btn:disabled{opacity:.55; cursor:not-allowed}
-
-/* Preset chips + waypoint rows (Tailwind utilities inside) */
-.preset-chip{border-radius:999px; font-weight:600}
-#waypointListContainer input{
-  background:var(--card); color:var(--ink);
-  border:1px solid var(--line-strong); border-radius:9px; min-height:44px;
-}
-#waypointListContainer input:focus{border-color:var(--green); outline:none; box-shadow:0 0 0 3px rgba(23,104,74,.15)}
-#waypointListContainer input::placeholder{color:var(--ink-3)}
-
-/* ================= Police photo viewer ================= */
-#policePhotoViewerModal{background:rgba(27,25,21,.85)}
-#policePhotoViewerModal .rounded-2xl{border-radius:16px}
-
-/* ================= PTT walkie-talkie dock ================= */
-#pttWalkieDock{position:fixed; left:12px; bottom:150px; z-index:9400; display:flex; flex-direction:column; gap:8px; align-items:center}
-.ptt-mute-btn, .ptt-talk-btn{
-  width:56px; height:56px; min-height:56px; border-radius:50%;
-  background:rgba(24,22,18,.92); color:var(--paper-on-dark);
-  border:1px solid var(--dark-line); cursor:pointer;
-  display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow-dark);
-}
-.ptt-talk-btn.transmitting{background:var(--red); border-color:var(--red); color:#fff}
-.ptt-talk-btn.receiving{background:var(--green); border-color:var(--green); color:#fff}
-.ptt-talk-btn.muted{opacity:.6}
-.ptt-countdown{
-  background:var(--red); color:#fff; border-radius:999px;
-  font-weight:700; font-variant-numeric:tabular-nums;
-}
-
-/* ================= Toasts / status ================= */
-.toast-container{position:fixed; left:50%; transform:translateX(-50%); bottom:150px; z-index:100050; pointer-events:none}
-.toast{
-  background:var(--dark-2); color:var(--paper-on-dark);
-  border:1px solid var(--dark-line); border-radius:12px;
-  box-shadow:var(--shadow-dark); font-size:14px;
-}
-
-/* ================= IAB warning banner ================= */
-#iabWarningBanner{background:#f7ecd4; border-bottom:1px solid rgba(154,98,6,.4); color:#5f4305}
-body.has-iab-banner #map{top:44px}
-
-/* ================= Road change modal ================= */
-.road-change-modal{background:var(--card); color:var(--ink); border:1px solid var(--line-strong); border-radius:18px; box-shadow:var(--shadow)}
-.road-change-pill{background:var(--green-soft); color:var(--green-deep); border-radius:999px; font-weight:700}
-.giant-speed-sign{
-  background:var(--card); color:var(--ink);
-  border:3px solid var(--red); border-radius:14px; font-weight:700;
-}
-
-/* ================= Safety nets ================= */
-body{height:100vh; height:100dvh; overflow:hidden}
+/* ---------- clean app shell (no phone mockup, no demo chrome) ---------- */
+html,body{height:100%}
+body{margin:0}
+#app{display:flex; flex-direction:column; height:100dvh; max-width:480px; margin:0 auto; background:var(--card); box-shadow:0 0 0 1px var(--line)}
+@media (min-width:520px){ #app{border-left:1px solid var(--line); border-right:1px solid var(--line)} }
+#screens{flex:1; min-height:0; display:flex; flex-direction:column; position:relative}
+.screen-riding{overflow:hidden !important}
 .hidden{display:none !important}
-#convoyDrawer{transition:transform .28s ease}
-#drawerBackdrop{transition:opacity .25s ease}
-#onboardingModal, #gpsPermissionModal, #policeConfirmModal, #verifyPoliceModal, #tourPlannerModal, #policePhotoViewerModal{transition:opacity .2s ease}
-
-/* ================= Day mode (light map tiles) ================= */
-/* Dark map chrome stays dark — it reads well on light tiles too. */
-body.map-day-mode .leaflet-container{background:#e8e4da}
-body.map-day-mode #map{background:#e8e4da}
-body.map-day-mode .brand-panel.glass-panel-neon,
-body.map-day-mode .speed-dial,
-body.map-day-mode .tool-btn,
-body.map-day-mode .mini-alert-btn{background:rgba(24,22,18,.92)}
-
-/* ================= Light-container Tailwind shim ================= */
-/* JS-generated and leftover Tailwind utilities inside paper surfaces
-   (drawer + modals) get paper-palette colors even if the CDN config
-   or a utility is missed. Dark backdrops are NOT in this list. */
-#convoyDrawer [class*="text-slate-100"],
-#onboardingModal [class*="text-slate-100"],
-#gpsPermissionModal [class*="text-slate-100"],
-#policeConfirmModal [class*="text-slate-100"],
-#verifyPoliceModal [class*="text-slate-100"],
-#tourPlannerModal [class*="text-slate-100"],
-.road-change-modal [class*="text-slate-100"]{color:var(--ink) !important}
-#convoyDrawer [class*="text-slate-200"],
-#convoyDrawer [class*="text-slate-300"],
-#onboardingModal [class*="text-slate-200"],
-#onboardingModal [class*="text-slate-300"],
-#gpsPermissionModal [class*="text-slate-200"],
-#policeConfirmModal [class*="text-slate-200"],
-#verifyPoliceModal [class*="text-slate-200"],
-#tourPlannerModal [class*="text-slate-200"],
-#tourPlannerModal [class*="text-slate-300"],
-.road-change-modal [class*="text-slate-200"]{color:var(--ink-2) !important}
-#convoyDrawer [class*="text-slate-400"],
-#convoyDrawer [class*="text-slate-500"],
-#onboardingModal [class*="text-slate-400"],
-#gpsPermissionModal [class*="text-slate-400"],
-#policeConfirmModal [class*="text-slate-400"],
-#verifyPoliceModal [class*="text-slate-400"],
-#tourPlannerModal [class*="text-slate-400"],
-#tourPlannerModal [class*="text-slate-500"],
-.road-change-modal [class*="text-slate-400"]{color:var(--ink-3) !important}
-#convoyDrawer [class*="bg-slate-800"],
-#convoyDrawer [class*="bg-slate-900"],
-#onboardingModal [class*="bg-slate-800"],
-#tourPlannerModal [class*="bg-slate-800"]{background-color:var(--card-2) !important}
-#convoyDrawer [class*="border-slate-700"],
-#convoyDrawer [class*="border-slate-800"],
-#tourPlannerModal [class*="border-slate-700"],
-#tourPlannerModal [class*="border-slate-800"]{border-color:var(--line-strong) !important}
-#convoyDrawer [class*="text-emerald-400"],
-#onboardingModal [class*="text-emerald-400"],
-#tourPlannerModal [class*="text-emerald-400"],
-#verifyPoliceModal [class*="text-emerald-400"]{color:var(--green) !important}
-#convoyDrawer [class*="text-cyan-400"],
-#convoyDrawer [class*="text-cyan-300"],
-#tourPlannerModal [class*="text-cyan-400"],
-#tourPlannerModal [class*="text-cyan-300"]{color:var(--green-deep) !important}
-#convoyDrawer [class*="text-amber-400"],
-#convoyDrawer [class*="text-amber-300"],
-#tourPlannerModal [class*="text-amber-400"]{color:var(--amber) !important}
-#convoyDrawer [class*="text-rose-400"],
-#tourPlannerModal [class*="text-rose-400"],
-#verifyPoliceModal [class*="text-rose-400"]{color:var(--red) !important}
-#tourPlannerModal [class*="text-sky-400"]{color:#33658a !important}
-#convoyDrawer [class*="bg-emerald-500/20"],
-#tourPlannerModal [class*="bg-emerald-500/20"],
-#tourPlannerModal [class*="bg-cyan-500/20"]{background-color:var(--green-soft) !important}
-#convoyDrawer [class*="bg-amber-500/20"],
-#tourPlannerModal [class*="bg-amber-500/20"]{background-color:var(--amber-soft) !important}
-#tourPlannerModal [class*="border-cyan-500/40"],
-#tourPlannerModal [class*="border-cyan-500/30"]{border-color:rgba(23,104,74,.4) !important}
-#tourPlannerModal [class*="border-amber-500/40"],
-#tourPlannerModal [class*="border-amber-500/50"]{border-color:rgba(154,98,6,.45) !important}
-select.tour-input{background-color:var(--card)}
-.tour-pulsing-icon{display:inline-flex}
-
-/* ================= Small screens ================= */
-@media (max-width: 380px){
-  .loc-top{max-width:158px}
-  .loc-name{font-size:11.5px}
-  .speed-dial{width:76px; height:76px}
-  .speed-dial #liveSpeedDisplay{font-size:24px}
-  .speed-dial-wrap{top:150px}
-  .map-tools{top:282px}
-  .brand-name{font-size:11px}
-  #subRoadAlertSection{bottom:134px}
+.field-error{color:var(--red); font-size:13.5px; font-weight:600; margin:0}
+/* Join hero: plain gradient art, no photo, no logo image */
+.join-hero-art{width:100%; height:218px; display:block;
+  background:linear-gradient(135deg, #0f4f37 0%, #17684a 45%, #2c2a24 100%);}
+.join-hero-art::after{content:""; display:block; height:100%;
+  background:radial-gradient(120px 60px at 78% 30%, rgba(238,194,122,.55), transparent 70%),
+             radial-gradient(200px 90px at 20% 80%, rgba(255,253,247,.14), transparent 70%);}
+.join-hero .scrim{position:absolute; inset:auto 0 0 0; padding:34px 20px 14px;
+  background:linear-gradient(to top, rgba(14,13,10,.82), rgba(14,13,10,0)); color:#f5f1e6;}
+/* Riding: real Leaflet/Mapbox map fills the map zone */
+.map-zone #map{position:absolute; inset:0; z-index:1; background:#24211c}
+.map-zone .map-fade{z-index:2; pointer-events:none}
+.map-zone .stop-badge{z-index:3}
+.map-zone .leaflet-container{font-family:inherit}
+.map-zone .leaflet-control-attribution{font-size:9px; background:rgba(255,253,247,.75)}
+/* Tour: real Leaflet map as the picking surface; pins float above it */
+.tour-map #tourLeaflet{position:absolute; inset:0; z-index:1; background:#2c2a24}
+.tour-map .tm-shade{z-index:2; pointer-events:none}
+.tour-map svg.tm-route{z-index:3}
+.tour-map .tm-pins{z-index:4}
+.tour-map .leaflet-container{font-family:inherit; cursor:crosshair}
+/* Bottom tabs: always visible, fixed at the bottom of the app */
+.bottom-tabs{
+  flex:none; display:flex; gap:6px; padding:8px 10px calc(8px + env(safe-area-inset-bottom));
+  background:var(--card); border-top:1px solid var(--line); box-shadow:0 -6px 18px rgba(30,27,22,.06);
 }
-
-/* ================= Reduced motion ================= */
-@media (prefers-reduced-motion: reduce){
-  *, *::before, *::after{animation:none !important; transition:none !important}
+.bottom-tabs button{
+  flex:1; border:0; background:transparent; color:var(--ink-2);
+  font-weight:600; font-size:13.5px; border-radius:10px; padding:10px 2px; cursor:pointer; min-height:44px;
 }
-
-/* ================= Coverage fixes (found by class audit) ================= */
-
-/* Primary green button — Ride শুরু করো CTA + road-popup dismiss */
-.neon-btn-green{
-  background:var(--green); color:#fff; border:1px solid var(--green);
-  font-weight:700; cursor:pointer; min-height:50px;
-}
-.neon-btn-green:hover{background:var(--green-deep)}
-.neon-btn-green:active{transform:scale(.98)}
-
-/* Road-transition + verify modals: wrappers are the fixed overlays,
-   inner cards are the paper panels (chunk 2 styled the wrapper as a
-   card by mistake — corrected here). */
-.road-change-modal, .verify-police-modal{
-  position:fixed; inset:0; z-index:100010;
-  display:flex; align-items:center; justify-content:center;
-  padding:16px; background:rgba(27,25,21,.72); backdrop-filter:blur(4px);
-  border:0; border-radius:0; box-shadow:none;
-  transition:opacity .2s ease;
-}
-.road-change-card, .verify-police-card{
-  background:var(--card); color:var(--ink);
-  border:1px solid var(--line-strong); border-radius:18px; box-shadow:var(--shadow);
-  padding:20px; width:100%; max-width:430px; text-align:center;
-}
-/* Giant circular speed-limit sign */
-.giant-speed-sign{
-  width:112px; height:112px; border-radius:50%;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  margin:12px auto; padding:0;
-}
-.giant-speed-num{font-family:"IBM Plex Mono", ui-monospace, monospace; font-size:44px; font-weight:700; line-height:1; font-variant-numeric:tabular-nums}
-.giant-speed-unit{font-size:11px; font-weight:700; color:var(--ink-2); margin-top:3px}
-.road-progress-bar{height:6px; background:var(--green); border-radius:999px; margin-top:16px; width:100%}
-
-/* Verify voting buttons */
-.vote-btn-yes{
-  background:var(--green); color:#fff; border:1px solid var(--green);
-  min-height:52px; cursor:pointer;
-}
-.vote-btn-yes:hover{background:var(--green-deep)}
-.vote-btn-no{
-  background:var(--red-soft); color:var(--red); border:1px solid rgba(179,55,42,.4);
-  min-height:52px; cursor:pointer;
-}
-.vote-btn-no:hover{background:#f6ddd7}
-
-/* PTT dock — actual class names from the HTML */
-.ptt-speaker-btn{
-  width:46px; height:46px; min-height:46px; border-radius:50%;
-  background:rgba(24,22,18,.92); color:var(--paper-on-dark);
-  border:1px solid var(--dark-line); cursor:pointer;
-  display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow-dark);
-  font-size:17px; padding:0;
-}
-.ptt-speaker-btn.muted{opacity:.6}
-.ptt-talk-btn{position:relative}
-.ptt-talk-content{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; line-height:1.1}
-.ptt-talk-icon{font-size:20px}
-.ptt-talk-label{font-size:10px; font-weight:700; letter-spacing:.04em}
-.ptt-countdown-badge{
-  position:absolute; top:-7px; right:-7px;
-  background:var(--red); color:#fff; border-radius:999px;
-  font-size:11px; font-weight:700; padding:1px 7px; line-height:1.5;
-}
-.ptt-pulse-ring{
-  position:absolute; inset:-5px; border-radius:50%;
-  border:2px solid rgba(77,180,136,.45); pointer-events:none;
-}
-.ptt-audio-wave{display:inline-flex; align-items:center; gap:2px; height:16px}
-.wave-bar{width:3px; background:var(--green-on-dark); border-radius:2px; display:inline-block}
-.wave-bar:nth-child(1){height:7px}
-.wave-bar:nth-child(2){height:13px}
-.wave-bar:nth-child(3){height:9px}
-.wave-bar:nth-child(4){height:15px}
-.wave-bar:nth-child(5){height:8px}
-
-/* Join header logo */
-.cholo-ghuri-brand-logo{
-  width:84px; height:84px; border-radius:20px; overflow:hidden;
-  margin:0 auto 10px; border:1px solid var(--line-strong);
-  box-shadow:var(--shadow); background:var(--card-2);
-}
-.brand-logo-img{width:100%; height:100%; object-fit:cover; display:block}
-
-/* Group drawer — next-stop card text */
-.drawer-next-stop .lab{font-size:11px; font-weight:700; color:var(--ink-3); display:block}
-.drawer-next-stop .place{font-size:15px; font-weight:700; color:var(--ink); line-height:1.35}
-.drawer-next-stop .chain{font-size:12px; color:var(--ink-2); margin-top:2px}
-
-/* Slim scrollbars on paper surfaces */
-.custom-scrollbar::-webkit-scrollbar{width:6px}
-.custom-scrollbar::-webkit-scrollbar-thumb{background:rgba(30,27,22,.2); border-radius:3px}
-.custom-scrollbar::-webkit-scrollbar-track{background:transparent}
-
-/* Tour-proximity mini-dock close button (app.js uses this name; same
-   treatment as .mini-alert-close — found by the CSS inventory audit). */
-.mini-alert-close-btn{
-  width:26px; height:26px; min-height:26px; border-radius:50%;
-  background:rgba(24,22,18,.92); color:var(--paper-on-dark);
-  border:1px solid var(--dark-line); cursor:pointer; font-size:11px;
-  display:flex; align-items:center; justify-content:center;
-}
-
-/* ================= Tailwind-failure safety net ================= */
-/* Layout-critical rules that must NOT depend on the Tailwind Play CDN.
-   If the CDN script ever fails to run (CORS/SRI, offline, blocked), these
-   keep the page usable: logo stays 28/36px, Join card keeps its width and
-   padding, START/APK buttons stay full-width, header and modals stay
-   fixed, drawer backdrop stays a full-screen overlay. They duplicate
-   what the Tailwind classes on the same elements already say, so when
-   Tailwind DOES run nothing changes. */
-.brand-logo{width:28px; height:28px; flex-shrink:0; overflow:hidden}
-@media (min-width:640px){.brand-logo{width:36px; height:36px}}
-.brand-logo img{width:100%; height:100%; object-fit:contain; display:block}
-.hud-top-bar{position:fixed; top:0; left:0; right:0; z-index:10000; width:100%; pointer-events:none}
-.hud-row-1{display:flex; align-items:flex-start; justify-content:space-between; gap:6px}
-.brand-panel{display:flex; align-items:center; gap:6px}
-.join-card{width:100%; max-width:448px; padding:24px}
-@media (min-width:640px){.join-card{padding:32px}}
-#startRidingBtn{width:100%; display:flex; align-items:center; justify-content:center; gap:8px; padding:14px 12px}
-.apk-btn{display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:12px}
-#gpsPermissionModal,#policeConfirmModal,#policePhotoViewerModal{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; padding:16px}
-#gpsPermissionModal{z-index:100010}
-#policeConfirmModal{z-index:1600}
-#policePhotoViewerModal{z-index:2000}
-#drawerBackdrop{position:fixed; inset:0; z-index:99990}
-#mapPickBanner{position:fixed; top:16px; left:50%; transform:translateX(-50%); z-index:15000; display:flex; align-items:center; gap:12px; padding:10px 16px; border-radius:16px; background:var(--card); color:var(--ink); border:1px solid var(--line-strong); box-shadow:var(--shadow)}
-.tour-planner-card{width:100%; max-width:672px}
+.bottom-tabs button[aria-selected="true"]{background:var(--green); color:#fff}
+@media (prefers-color-scheme: dark){ .bottom-tabs button[aria-selected="true"]{background:var(--green); color:#10130f} }
+/* Defect fixes: Group list is one vertical column, full width rows */
+.rider-list{flex-direction:column !important; width:100%}
+.rider-list li{width:100%; min-width:0}
+.rider-list .kick-btn{flex:none; border:1.5px solid var(--line-strong); background:var(--card);
+  color:var(--red); border-radius:9px; padding:6px 10px; min-height:38px; cursor:pointer;
+  font-weight:700; font-size:12.5px}
+/* Tour screen is a normal scrolling screen: never clipped at the viewport edge */
+#screen-tour{padding-bottom:8px}
+.tour-map-card{overflow:visible}
