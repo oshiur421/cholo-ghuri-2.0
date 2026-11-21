@@ -30,12 +30,13 @@
     return "id-" + Date.now() + "-" + Math.floor(Math.random() * 1e9);
   }
   function generateRoomCode() {
-    var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    // No I / 1 / O / 0 — those get misread (4ZDI5A looked like 4ZD15A).
+    var chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     var buf = new Uint8Array(6);
     if (typeof crypto !== "undefined" && crypto.getRandomValues) crypto.getRandomValues(buf);
     else for (var i = 0; i < 6; i++) buf[i] = Math.floor(Math.random() * 256);
     var out = "";
-    for (var j = 0; j < 6; j++) out += chars[buf[j] % 36];
+    for (var j = 0; j < 6; j++) out += chars[buf[j] % 32];
     return out;
   }
   function initials(name) {
@@ -243,8 +244,12 @@
 
   /* ---------- GPS ---------- */
   var gpsWatchId = null;
+  var gpsLowAccuracy = false; // set after a high-accuracy timeout — network location works indoors
   function startGps() {
     if (!("geolocation" in navigator) || gpsWatchId !== null) return;
+    var opts = gpsLowAccuracy
+      ? { enableHighAccuracy: false, maximumAge: 10000, timeout: 20000 }
+      : { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 };
     gpsWatchId = navigator.geolocation.watchPosition(function (pos) {
       hasGpsFix = true;
       riderLocation.lat = pos.coords.latitude;
@@ -264,11 +269,27 @@
       maybeGeocode();
       evaluatePoliceProximity();
     }, function (err) {
-      console.debug("[GPS]", err && err.message);
-      var w = $("whereNow"); if (w) w.textContent = "Location পাওয়া যাচ্ছে না";
-      var ws = $("whereSub"); if (ws) ws.textContent = "ফোনের Location অনুমতি দাও, তারপর আবার চেষ্টা করো";
-      toast($("rideToast"), "Location অনুমতি দরকার — ফোনের সেটিংসে Location চালু করো");
-    }, { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 });
+      console.debug("[GPS]", err && err.code, err && err.message);
+      var code = err && err.code;
+      if (code === 1) {
+        // Permission actually denied — only then say so.
+        var w = $("whereNow"); if (w) w.textContent = "Location পাওয়া যাচ্ছে না";
+        var ws = $("whereSub"); if (ws) ws.textContent = "ফোনের Location অনুমতি দাও, তারপর আবার চেষ্টা করো";
+        toast($("rideToast"), "Location অনুমতি দরকার — ব্রাউজারের ঠিকানা বারের তালা চিহ্নে চেপে Location Allow করো");
+      } else if (code === 3 && !gpsLowAccuracy) {
+        // High-accuracy GPS timed out (common indoors) — fall back to
+        // network location instead of wrongly reporting "not found".
+        gpsLowAccuracy = true;
+        try { navigator.geolocation.clearWatch(gpsWatchId); } catch (e) {}
+        gpsWatchId = null;
+        var w2 = $("whereNow"); if (w2) w2.textContent = "অবস্থান খোঁজা হচ্ছে…";
+        startGps();
+      } else {
+        // Still searching (no fix yet) — keep waiting, don't claim failure.
+        var w3 = $("whereNow"); if (w3) w3.textContent = "অবস্থান খোঁজা হচ্ছে…";
+        var ws3 = $("whereSub"); if (ws3) ws3.textContent = "GPS সিগন্যাল খোঁজা হচ্ছে — খোলা জায়গায় গেলে তাড়াতাড়ি পাবে";
+      }
+    }, opts);
   }
   async function maybeGeocode() {
     var now = Date.now();
@@ -1187,7 +1208,9 @@
     setPickMode("from");
     renderTour();
     var rc = $("roomCode");
-    if (rc && !rc.value) rc.value = generateRoomCode();
+    // No auto-filled code: the field stays empty until the user taps
+    // "নতুন কোড" or presses START (which generates a fresh real code),
+    // so no code ever appears on its own looking like a fixed demo value.
     if (currentSession.riderName) { var rn = $("riderName"); if (rn) rn.value = currentSession.riderName; }
     if (currentSession.roomCode && rc) rc.value = currentSession.roomCode;
     if (currentSession.isLeader) {
