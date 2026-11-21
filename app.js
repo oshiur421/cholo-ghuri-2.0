@@ -93,6 +93,7 @@
     if (saved) { var p = JSON.parse(saved); if (p && p.riderId) currentSession = p; }
   } catch (e) {}
   var riderLocation = { lat: 23.8103, lng: 90.4125, speed: 0, heading: 0 };
+  var hasGpsFix = false; // true only after a real GPS fix — never show the Dhaka fallback as "you"
   var hasJoinedDB = false;
   var isHandlingKick = false, isHandlingRoomClose = false;
   var kickedRiderIds = new Set();
@@ -119,7 +120,12 @@
     document.querySelectorAll(".bottom-tabs [role='tab']").forEach(function (t) {
       t.setAttribute("aria-selected", t.getAttribute("data-screen") === id ? "true" : "false");
     });
-    if (id === "screen-riding") { ensureRidingMap(); setTimeout(function () { if (window.map) window.map.invalidateSize(); }, 120); }
+    if (id === "screen-riding") {
+      ensureRidingMap();
+      startGps(); // GPS must run even if the user opens the Ride tab before pressing START
+      if (hasGpsFix) { updateMyMarker(); if (window.map) window.map.panTo([riderLocation.lat, riderLocation.lng], { animate: true }); }
+      setTimeout(function () { if (window.map) window.map.invalidateSize(); }, 120);
+    }
     if (id === "screen-tour") { ensureTourMap(); setTimeout(function () { if (tourMap) tourMap.invalidateSize(); }, 120); }
   }
   document.querySelectorAll(".bottom-tabs [role='tab']").forEach(function (tab) {
@@ -191,7 +197,7 @@
     });
   }
   function updateMyMarker() {
-    if (!window.map) return;
+    if (!window.map || !hasGpsFix) return;
     if (!myMarker) {
       myMarker = L.marker([riderLocation.lat, riderLocation.lng],
         { icon: riderIcon(currentSession.riderName || "তুমি", true, currentSession.isLeader) }).addTo(window.map);
@@ -240,6 +246,7 @@
   function startGps() {
     if (!("geolocation" in navigator) || gpsWatchId !== null) return;
     gpsWatchId = navigator.geolocation.watchPosition(function (pos) {
+      hasGpsFix = true;
       riderLocation.lat = pos.coords.latitude;
       riderLocation.lng = pos.coords.longitude;
       riderLocation.speed = pos.coords.speed != null ? pos.coords.speed * 3.6 : 0;
@@ -258,6 +265,9 @@
       evaluatePoliceProximity();
     }, function (err) {
       console.debug("[GPS]", err && err.message);
+      var w = $("whereNow"); if (w) w.textContent = "Location পাওয়া যাচ্ছে না";
+      var ws = $("whereSub"); if (ws) ws.textContent = "ফোনের Location অনুমতি দাও, তারপর আবার চেষ্টা করো";
+      toast($("rideToast"), "Location অনুমতি দরকার — ফোনের সেটিংসে Location চালু করো");
     }, { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 });
   }
   async function maybeGeocode() {
@@ -1199,6 +1209,17 @@
     if (currentSession.riderId && currentSession.roomCode) {
       fetchActiveTourPlan();
     }
+    // Show the room code the user is about to join with — never a fake demo code.
+    if (!currentSession.roomCode && rc && rc.value) {
+      var gs = $("groupSub");
+      if (gs) gs.textContent = "রুম " + rc.value + " · Ride শুরু করলে গ্রুপ দেখাবে";
+      var chip0 = $("roomChip");
+      if (chip0) chip0.textContent = "রুম " + rc.value + " · এখনো যোগ দাওনি";
+    }
+    // GPS starts on load so the Riding map shows the real location even before
+    // START is pressed; a saved session also resumes its live sync.
+    startGps();
+    if (currentSession.riderId && currentSession.roomCode) { startSyncLoops(); subscribeRealtime(); }
     openScreen("screen-join");
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
