@@ -2,7 +2,7 @@
 <html lang="bn">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 <meta name="color-scheme" content="light dark" />
 <link rel="icon" href="data:," />
 <title>Cholo Ghuri — Biker Convoy &amp; Highway Radar</title>
@@ -62,7 +62,7 @@
 
           <!-- ===== Screen 2 : Riding — full-screen map ===== -->
           <div class="screen screen-riding" id="screen-riding" role="tabpanel" aria-label="Riding screen">
-            <div class="map-zone"><div id="map"></div><div class="map-fade"></div><div class="stop-badge" style="left:12px; top:118px"><i>১</i><span id="mapNextBadge">Cumilla</span></div></div>
+            <div class="map-zone"><div id="map"></div><div class="map-fade"></div><div class="stop-badge" style="left:12px; top:118px"><i>১</i><span id="mapNextBadge">—</span></div></div>
             <div class="riding-ui">
               <div class="map-topbar">
                 <div class="map-chip">
@@ -90,9 +90,9 @@
               <div class="ride-sheet">
                 <div class="sheet-grab" aria-hidden="true"></div>
                 <div class="tour-progress">
-                  <div class="tp-top"><b>পরের থামা: <span id="rideNextStop">Cumilla · ১৮.৪ km</span></b><span id="rideTourLeft">মোট বাকি ১৯২ km</span></div>
+                  <div class="tp-top"><b>পরের থামা: <span id="rideNextStop">ট্যুর সেট করা হয়নি</span></b><span id="rideTourLeft">—</span></div>
                   <div class="tp-bar" aria-hidden="true"><i id="rideTpBar"></i></div>
-                  <div class="tp-stops" id="rideTpStops"><span>Dhaka ✓</span><span class="on">Mawa · এখন</span><span>Cumilla</span><span>Chattogram</span></div>
+                  <div class="tp-stops" id="rideTpStops"><span>এখনো ট্যুর সেট করা হয়নি — Tour ট্যাবে গিয়ে পথ সেট করো</span></div>
                 </div>
                 <div class="alert-card" id="policeCard">
                   <div class="row">
@@ -135,12 +135,9 @@
             </div>
             <div class="next-stop">
               <div class="lab">পরের থামা · Tour থেকে সেট করা</div>
-              <div class="place" id="groupNextPlace">Cumilla — সবাই মিলব এখানে · ১৮.৪ km</div>
+              <div class="place" id="groupNextPlace">এখনো ট্যুর সেট করা হয়নি — Tour ট্যাবে গিয়ে পথ সেট করো</div>
               <div class="route-chain" id="groupRouteChain" aria-label="ট্যুরের থামাগুলো">
-                <div class="stop done">Dhaka<br />ছেড়েছ</div>
-                <div class="stop now">Mawa<br />এখন এখানে</div>
-                <div class="stop">Cumilla<br />১৮.৪ km</div>
-                <div class="stop">Chattogram<br />১৯২ km</div>
+                <div class="stop">ট্যুর সেট করলে এখানে পথ দেখাবে</div>
               </div>
             </div>
             <ul class="rider-list" id="riderList"></ul>

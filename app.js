@@ -144,7 +144,7 @@
     if (!el || typeof L === "undefined") return null;
     if (window.map && window.map.invalidateSize) { window.map.invalidateSize(); return window.map; }
     if (el._leaflet_id) { el._leaflet_id = null; el.innerHTML = ""; }
-    window.map = L.map("map", { zoomControl: false, attributionControl: true })
+    window.map = L.map("map", { zoomControl: false, attributionControl: true, touchZoom: true, scrollWheelZoom: true, doubleClickZoom: true, zoomSnap: 0.5 })
       .setView([riderLocation.lat, riderLocation.lng], 14);
     rideTileLayer = L.tileLayer(tileUrlFor(currentMapTheme), {
       maxZoom: 19, tileSize: 512, zoomOffset: -1, attribution: "© Mapbox"
@@ -158,7 +158,7 @@
     if (!el || typeof L === "undefined") return null;
     if (tourMap && tourMap.invalidateSize) { tourMap.invalidateSize(); return tourMap; }
     if (el._leaflet_id) { el._leaflet_id = null; el.innerHTML = ""; }
-    tourMap = L.map("tourLeaflet", { zoomControl: false, attributionControl: false })
+    tourMap = L.map("tourLeaflet", { zoomControl: false, attributionControl: false, touchZoom: true, scrollWheelZoom: true, doubleClickZoom: true, zoomSnap: 0.5 })
       .setView([23.9, 90.5], 7);
     tourTileLayer = L.tileLayer(tileUrlFor(currentMapTheme), {
       maxZoom: 19, tileSize: 512, zoomOffset: -1, attribution: ""

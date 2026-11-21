@@ -464,7 +464,12 @@ body{margin:0}
 /* Join hero: the demo's riders photo (riders.jpg) behind the wordmark */
 .join-hero .scrim{position:absolute; inset:auto 0 0 0; padding:34px 20px 14px;
   background:linear-gradient(to top, rgba(14,13,10,.82), rgba(14,13,10,0)); color:#f5f1e6;}
-/* Riding: real Leaflet/Mapbox map fills the map zone */
+/* Riding: real Leaflet/Mapbox map fills the map zone.
+   Pinch on the map must zoom the MAP, not the whole page: the viewport meta
+   already disables page pinch-zoom, and touch-action:none keeps the browser
+   from stealing the two-finger gesture from Leaflet. */
+.map-zone, .tour-map{touch-action:none}
+.leaflet-container{touch-action:none !important}
 .map-zone #map{position:absolute; inset:0; z-index:1; background:#24211c}
 .map-zone .map-fade{z-index:2; pointer-events:none}
 .map-zone .stop-badge{z-index:3}
