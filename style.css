@@ -338,6 +338,12 @@
   .map-pin.is-stop .mp-dot{background:#eec27a; border-color:#fffdf7}
   .map-pin.is-stop .mp-label{background:#f7ecd4; color:#5f4305}
   .map-pin:active .mp-dot{transform:rotate(-45deg) scale(1.18)}
+  /* Single location pins for Tour points on the Riding map: start green,
+     destination red, stops gold — one pin each, no joining line. */
+  .tour-pin{width:20px; height:20px; border-radius:50%; background:#eec27a; border:3px solid #fffdf7; box-shadow:0 2px 8px rgba(0,0,0,.4)}
+  .tour-pin.is-from{background:var(--green)}
+  .tour-pin.is-to{background:var(--red)}
+  .tour-pin.is-stop{background:#eec27a}
   .tour-map-selected{
     margin-top:10px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;
     font-size:14.5px; font-weight:700; line-height:1.35;

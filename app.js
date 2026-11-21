@@ -1302,17 +1302,29 @@
   on("openRideMapPickBtn", "click", openRideMapPick);
   on("pickDoneBtn", "click", closeRideMapPick);
 
+  // Tour points on the Riding map are single location pins only — one pin
+  // for the start, one for the destination, one per stop — with no line
+  // (dotted or otherwise) joining them. tourRouteLine now holds that pin
+  // group, so resetTour() can still remove it with removeLayer().
   function drawTourRouteOnRidingMap(plan) {
     if (!window.map || !plan) return;
     if (tourRouteLine) { try { window.map.removeLayer(tourRouteLine); } catch (e) {} tourRouteLine = null; }
-    var pts = [];
-    (plan.places || []).forEach(function (p) {
+    var places = plan.places || [];
+    if (places.length < 1 || typeof L === "undefined") return;
+    var group = L.layerGroup();
+    places.forEach(function (p, i) {
       var ll = PLACE_LATLNG[p];
-      if (ll) pts.push(ll);
+      if (!ll) return;
+      var cls = i === 0 ? "is-from" : (i === places.length - 1 ? "is-to" : "is-stop");
+      var icon = L.divIcon({
+        className: "",
+        html: '<div class="tour-pin ' + cls + '"></div>',
+        iconSize: [22, 22], iconAnchor: [11, 11]
+      });
+      L.marker(ll, { icon: icon, interactive: false }).addTo(group);
     });
-    if (pts.length >= 2 && typeof L !== "undefined") {
-      tourRouteLine = L.polyline(pts, { color: "#17684a", weight: 4, dashArray: "1 8" }).addTo(window.map);
-    }
+    group.addTo(window.map);
+    tourRouteLine = group;
   }
   async function applyTour(goRide) {
     var from = tourFrom.value, to = tourTo.value;
@@ -1365,6 +1377,34 @@
     toast($("tourToast"), "Tour সেট হয়েছে: " + placeLabel(from) + " → " + placeLabel(to) + " — Group আর Riding-এও বদলে গেছে");
     if (goRide) setTimeout(function () { openScreen("screen-riding"); }, 500);
   }
+  // Reset the whole Tour so fresh data can be entered again: clears the
+  // start, destination and stops, the distance/time summary, the live ride
+  // clock, the route line on the map, and the saved plan (local + server),
+  // so Riding and Group go back to "no tour set" too.
+  function resetTour() {
+    if (tourFrom) tourFrom.value = "";
+    if (tourTo) tourTo.value = "";
+    stopOrder.length = 0;
+    activeTourPlan = null;
+    try { sessionStorage.removeItem("cg_active_tour_plan"); } catch (e) {}
+    if (rideTimerId) clearInterval(rideTimerId);
+    rideTimerId = null; rideStartAt = null;
+    if (tourRouteLine && window.map) { try { window.map.removeLayer(tourRouteLine); } catch (e) {} tourRouteLine = null; }
+    var rns = $("rideNextStop"); if (rns) rns.textContent = "ট্যুর সেট করা হয়নি";
+    var rtl = $("rideTourLeft"); if (rtl) rtl.textContent = "—";
+    var tp = $("rideTpStops"); if (tp) tp.innerHTML = "<span>এখনো ট্যুর সেট করা হয়নি — Tour ট্যাবে গিয়ে পথ সেট করো</span>";
+    var bar = $("rideTpBar"); if (bar) bar.style.width = "0%";
+    var gnp = $("groupNextPlace"); if (gnp) gnp.textContent = "এখনো ট্যুর সেট করা হয়নি — Tour ট্যাবে গিয়ে পথ সেট করো";
+    var grc = $("groupRouteChain"); if (grc) grc.innerHTML = "";
+    var mnb = $("mapNextBadge"); if (mnb) mnb.textContent = "—";
+    if (currentSession.roomCode) {
+      try { supabaseRest("tour_plans?room_code=eq." + encodeURIComponent(currentSession.roomCode.trim().toUpperCase()), "DELETE").catch(function () {}); } catch (e) {}
+    }
+    setPickMode("from");
+    renderTour();
+    toast($("tourToast"), "সব মুছে গেছে — এখন নতুন করে শুরু, গন্তব্য আর থামা বাছো");
+  }
+  on("resetTourBtn", "click", resetTour);
   on("clearStopsBtn", "click", function () {
     stopOrder.slice().forEach(function (s) { setStop(s, false); });
     renderTour();
