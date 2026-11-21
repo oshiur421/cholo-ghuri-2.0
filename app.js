@@ -95,6 +95,9 @@
   } catch (e) {}
   var riderLocation = { lat: 23.8103, lng: 90.4125, speed: 0, heading: 0 };
   var hasGpsFix = false; // true only after a real GPS fix — never show the Dhaka fallback as "you"
+  var followMe = false; // true only after the rider pins his own location
+  // (recenter button). The map never chases the rider on its own: dragging
+  // the map away to look elsewhere must stay put until he pins again.
   var hasJoinedDB = false;
   var isHandlingKick = false, isHandlingRoomClose = false;
   // A rider counts as "live" for 2 minutes without an update (was 45s).
@@ -159,6 +162,9 @@
     // In Tour pick mode, a tap on the real map picks a tour point.
     // (Ordinary taps do nothing — the map keeps its normal pan/zoom.)
     window.map.on("click", function (e) { if (tourPickActive) handleRideMapPick(e.latlng); });
+    // Any manual drag unlocks the follow: the map stays where the rider
+    // put it until he pins his own location again (recenter button).
+    window.map.on("dragstart", function () { followMe = false; });
     rideTileLayer = L.tileLayer(tileUrlFor(currentMapTheme), {
       maxZoom: 19, tileSize: 512, zoomOffset: -1, attribution: "© Mapbox"
     }).addTo(window.map);
@@ -275,8 +281,10 @@
       var ws0 = $("whereSub");
       if (ws0) ws0.textContent = riderLocation.lat.toFixed(4) + ", " + riderLocation.lng.toFixed(4);
       updateMyMarker();
-      if (window.map && currentSession.riderId) {
-        // keep the map loosely following the rider without yanking it every fix
+      if (window.map && currentSession.riderId && followMe) {
+        // Follow only while the rider pinned his own location. Without the
+        // pin, a GPS fix must never yank the map back after he dragged it
+        // away to look at another place.
         var c = window.map.getCenter();
         if (haversineKm(c.lat, c.lng, riderLocation.lat, riderLocation.lng) > 0.6) {
           window.map.panTo([riderLocation.lat, riderLocation.lng], { animate: true });
@@ -343,8 +351,11 @@
       lastGeocodeAt = Date.now() - 20000;
     }
   }
+  // Pin my location: the ONLY thing that locks the map to the rider.
+  // From here on, GPS fixes keep the map following until he drags it away.
   on("recenterBtn", "click", function () {
     ensureRidingMap();
+    followMe = true;
     if (window.map) window.map.setView([riderLocation.lat, riderLocation.lng], 15);
     updateMyMarker();
     toast($("rideToast"), "ম্যাপ তোমার অবস্থানে ফিরল");
