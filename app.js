@@ -148,9 +148,13 @@ window.submitOnboarding = async function(event) {
   // a) Read #riderNameInput and #roomCodeInput. If empty, fallback to a default name and pre-generated room code
   let name = riderNameInput ? riderNameInput.value.trim() : "";
   if (!name) {
-    name = "Rider_" + Math.floor(100 + Math.random() * 900);
-    if (riderNameInput) riderNameInput.value = name;
+    // Name is required — never auto-generate one (used to create Rider_123).
+    if (typeof window.showToast === "function") window.showToast("নাম দিন", "Ride শুরু করতে তোমার নাম লিখো।");
+    else if (typeof alert === "function") alert("Ride শুরু করতে তোমার নাম লিখো।");
+    if (riderNameInput) { riderNameInput.focus(); riderNameInput.style.borderColor = "#b3372a"; }
+    return;
   }
+  if (riderNameInput) riderNameInput.style.borderColor = "";
 
   let code = roomCodeInput ? roomCodeInput.value.trim().toUpperCase() : "";
   if (!code || code === "----") {

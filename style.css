@@ -372,10 +372,31 @@ input, select{font:inherit}
 }
 
 /* ================= Group drawer ================= */
+/* Fixed off-canvas drawer (restored from the original stylesheet — the
+   rewrite dropped the positioning, so the drawer rendered as a static
+   in-flow item underneath the fixed #map and was invisible). */
 #convoyDrawer{
+  position:fixed; top:0; left:0; bottom:0;
+  width:320px; max-width:85vw; z-index:99999;
+  transform:translateX(-100%);
   background:var(--card); color:var(--ink);
   border-right:1px solid var(--line-strong);
   box-shadow:0 0 40px rgba(0,0,0,.35);
+}
+#ridersDrawer,
+#groupDrawer{
+  position:fixed; top:0; left:0; bottom:0;
+  width:320px; max-width:85vw; z-index:99999;
+  transform:translateX(-100%);
+}
+#convoyDrawer.translate-x-0,
+#convoyDrawer.open,
+#ridersDrawer.translate-x-0,
+#ridersDrawer.open,
+#groupDrawer.translate-x-0,
+#groupDrawer.open{
+  transform:translateX(0%) !important;
+  pointer-events:auto !important;
 }
 .drawer-head{color:var(--ink)}
 .drawer-head-icon{background:var(--green-soft); color:var(--green-deep)}
@@ -798,3 +819,29 @@ select.tour-input{background-color:var(--card)}
   border:1px solid var(--dark-line); cursor:pointer; font-size:11px;
   display:flex; align-items:center; justify-content:center;
 }
+
+/* ================= Tailwind-failure safety net ================= */
+/* Layout-critical rules that must NOT depend on the Tailwind Play CDN.
+   If the CDN script ever fails to run (CORS/SRI, offline, blocked), these
+   keep the page usable: logo stays 28/36px, Join card keeps its width and
+   padding, START/APK buttons stay full-width, header and modals stay
+   fixed, drawer backdrop stays a full-screen overlay. They duplicate
+   what the Tailwind classes on the same elements already say, so when
+   Tailwind DOES run nothing changes. */
+.brand-logo{width:28px; height:28px; flex-shrink:0; overflow:hidden}
+@media (min-width:640px){.brand-logo{width:36px; height:36px}}
+.brand-logo img{width:100%; height:100%; object-fit:contain; display:block}
+.hud-top-bar{position:fixed; top:0; left:0; right:0; z-index:10000; width:100%; pointer-events:none}
+.hud-row-1{display:flex; align-items:flex-start; justify-content:space-between; gap:6px}
+.brand-panel{display:flex; align-items:center; gap:6px}
+.join-card{width:100%; max-width:448px; padding:24px}
+@media (min-width:640px){.join-card{padding:32px}}
+#startRidingBtn{width:100%; display:flex; align-items:center; justify-content:center; gap:8px; padding:14px 12px}
+.apk-btn{display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:12px}
+#gpsPermissionModal,#policeConfirmModal,#policePhotoViewerModal{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; padding:16px}
+#gpsPermissionModal{z-index:100010}
+#policeConfirmModal{z-index:1600}
+#policePhotoViewerModal{z-index:2000}
+#drawerBackdrop{position:fixed; inset:0; z-index:99990}
+#mapPickBanner{position:fixed; top:16px; left:50%; transform:translateX(-50%); z-index:15000; display:flex; align-items:center; gap:12px; padding:10px 16px; border-radius:16px; background:var(--card); color:var(--ink); border:1px solid var(--line-strong); box-shadow:var(--shadow)}
+.tour-planner-card{width:100%; max-width:672px}

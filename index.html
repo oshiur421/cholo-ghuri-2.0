@@ -13,7 +13,12 @@
   <title>Cholo Ghuri — Biker convoy &amp; highway radar</title>
 
   <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com/3.4.16" integrity="sha384-mS5Uq7sE90lgbBDN8xgf34ibEgbZo4gB3tfLY40ZRle+M188BQw8onzNHg6GUZaA" crossorigin="anonymous"></script>
+  <!-- Tailwind Play CDN. NOTE: do NOT add crossorigin="anonymous" here:
+       cdn.tailwindcss.com sends no Access-Control-Allow-Origin header, so a
+       CORS fetch with SRI is refused by real browsers and ALL Tailwind
+       utilities silently die (giant logo, unpadded Join card, tiny START
+       button, lost fixed positioning). Plain classic-script load works. -->
+  <script src="https://cdn.tailwindcss.com/3.4.16" integrity="sha384-mS5Uq7sE90lgbBDN8xgf34ibEgbZo4gB3tfLY40ZRle+M188BQw8onzNHg6GUZaA"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -116,9 +121,13 @@
 
       var name = riderNameInput ? riderNameInput.value.trim() : "";
       if (!name) {
-        name = "Rider_" + Math.floor(100 + Math.random() * 900);
-        if (riderNameInput) riderNameInput.value = name;
+        // Name is required — never auto-generate one (used to create Rider_123).
+        if (typeof window.showToast === "function") window.showToast("নাম দিন", "Ride শুরু করতে তোমার নাম লিখো।");
+        else if (typeof alert === "function") alert("Ride শুরু করতে তোমার নাম লিখো।");
+        if (riderNameInput) { riderNameInput.focus(); riderNameInput.style.borderColor = "#b3372a"; }
+        return;
       }
+      if (riderNameInput) riderNameInput.style.borderColor = "";
       var code = roomCodeInput ? roomCodeInput.value.trim().toUpperCase() : "";
       if (!code || code === "----") {
         code = (function () { var a = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"; var b = new Uint8Array(6); if (typeof crypto !== "undefined" && crypto.getRandomValues) { crypto.getRandomValues(b); } else { for (var i = 0; i < 6; i++) b[i] = Math.floor(Math.random() * 256); } var c = ""; for (var j = 0; j < 6; j++) c += a[b[j] % 36]; return c; })();
